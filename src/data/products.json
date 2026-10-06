@@ -1,0 +1,192 @@
+{
+  "notice": "このファイルの商品はすべて架空のサンプルです。商品そのものと、容量違いのバリエーションは分けて保存します。",
+  "products": [
+    {
+      "id": "line_mofu_dry",
+      "name": "もふ畑 成犬用ごはん ドライ",
+      "brand": "もふ畑",
+      "category": "dog",
+      "description": "動作確認用の架空商品です。容量やサイズが違うものは、同じ商品の別バリエーションです。",
+      "unitPriceType": "per_100g",
+      "createdAt": "2026-09-01T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:00:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_dog_treat",
+      "name": "もふ畑 ささみジャーキー",
+      "brand": "もふ畑",
+      "category": "dog",
+      "description": "動作確認用の架空のおやつです。実在の商品ではありません。犬用のジャーキーとして登録したサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-02T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:05:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_cat_dry",
+      "name": "そよ風 成猫用カリカリ",
+      "brand": "そよ風",
+      "category": "cat",
+      "description": "動作確認用の架空商品です。実在のキャットフードではありません。成猫向け、内容量800gのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-03T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:10:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_cat_wet",
+      "name": "そよ風 猫用やわらかパウチ",
+      "brand": "そよ風",
+      "category": "cat",
+      "description": "動作確認用の架空商品です。ウェットフードの詰め合わせとして登録しています。一部のショップは送料を未確認にしています。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-03T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:15:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_rabbit_hay",
+      "name": "ぴょん舎 うさぎ用チモシー",
+      "brand": "ぴょん舎",
+      "category": "small-animal",
+      "description": "動作確認用の架空商品です。実在の牧草ではありません。うさぎ向け、内容量500gのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-04T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:20:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_rabbit_bed",
+      "name": "ぴょん舎 小動物用ベッド",
+      "brand": "ぴょん舎",
+      "category": "small-animal",
+      "description": "動作確認用の架空商品です。サイズが違うと同じ寝床でも別商品になります。このサンプルはMサイズだけを登録しています。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-04T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:25:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_bird_seed",
+      "name": "さえずり 小鳥用シード",
+      "brand": "さえずり",
+      "category": "bird",
+      "description": "動作確認用の架空商品です。実在の鳥用フードではありません。内容量300gのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-05T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:30:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_bird_perch",
+      "name": "さえずり 木の止まり木",
+      "brand": "さえずり",
+      "category": "bird",
+      "description": "動作確認用の架空商品です。長さが違う止まり木は別商品として扱います。このサンプルは長さ18cmです。在庫なしの表示もサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-05T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:35:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_fish_food",
+      "name": "あお庭 金魚のえさ",
+      "brand": "あお庭",
+      "category": "fish",
+      "description": "動作確認用の架空商品です。実在の観賞魚用フードではありません。内容量100gのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-06T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:40:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_fish_filter",
+      "name": "あお庭 ろ過カートリッジ",
+      "brand": "あお庭",
+      "category": "fish",
+      "description": "動作確認用の架空商品です。個数が違う詰め合わせは別商品です。このサンプルは3個入りだけを登録しています。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-06T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:45:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_other_brush",
+      "name": "にじいろ 抜け毛ブラシ",
+      "brand": "にじいろ",
+      "category": "other",
+      "description": "動作確認用の架空商品です。JANコードと型番が未登録の場合の表示を確認するためのサンプルです。ショップは1件だけ登録しています。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-07T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:50:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_other_spray",
+      "name": "にじいろ ペット消臭スプレー",
+      "brand": "にじいろ",
+      "category": "other",
+      "description": "動作確認用の架空商品です。容量が違うスプレーは別商品として扱います。このサンプルは200mlです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-07T09:00:00+09:00",
+      "updatedAt": "2026-10-01T09:55:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_soyo_litter",
+      "name": "そよ風 猫砂 ひのきの香り",
+      "brand": "そよ風",
+      "category": "cat",
+      "description": "動作確認用の架空商品です。容量やサイズが違うものは、同じ商品の別バリエーションです。",
+      "unitPriceType": "per_l",
+      "createdAt": "2026-09-08T09:00:00+09:00",
+      "updatedAt": "2026-10-01T11:00:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_cat_tower",
+      "name": "そよ風 キャットタワー",
+      "brand": "そよ風",
+      "category": "cat",
+      "description": "動作確認用の架空商品です。実在のキャットタワーではありません。高さ120cmのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-08T09:00:00+09:00",
+      "updatedAt": "2026-10-01T10:25:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_dog_crate",
+      "name": "もふ畑 室内サークル",
+      "brand": "もふ畑",
+      "category": "dog",
+      "description": "動作確認用の架空商品です。実在の犬用サークルではありません。幅90cmのサンプルです。",
+      "unitPriceType": "none",
+      "createdAt": "2026-09-08T09:00:00+09:00",
+      "updatedAt": "2026-10-01T10:30:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_mofu_kilo",
+      "name": "もふ畑 成犬用ごはん 大袋",
+      "brand": "もふ畑",
+      "category": "dog",
+      "description": "動作確認用の架空商品です。容量やサイズが違うものは、同じ商品の別バリエーションです。",
+      "unitPriceType": "per_100g",
+      "createdAt": "2026-09-09T09:00:00+09:00",
+      "updatedAt": "2026-10-01T11:00:00+09:00",
+      "isSample": true
+    },
+    {
+      "id": "line_niji_sheet",
+      "name": "にじいろ ペットシーツ",
+      "brand": "にじいろ",
+      "category": "other",
+      "description": "動作確認用の架空商品です。容量やサイズが違うものは、同じ商品の別バリエーションです。",
+      "unitPriceType": "per_sheet",
+      "createdAt": "2026-09-09T09:00:00+09:00",
+      "updatedAt": "2026-10-01T11:00:00+09:00",
+      "isSample": true
+    }
+  ]
+}

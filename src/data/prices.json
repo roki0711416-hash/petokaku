@@ -1,0 +1,453 @@
+{
+  "notice": "このファイルの価格はすべて架空のサンプルです。同じ販売情報の価格を、取得日時つきで時系列に追加できます。",
+  "prices": [
+    {
+      "id": "prc_off_dog15_n",
+      "offerId": "off_dog15_n",
+      "price": 2480,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:00:00+09:00"
+    },
+    {
+      "id": "prc_off_dog15_s",
+      "offerId": "off_dog15_s",
+      "price": 2590,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:10:00+09:00"
+    },
+    {
+      "id": "prc_off_dog15_e",
+      "offerId": "off_dog15_e",
+      "price": 2320,
+      "shippingFee": 550,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:20:00+09:00"
+    },
+    {
+      "id": "prc_off_dog40_n",
+      "offerId": "off_dog40_n",
+      "price": 5120,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:00:00+09:00"
+    },
+    {
+      "id": "prc_off_dog40_s",
+      "offerId": "off_dog40_s",
+      "price": 4980,
+      "shippingFee": 660,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:12:00+09:00"
+    },
+    {
+      "id": "prc_off_treat_n",
+      "offerId": "off_treat_n",
+      "price": 980,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:05:00+09:00"
+    },
+    {
+      "id": "prc_off_treat_s",
+      "offerId": "off_treat_s",
+      "price": 890,
+      "shippingFee": 550,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:18:00+09:00"
+    },
+    {
+      "id": "prc_off_treat_e",
+      "offerId": "off_treat_e",
+      "price": 1050,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:28:00+09:00"
+    },
+    {
+      "id": "prc_off_catdry_n",
+      "offerId": "off_catdry_n",
+      "price": 1680,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:10:00+09:00"
+    },
+    {
+      "id": "prc_off_catdry_s",
+      "offerId": "off_catdry_s",
+      "price": 1720,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:22:00+09:00"
+    },
+    {
+      "id": "prc_off_catdry_e",
+      "offerId": "off_catdry_e",
+      "price": 1590,
+      "shippingFee": 420,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:33:00+09:00"
+    },
+    {
+      "id": "prc_off_catwet_n",
+      "offerId": "off_catwet_n",
+      "price": 2280,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:15:00+09:00"
+    },
+    {
+      "id": "prc_off_catwet_s",
+      "offerId": "off_catwet_s",
+      "price": 2140,
+      "shippingFee": 550,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:25:00+09:00"
+    },
+    {
+      "id": "prc_off_catwet_e",
+      "offerId": "off_catwet_e",
+      "price": 2360,
+      "shippingFee": null,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:40:00+09:00"
+    },
+    {
+      "id": "prc_off_hay_n",
+      "offerId": "off_hay_n",
+      "price": 1480,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:20:00+09:00"
+    },
+    {
+      "id": "prc_off_hay_s",
+      "offerId": "off_hay_s",
+      "price": 1390,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:36:00+09:00"
+    },
+    {
+      "id": "prc_off_bed_n",
+      "offerId": "off_bed_n",
+      "price": 2980,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:25:00+09:00"
+    },
+    {
+      "id": "prc_off_bed_s",
+      "offerId": "off_bed_s",
+      "price": 3200,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:41:00+09:00"
+    },
+    {
+      "id": "prc_off_bed_e",
+      "offerId": "off_bed_e",
+      "price": 2750,
+      "shippingFee": 770,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:05:00+09:00"
+    },
+    {
+      "id": "prc_off_seed_n",
+      "offerId": "off_seed_n",
+      "price": 680,
+      "shippingFee": 350,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:30:00+09:00"
+    },
+    {
+      "id": "prc_off_seed_s",
+      "offerId": "off_seed_s",
+      "price": 720,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:48:00+09:00"
+    },
+    {
+      "id": "prc_off_perch_n",
+      "offerId": "off_perch_n",
+      "price": 1240,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:35:00+09:00"
+    },
+    {
+      "id": "prc_off_perch_s",
+      "offerId": "off_perch_s",
+      "price": 1180,
+      "shippingFee": 550,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:52:00+09:00"
+    },
+    {
+      "id": "prc_off_perch_e",
+      "offerId": "off_perch_e",
+      "price": 1320,
+      "shippingFee": 0,
+      "stockStatus": "out_of_stock",
+      "observedAt": "2026-10-01T10:12:00+09:00"
+    },
+    {
+      "id": "prc_off_fishfood_n",
+      "offerId": "off_fishfood_n",
+      "price": 480,
+      "shippingFee": 350,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:40:00+09:00"
+    },
+    {
+      "id": "prc_off_fishfood_s",
+      "offerId": "off_fishfood_s",
+      "price": 520,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:55:00+09:00"
+    },
+    {
+      "id": "prc_off_fishfood_e",
+      "offerId": "off_fishfood_e",
+      "price": 450,
+      "shippingFee": 350,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T10:08:00+09:00"
+    },
+    {
+      "id": "prc_off_filter_n",
+      "offerId": "off_filter_n",
+      "price": 980,
+      "shippingFee": null,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:45:00+09:00"
+    },
+    {
+      "id": "prc_off_filter_s",
+      "offerId": "off_filter_s",
+      "price": 1120,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:02:00+09:00"
+    },
+    {
+      "id": "prc_off_brush_n",
+      "offerId": "off_brush_n",
+      "price": 1580,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T09:50:00+09:00"
+    },
+    {
+      "id": "prc_off_spray_n",
+      "offerId": "off_spray_n",
+      "price": 880,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T09:55:00+09:00"
+    },
+    {
+      "id": "prc_off_spray_s",
+      "offerId": "off_spray_s",
+      "price": 920,
+      "shippingFee": 0,
+      "stockStatus": "out_of_stock",
+      "observedAt": "2026-10-01T10:15:00+09:00"
+    },
+    {
+      "id": "prc_off_litter_a",
+      "offerId": "off_litter_a",
+      "price": 1280,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:20:00+09:00"
+    },
+    {
+      "id": "prc_off_litter_b",
+      "offerId": "off_litter_b",
+      "price": 1180,
+      "shippingFee": 350,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T10:21:00+09:00"
+    },
+    {
+      "id": "prc_off_litter_c",
+      "offerId": "off_litter_c",
+      "price": 1400,
+      "shippingFee": null,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:22:00+09:00"
+    },
+    {
+      "id": "prc_off_tower_a",
+      "offerId": "off_tower_a",
+      "price": 3980,
+      "shippingFee": 550,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:25:00+09:00"
+    },
+    {
+      "id": "prc_off_tower_b",
+      "offerId": "off_tower_b",
+      "price": 4680,
+      "shippingFee": 0,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T10:26:00+09:00"
+    },
+    {
+      "id": "prc_off_crate_a",
+      "offerId": "off_crate_a",
+      "price": 11800,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T10:30:00+09:00"
+    },
+    {
+      "id": "prc_off_crate_b",
+      "offerId": "off_crate_b",
+      "price": 10980,
+      "shippingFee": 880,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T10:31:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo1_a",
+      "offerId": "off_kilo1_a",
+      "price": 2480,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:01:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo1_b",
+      "offerId": "off_kilo1_b",
+      "price": 2390,
+      "shippingFee": 550,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:02:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo3_a",
+      "offerId": "off_kilo3_a",
+      "price": 5980,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:03:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo3_b",
+      "offerId": "off_kilo3_b",
+      "price": 5780,
+      "shippingFee": 550,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:04:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo8_a",
+      "offerId": "off_kilo8_a",
+      "price": 13800,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:05:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo8_b",
+      "offerId": "off_kilo8_b",
+      "price": 13200,
+      "shippingFee": 880,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:06:00+09:00"
+    },
+    {
+      "id": "prc_off_kilo8_c",
+      "offerId": "off_kilo8_c",
+      "price": 12000,
+      "shippingFee": null,
+      "stockStatus": "unknown",
+      "observedAt": "2026-10-01T11:07:00+09:00"
+    },
+    {
+      "id": "prc_off_lit10_a",
+      "offerId": "off_lit10_a",
+      "price": 1980,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:08:00+09:00"
+    },
+    {
+      "id": "prc_off_lit10_b",
+      "offerId": "off_lit10_b",
+      "price": 1890,
+      "shippingFee": 350,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:09:00+09:00"
+    },
+    {
+      "id": "prc_off_lit20_a",
+      "offerId": "off_lit20_a",
+      "price": 3200,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:10:00+09:00"
+    },
+    {
+      "id": "prc_off_lit20_b",
+      "offerId": "off_lit20_b",
+      "price": 2980,
+      "shippingFee": 660,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:11:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet100_a",
+      "offerId": "off_sheet100_a",
+      "price": 980,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:12:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet100_b",
+      "offerId": "off_sheet100_b",
+      "price": 900,
+      "shippingFee": 220,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:13:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet200_a",
+      "offerId": "off_sheet200_a",
+      "price": 1680,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:14:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet200_b",
+      "offerId": "off_sheet200_b",
+      "price": 1600,
+      "shippingFee": 330,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:15:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet400_a",
+      "offerId": "off_sheet400_a",
+      "price": 2880,
+      "shippingFee": 0,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:16:00+09:00"
+    },
+    {
+      "id": "prc_off_sheet400_b",
+      "offerId": "off_sheet400_b",
+      "price": 2760,
+      "shippingFee": 440,
+      "stockStatus": "in_stock",
+      "observedAt": "2026-10-01T11:17:00+09:00"
+    }
+  ]
+}

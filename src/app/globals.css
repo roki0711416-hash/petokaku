@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f7f3ec;
+  --color-ink: #2c2824;
+  --color-forest: #2f6b56;
+  --color-forest-deep: #234e3e;
+  --color-clay: #a85a45;
+  --color-accent: #2f6b56;
+  --color-sand: #f4e6d6;
+  --color-card: #fffdfb;
+  --color-muted: #5e564e;
+  --color-line: #eadfd0;
+  --color-moss: #e7f3ec;
+  --color-dog: #f6e4d6;
+  --color-cat: #e5f0e8;
+  --color-honey: #f6e7c3;
+  --font-sans: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+}
+
+.font-display {
+  font-family: var(--font-fraunces), "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+
+.price-num {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-card);
+  padding: 0.7rem 1rem;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-clay);
+  outline-offset: 3px;
+}
+
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-menu-overlay,
+.mobile-menu-drawer {
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  background: rgba(28, 40, 34, 0.48);
+  opacity: 0;
+  transition-property: opacity;
+}
+
+.mobile-menu.is-open .mobile-menu-overlay {
+  opacity: 1;
+}
+
+.mobile-menu-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  display: flex;
+  width: 88vw;
+  max-width: 88vw;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--color-line);
+  border-radius: 1.5rem 0 0 1.5rem;
+  background: var(--color-card);
+  box-shadow: -12px 0 32px rgba(28, 40, 34, 0.12);
+  transform: translateX(100%);
+  transition-property: transform;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-menu.is-open .mobile-menu-drawer {
+  transform: translateX(0);
+}
+
+.mobile-menu-link {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border-radius: 0.9rem;
+  padding: 0.4rem 0.75rem;
+  font-weight: 700;
+}
+
+.mobile-menu-link:hover {
+  background: var(--color-moss);
+}
+
+.listing-filter-overlay,
+.listing-filter-panel {
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+
+.listing-filter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  background: rgba(28, 40, 34, 0.48);
+}
+
+.listing-filter-panel {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 41;
+  display: flex;
+  max-height: min(88vh, 40rem);
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--color-line);
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: var(--color-card);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.lift {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.rise {
+  animation: rise-in 0.55s ease both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(44, 40, 36, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .mobile-menu-overlay,
+  .mobile-menu-drawer,
+  .listing-filter-overlay,
+  .listing-filter-panel,
+  .lift,
+  .rise {
+    transition: none;
+    animation: none;
+  }
+}

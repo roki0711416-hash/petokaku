@@ -1,0 +1,43 @@
+import type { RakutenSourceItem } from "./types.ts";
+
+export const rakutenFixtureItems: RakutenSourceItem[] = [
+  {
+    name: "ロイヤルカナン ミニ インドア アダルト 4kg",
+    price: 5720,
+    url: "https://item.rakuten.co.jp/example/rc4/",
+    imageUrl: "https://thumbnail.image.rakuten.co.jp/example.jpg",
+    shopName: "楽天サンプル店",
+    shopCode: "rakuten-shop",
+    itemCode: "rakuten-shop:10001",
+    janCode: "3182550849647",
+    shippingFee: 0,
+    shippingStatus: "free",
+    inStock: true,
+  },
+  {
+    name: "名前だけでJANがないフード",
+    price: 1000,
+    url: "https://item.rakuten.co.jp/example/nojan-a/",
+    imageUrl: null,
+    shopName: "別ショップ",
+    shopCode: "other-shop",
+    itemCode: "other-shop:20002",
+    janCode: null,
+    shippingFee: null,
+    shippingStatus: null,
+    inStock: null,
+  },
+  {
+    name: "名前だけでJANがないフード",
+    price: 1100,
+    url: "https://item.rakuten.co.jp/example/nojan-b/",
+    imageUrl: null,
+    shopName: "さらに別のショップ",
+    shopCode: "third-shop",
+    itemCode: "third-shop:20003",
+    janCode: null,
+    shippingFee: 0,
+    shippingStatus: null,
+    inStock: true,
+  },
+];

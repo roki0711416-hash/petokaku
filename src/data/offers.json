@@ -1,0 +1,509 @@
+{
+  "notice": "このファイルのショップ名はすべて架空のサンプルです。価格そのものは価格記録のファイルに分けています。",
+  "offers": [
+    {
+      "id": "off_dog15_n",
+      "variantId": "prd_dog_food_15",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_dog15_s",
+      "variantId": "prd_dog_food_15",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_dog15_e",
+      "variantId": "prd_dog_food_15",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_dog40_n",
+      "variantId": "prd_dog_food_40",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_dog40_s",
+      "variantId": "prd_dog_food_40",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_treat_n",
+      "variantId": "prd_dog_treat",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_treat_s",
+      "variantId": "prd_dog_treat",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_treat_e",
+      "variantId": "prd_dog_treat",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catdry_n",
+      "variantId": "prd_cat_dry",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catdry_s",
+      "variantId": "prd_cat_dry",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catdry_e",
+      "variantId": "prd_cat_dry",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catwet_n",
+      "variantId": "prd_cat_wet",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catwet_s",
+      "variantId": "prd_cat_wet",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_catwet_e",
+      "variantId": "prd_cat_wet",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_hay_n",
+      "variantId": "prd_rabbit_hay",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_hay_s",
+      "variantId": "prd_rabbit_hay",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_bed_n",
+      "variantId": "prd_rabbit_bed",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_bed_s",
+      "variantId": "prd_rabbit_bed",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_bed_e",
+      "variantId": "prd_rabbit_bed",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_seed_n",
+      "variantId": "prd_bird_seed",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_seed_s",
+      "variantId": "prd_bird_seed",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_perch_n",
+      "variantId": "prd_bird_perch",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_perch_s",
+      "variantId": "prd_bird_perch",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_perch_e",
+      "variantId": "prd_bird_perch",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_fishfood_n",
+      "variantId": "prd_fish_food",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_fishfood_s",
+      "variantId": "prd_fish_food",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_fishfood_e",
+      "variantId": "prd_fish_food",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_filter_n",
+      "variantId": "prd_fish_filter",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_filter_s",
+      "variantId": "prd_fish_filter",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_brush_n",
+      "variantId": "prd_other_brush",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_spray_n",
+      "variantId": "prd_other_spray",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_spray_s",
+      "variantId": "prd_other_spray",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_litter_a",
+      "variantId": "prd_cat_litter",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_litter_b",
+      "variantId": "prd_cat_litter",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_litter_c",
+      "variantId": "prd_cat_litter",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_tower_a",
+      "variantId": "prd_cat_tower",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_tower_b",
+      "variantId": "prd_cat_tower",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_crate_a",
+      "variantId": "prd_dog_crate",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_crate_b",
+      "variantId": "prd_dog_crate",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo1_a",
+      "variantId": "prd_dog_kilo_1",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo1_b",
+      "variantId": "prd_dog_kilo_1",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo3_a",
+      "variantId": "prd_dog_kilo_3",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo3_b",
+      "variantId": "prd_dog_kilo_3",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo8_a",
+      "variantId": "prd_dog_kilo_8",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo8_b",
+      "variantId": "prd_dog_kilo_8",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_kilo8_c",
+      "variantId": "prd_dog_kilo_8",
+      "shopName": "ショップC",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_lit10_a",
+      "variantId": "prd_cat_litter_10",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_lit10_b",
+      "variantId": "prd_cat_litter_10",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_lit20_a",
+      "variantId": "prd_cat_litter_20",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_lit20_b",
+      "variantId": "prd_cat_litter_20",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet100_a",
+      "variantId": "prd_sheet_100",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet100_b",
+      "variantId": "prd_sheet_100",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet200_a",
+      "variantId": "prd_sheet_200",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet200_b",
+      "variantId": "prd_sheet_200",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet400_a",
+      "variantId": "prd_sheet_400",
+      "shopName": "ショップA",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    },
+    {
+      "id": "off_sheet400_b",
+      "variantId": "prd_sheet_400",
+      "shopName": "ショップB",
+      "productUrl": null,
+      "affiliateUrl": null,
+      "source": "sample",
+      "isSample": true
+    }
+  ]
+}

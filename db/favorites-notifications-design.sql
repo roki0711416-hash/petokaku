@@ -1,0 +1,39 @@
+-- お気に入りと値下がり通知の設計。まだ実行しない。
+-- Auth、メール送信、画面、日次処理への接続はまだ作らない。
+-- このファイルを Supabase で実行しない。既存テーブルは変更しない。
+
+-- jan_favorites
+--   id uuid primary key
+--   user_id uuid not null
+--     将来 Supabase Auth のユーザーに紐づける。今回は auth.users への外部キーを作らない。
+--   jan_code text not null check (13桁)
+--   target_price integer null check (null または 0以上)
+--     希望価格。null のあいだは通知条件にしない。
+--   created_at timestamptz not null
+--   updated_at timestamptz not null
+--   unique (user_id, jan_code)
+--     同じユーザーの同じJANは1行。
+--
+-- price_drop_notifications
+--   id uuid primary key
+--   favorite_id uuid not null references jan_favorites (id) on delete restrict
+--   jan_code text not null
+--   notified_price integer not null check (0以上)
+--   previous_price integer null
+--   notified_at timestamptz not null
+--   unique (favorite_id, notified_price)
+--     同じお気に入りで、同じ通知価格は1回だけ残す。
+--     価格が戻ったあと再び同じ価格になっても再通知しない。
+--     より安い別の価格には、別の行として通知できる。
+--
+-- RLS
+--   両テーブルとも ENABLE ROW LEVEL SECURITY。
+--   許可ポリシーは Auth を実装するまで置かない。
+--   PUBLIC、anon、authenticated からは全権限を外す。
+--   サーバーの service_role にだけ SELECT、INSERT、UPDATE を与える。
+--   ユーザーは自分の user_id の行だけ読めるポリシーを、Auth 実装時に追加する。
+--
+-- 通知判定
+--   日次価格更新で得た送料込みの現在価格が target_price 以下のときだけ通知候補にする。
+--   送料が不明な商品価格だけでは通知しない。
+--   すでに unique (favorite_id, notified_price) がある価格は送らない。
