@@ -140,12 +140,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ショップ名と金額は、動作確認用の架空データです。いちばん大きい金額は商品の販売価格です。送料が分かるショップは、支払総額の安い順に並べています。
         </p>
         <div className="mt-5">
-          <OfferList
-            offers={product.offers}
-            quantity={product.quantity}
-            quantityUnit={product.quantityUnit}
-            unitPriceType={product.unitPriceType}
-          />
+          <OfferList offers={product.offers} />
         </div>
       </section>
 

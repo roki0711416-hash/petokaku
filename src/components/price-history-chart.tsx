@@ -51,9 +51,7 @@ function ChartSvg({ points, start, days }: { points: ChartValue[]; start: string
       )}
       {points.map((point) => (
         <circle key={point.date} cx={xFor(point.date)} cy={yFor(point.value)} r="3" fill="#17382f">
-          <title>
-            {point.date} {formatYen(point.value)}
-          </title>
+          <title>{`${point.date} ${formatYen(point.value)}`}</title>
         </circle>
       ))}
     </svg>
