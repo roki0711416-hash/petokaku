@@ -8,12 +8,10 @@ export function OfferStack({
   initial,
   rest,
   lowestTotal,
-  markLowest = false,
 }: {
   initial: Offer[];
   rest: Offer[];
   lowestTotal: number | null;
-  markLowest?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const shown = open ? [...initial, ...rest] : initial;
@@ -23,15 +21,9 @@ export function OfferStack({
       {shown.length === 0 ? (
         <p className="py-6 text-sm leading-7 text-muted">在庫ありの掲載はありません。</p>
       ) : (
-        <ol>
+        <ol className="grid gap-2">
           {shown.map((offer, index) => (
-            <ShopCard
-              key={offer.id}
-              offer={offer}
-              lowestTotal={lowestTotal}
-              rank={index + 1}
-              anchorId={markLowest && index === 0 ? "lowest-shop" : undefined}
-            />
+            <ShopCard key={offer.id} offer={offer} lowestTotal={lowestTotal} rank={index + 1} />
           ))}
         </ol>
       )}

@@ -23,18 +23,18 @@ export function PriceSummary({ quote, shopLabel }: { quote: SingleSizeQuote; sho
   return (
     <div>
       <p className="text-sm text-muted">最安価格</p>
-      <p className="price-num mt-1 text-4xl leading-none text-ink md:text-5xl">
+      <p className="price-num mt-1 text-5xl leading-none text-ink lg:text-6xl">
         {quote.sellingPrice == null ? "確認できません" : formatYen(quote.sellingPrice)}
       </p>
-      {shipping ? <p className="mt-3 text-sm text-ink">{shipping}</p> : null}
+      {shipping ? <p className="mt-2 text-base text-ink">{shipping}</p> : null}
       {quote.itemUnitYen != null && quote.unitLabel ? (
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-base font-medium text-forest-deep">
           参考単価 {formatUnitAmount({ yen: quote.itemUnitYen, exact: quote.itemUnitExact }, quote.unitLabel)}
         </p>
       ) : (
         <p className="mt-1 text-sm text-muted">内容量が確定できないため、参考単価は出していません。</p>
       )}
-      <p className="mt-3 text-sm text-ink">{shopLabel}</p>
+      <p className="mt-2 text-sm text-ink">{shopLabel}</p>
     </div>
   );
 }

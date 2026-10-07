@@ -54,61 +54,56 @@ export function YahooProductView({
     { label: visibleName, href: pageHref, current: true },
   ];
 
+  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} />;
+  const sizes = <SizeChoices choices={sizeChoices} sizeLabel={product.sizeLabel} />;
+  const image = <ProductImage imageUrl={imageUrl} alt={visibleName} />;
+
   return (
-    <article className="mx-auto max-w-xl px-4 py-5 md:py-8">
+    <article className="mx-auto max-w-xl px-4 py-5 lg:max-w-6xl lg:py-8">
       <Breadcrumbs items={crumbs} />
-      <p className="mt-5 text-sm text-forest">{product.brand || "ブランドは販売店の表記によります"}</p>
-      <h1 className="mt-1 text-2xl leading-snug font-medium tracking-tight">{visibleName}</h1>
-      <div className="mt-4 overflow-hidden rounded-[1.6rem] bg-sand/70">
-        {imageUrl ? (
-          // Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。
-          <img src={imageUrl} alt={visibleName} className="mx-auto h-56 w-full object-contain md:h-72" />
-        ) : (
-          <p className="grid h-56 place-items-center text-muted md:h-72">画像なし</p>
-        )}
-      </div>
-      {sizeChoices.length > 1 ? (
-        <div className="mt-4 flex min-w-0 gap-2 overflow-x-auto pb-1" role="group" aria-label="容量">
-          {sizeChoices.map((choice) => (
-            <Link
-              key={choice.janCode}
-              href={choice.href}
-              aria-current={choice.current ? "page" : undefined}
-              aria-label={sizeChoiceLabel(choice)}
-              className={
-                choice.current
-                  ? "inline-flex min-h-11 shrink-0 items-center rounded-full bg-ink px-4 text-sm text-card"
-                  : "inline-flex min-h-11 shrink-0 items-center rounded-full bg-card px-4 text-sm text-ink"
-              }
-            >
-              {choice.label}
-            </Link>
-          ))}
+      <div className="mt-4 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10">
+        <div className="lg:col-start-2">
+          <p className="text-sm text-forest">{product.brand || "ブランドは販売店の表記によります"}</p>
+          <h1 className="mt-1 text-xl leading-snug font-medium tracking-tight lg:text-3xl">{visibleName}</h1>
+          <div className="mt-3 lg:mt-4">{sizes}</div>
+          <div className="mt-4 rounded-[1.6rem] bg-card px-4 py-4 lg:mt-5 lg:bg-transparent lg:px-0 lg:py-0">{summary}</div>
+          {product.offers.length > 0 ? (
+            <p className="mt-5 hidden lg:block">
+              <a
+                href="#lowest-shop"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-sm text-white hover:bg-forest-deep"
+              >
+                最安ショップを見る
+              </a>
+            </p>
+          ) : null}
         </div>
-      ) : (
-        <p className="mt-4 inline-flex min-h-11 items-center rounded-full bg-ink px-4 text-sm text-card">{product.sizeLabel}</p>
-      )}
-      <hr className="mt-5 border-line" />
-      <div className="mt-5">
-        <PriceSummary quote={quote} shopLabel={shopLabel} />
+        <div className="mt-3 lg:col-start-1 lg:row-start-1 lg:mt-0">{image}</div>
       </div>
       {product.offers.length > 0 ? (
-        <p className="mt-5">
+        <p className="mt-4 lg:hidden">
           <a
-            href="#lowest-shop"
+            href="#compare"
             className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-6 text-sm text-white hover:bg-forest-deep"
           >
-            最安ショップを見る
+            価格比較を見る
           </a>
         </p>
       ) : null}
-      <hr className="mt-6 border-line" />
-      <section id="compare" aria-labelledby="compare-heading" className="mt-6 scroll-mt-24">
-        <h2 id="compare-heading" className="text-xl font-medium">
-          価格比較
-        </h2>
+      <section id="compare" aria-labelledby="compare-heading" className="mt-8 scroll-mt-24 lg:mt-12">
+        <div className="rounded-[1.6rem] bg-forest px-4 py-4 text-white lg:rounded-none lg:bg-transparent lg:px-0 lg:py-0 lg:text-ink">
+          <h2 id="compare-heading" className="text-lg font-medium lg:text-2xl">
+            価格比較
+          </h2>
+          <p className="mt-1 text-sm text-white/90 lg:text-muted">ショップごとの価格です。</p>
+        </div>
         <div className="mt-4">
-          <OfferList offers={product.offers} />
+          <OfferList
+            offers={product.offers}
+            quantity={product.quantity}
+            quantityUnit={product.quantityUnit}
+            unitPriceType={product.unitPriceType}
+          />
         </div>
       </section>
 
@@ -131,6 +126,44 @@ export function YahooProductView({
         </ul>
       </section>
     </article>
+  );
+}
+
+function ProductImage({ imageUrl, alt }: { imageUrl: string | null; alt: string }) {
+  return (
+    <div className="overflow-hidden rounded-[1.6rem] bg-sand/70">
+      {imageUrl ? (
+        // Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。
+        <img src={imageUrl} alt={alt} className="mx-auto h-36 w-full object-contain lg:h-72" />
+      ) : (
+        <p className="grid h-36 place-items-center text-muted lg:h-72">画像なし</p>
+      )}
+    </div>
+  );
+}
+
+function SizeChoices({ choices, sizeLabel }: { choices: YahooSizeChoice[]; sizeLabel: string }) {
+  if (choices.length <= 1) {
+    return <p className="inline-flex min-h-11 items-center rounded-full bg-ink px-4 text-sm text-card">{sizeLabel}</p>;
+  }
+  return (
+    <div className="flex min-w-0 gap-2 overflow-x-auto pb-1" role="group" aria-label="容量">
+      {choices.map((choice) => (
+        <Link
+          key={choice.janCode}
+          href={choice.href}
+          aria-current={choice.current ? "page" : undefined}
+          aria-label={sizeChoiceLabel(choice)}
+          className={
+            choice.current
+              ? "inline-flex min-h-11 shrink-0 items-center rounded-full bg-ink px-4 text-sm text-card"
+              : "inline-flex min-h-11 shrink-0 items-center rounded-full bg-card px-4 text-sm text-ink"
+          }
+        >
+          {choice.label}
+        </Link>
+      ))}
+    </div>
   );
 }
 
