@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, MetadataRoute } from "next";
 
 const fallbackSiteUrl = "http://localhost:3000";
 
@@ -19,8 +19,31 @@ export function getSiteUrl(): string {
 }
 
 export function indexingAllowed(): boolean {
-  const source = process.env.PRICE_SOURCE?.trim() || "sample";
-  return process.env.ALLOW_INDEXING === "true" && source !== "sample";
+  return process.env.ALLOW_INDEXING === "true";
+}
+
+export function robotsPolicy(): MetadataRoute.Robots {
+  if (!indexingAllowed()) {
+    return {
+      rules: [{ userAgent: "*", disallow: "/" }],
+    };
+  }
+
+  return {
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/search", "/products/yahoo-preview"] }],
+    sitemap: new URL("/sitemap.xml", getSiteUrl()).toString(),
+  };
+}
+
+const publicPaths = ["/", "/about", "/guide", "/contact", "/privacy", "/terms", "/affiliate"];
+
+export function sitemapEntries(): MetadataRoute.Sitemap {
+  const siteUrl = getSiteUrl();
+  return publicPaths.map((path) => ({
+    url: new URL(path, siteUrl).toString(),
+    changeFrequency: "weekly" as const,
+    priority: path === "/" ? 1 : 0.6,
+  }));
 }
 
 export function privateRobots(): Metadata["robots"] {
