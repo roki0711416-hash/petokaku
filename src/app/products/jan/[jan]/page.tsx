@@ -10,7 +10,7 @@ import { saveDisplayedJanPrices } from "@/lib/supabase/save-price-history";
 import { validJanCode } from "@/lib/sources/yahoo/adapter";
 import { classifyPetKind } from "@/lib/sources/yahoo/pet-kind";
 import { bestItemUnitIds, groupSizeFamilies, quoteSingleSize, sizeFamilyHref, type SizeFamilyMember } from "@/lib/sources/yahoo/size-family";
-import { getSiteUrl, robotsMetadata } from "@/lib/site";
+import { getSiteUrl, janPageRobots } from "@/lib/site";
 import { safeHttpUrl } from "@/lib/urls";
 import type { ProductDetail } from "@/lib/types";
 
@@ -97,11 +97,11 @@ function sizeChoicesFor(current: ProductDetail, companions: ProductDetail[]): Ya
 export async function generateMetadata({ params }: JanPageProps): Promise<Metadata> {
   const { jan } = await params;
   if (!validJanCode(jan)) {
-    return { title: "商品が見つかりません", robots: robotsMetadata() };
+    return { title: "商品が見つかりません", robots: janPageRobots(false) };
   }
   const result = await loadYahooJan(jan);
   if (!result.ok) {
-    return { title: "商品を表示できません", robots: robotsMetadata() };
+    return { title: "商品を表示できません", robots: janPageRobots(false) };
   }
   const name = result.adapted.detail.name.trim();
   const title = name || "商品の価格比較";
@@ -112,7 +112,7 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
     title,
     description,
     alternates: { canonical },
-    robots: robotsMetadata(),
+    robots: janPageRobots(true),
     openGraph: {
       title,
       description,

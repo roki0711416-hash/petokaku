@@ -3,7 +3,7 @@ import { InfoArticle } from "@/components/info-article";
 
 export const metadata: Metadata = {
   title: "ペトカクについて",
-  description: "ペトカクは、ペット用品の価格と送料を見比べるためのサイトです。表示は取得時点の販売店の掲載です。",
+  description: "ペトカクは、ペット用品の価格と送料を見比べるためのサイトです。運営はペトカク運営事務局です。",
 };
 
 export default function AboutPage() {
@@ -20,7 +20,15 @@ export default function AboutPage() {
         商品名で検索した価格、送料、在庫は、販売店の掲載を取得した時点の情報です。その後にショップ側で変わることがあります。購入前に、ショップのページで確認してください。
       </p>
       <p>ペトカクは、表示した金額が必ず最安であることや、購入がお得であることを保証しません。</p>
-      <p>収益は、商品紹介によるアフィリエイト報酬と、将来の広告を想定しています。広告を置くときは、広告であることが分かるように表示します。</p>
+      <p>いまの販売店へのリンクは、アフィリエイトリンクではありません。報酬のあるリンクにするときは、広告であることが分かるように表示します。</p>
+      <p>運営者は、ペトカク運営事務局です。</p>
+      <p>
+        連絡先は
+        <a href="mailto:petokaku@outlook.jp" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          petokaku@outlook.jp
+        </a>
+        です。詳しくはお問い合わせのページにも案内しています。
+      </p>
     </InfoArticle>
   );
 }

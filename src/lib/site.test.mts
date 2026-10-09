@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { indexingAllowed, privateRobots, robotsMetadata, robotsPolicy, sitemapEntries } from "./site.ts";
+import {
+  indexedJanLimit,
+  indexedJanProducts,
+  indexingAllowed,
+  janPageRobots,
+  privateRobots,
+  robotsMetadata,
+  robotsPolicy,
+  selectIndexedJans,
+  sitemapEntries,
+} from "./site.ts";
 
 const envKeys = ["ALLOW_INDEXING", "PRICE_SOURCE", "NEXT_PUBLIC_SITE_URL"] as const;
 
@@ -39,6 +49,7 @@ const publicSitemap = [
   "https://petokaku.com/privacy",
   "https://petokaku.com/terms",
   "https://petokaku.com/affiliate",
+  "https://petokaku.com/products/jan/3182550706933",
 ];
 
 test("ALLOW_INDEXING=true かつ PRICE_SOURCE=sample でも公開ページを許可する", () => {
@@ -65,7 +76,7 @@ test("ALLOW_INDEXING が true でないときはサイト全体を拒否する",
   });
 });
 
-test("サイトマップは公開固定ページだけをサイトURLのオリジンで出す", () => {
+test("サイトマップは公開固定ページと確認済みJANだけをサイトURLのオリジンで出す", () => {
   withEnv({ NEXT_PUBLIC_SITE_URL: "https://petokaku.com/unused" }, () => {
     const entries = sitemapEntries();
     assert.deepEqual(
@@ -73,11 +84,42 @@ test("サイトマップは公開固定ページだけをサイトURLのオリ�
       publicSitemap,
     );
     assert.equal(
-      entries.some((entry) => entry.url.includes("/search") || entry.url.includes("/products")),
+      entries.some((entry) => entry.url.includes("/search") || entry.url.includes("/products/yahoo-preview")),
       false,
     );
+    assert.equal(entries.filter((entry) => entry.url.includes("/products/jan/")).length, 1);
     assert.equal(entries[0]?.priority, 1);
     assert.ok(entries.slice(1).every((entry) => entry.priority === 0.6 && entry.changeFrequency === "weekly"));
+  });
+});
+
+test("確認済みJANは13桁だけを上限まで選ぶ", () => {
+  assert.deepEqual(indexedJanProducts, [{ janCode: "3182550706933", label: "ロイヤルカナンの猫用4kg商品" }]);
+  assert.equal(selectIndexedJans(indexedJanProducts).length, 1);
+  const extra = [
+    ...indexedJanProducts,
+    { janCode: "123", label: "桁不足" },
+    { janCode: "3182550706933", label: "重複" },
+    ...Array.from({ length: indexedJanLimit + 2 }, (_, index) => ({
+      janCode: `3182550706${String(index).padStart(3, "0")}`,
+      label: "上限確認",
+    })),
+  ];
+  const selected = selectIndexedJans(extra);
+  assert.equal(selected.length, indexedJanLimit);
+  assert.equal(selected[0]?.janCode, "3182550706933");
+  assert.ok(selected.every((item) => /^[0-9]{13}$/.test(item.janCode)));
+  assert.equal(new Set(selected.map((item) => item.janCode)).size, selected.length);
+});
+
+test("商品を取得できないJANページはnoindex、取得できたページは公開判定に従う", () => {
+  withEnv({ ALLOW_INDEXING: "true", PRICE_SOURCE: "sample" }, () => {
+    assert.deepEqual(janPageRobots(true), { index: true, follow: true });
+    assert.deepEqual(janPageRobots(false), { index: false, follow: false });
+  });
+  withEnv({ ALLOW_INDEXING: "false" }, () => {
+    assert.deepEqual(janPageRobots(true), { index: false, follow: false });
+    assert.deepEqual(janPageRobots(false), { index: false, follow: false });
   });
 });
 
@@ -90,6 +132,16 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
     assert.doesNotMatch(source, /robotsMetadata\(\)/);
   }
   const jan = read("../app/products/jan/[jan]/page.tsx");
-  assert.match(jan, /robotsMetadata\(\)/);
-  assert.doesNotMatch(jan, /privateRobots\(\)/);
+  assert.match(jan, /janPageRobots\(true\)/);
+  assert.match(jan, /janPageRobots\(false\)/);
+  const home = read("../app/page.tsx");
+  const site = read("./site.ts");
+  assert.match(home, /価格比較できる商品/);
+  assert.match(home, /selectIndexedJans\(indexedJanProducts\)/);
+  assert.match(home, /indexedJanPath\(product\.janCode\)/);
+  assert.match(site, /3182550706933/);
+  assert.doesNotMatch(home, /searchYahooItems|loadYahooJan|loadYahooKeywordSearch/);
+  assert.doesNotMatch(site, /searchYahooItems|loadYahooJan/);
+  assert.doesNotMatch(read("../app/sitemap.ts"), /searchYahooItems|loadYahooJan/);
+  assert.doesNotMatch(`${home}\n${site}`, /人気商品|売れ筋/);
 });

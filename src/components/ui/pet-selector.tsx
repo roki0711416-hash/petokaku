@@ -39,7 +39,7 @@ export function PetSelector() {
   return (
     <section id="pets" aria-labelledby="pets-heading" className="px-4 py-12 md:py-20">
       <div className="mx-auto max-w-5xl">
-        <SectionHeading id="pets-heading" eyebrow="まずは仲間から" title="犬と猫で探す" lead="選んだ方の用品だけが出ます。検索したときは、その結果を優先します。" />
+        <SectionHeading id="pets-heading" eyebrow="まずは仲間から" title="犬と猫で探す" lead="犬か猫を選ぶと、フードやトイレなどの検索へ進めます。" />
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {pets.map((pet) => {
             const pressed = animal === pet.id;

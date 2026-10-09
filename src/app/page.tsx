@@ -4,6 +4,7 @@ import { Hero } from "@/components/ui/hero";
 import { PetSelector } from "@/components/ui/pet-selector";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { categories, categorySearchHref } from "@/lib/categories";
+import { indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
 import type { CategoryId } from "@/lib/types";
 
 const popular = [
@@ -15,13 +16,35 @@ const popular = [
 ];
 
 export default function HomePage() {
+  const comparableProducts = selectIndexedJans(indexedJanProducts);
+
   return (
     <>
       <Hero />
       <PetSelector />
+      {comparableProducts.length > 0 ? (
+        <section aria-labelledby="comparable-products" className="px-4 py-10 md:py-14">
+          <div className="mx-auto max-w-5xl">
+            <SectionHeading id="comparable-products" title="価格比較できる商品" lead="表示を確認した商品です。ショップごとの価格は、商品ページで見られます。" />
+            <ul className="mt-6 grid gap-3">
+              {comparableProducts.map((product) => (
+                <li key={product.janCode}>
+                  <Link
+                    href={indexedJanPath(product.janCode)}
+                    className="flex min-h-14 items-center justify-between gap-3 rounded-[1.6rem] bg-card px-4 py-3 text-sm"
+                  >
+                    <span>{product.label}</span>
+                    <span className="shrink-0 text-forest">価格を比較する</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
       <section aria-labelledby="popular-heading" className="overflow-hidden bg-honey/40 px-4 py-14 md:py-20">
         <div className="mx-auto max-w-5xl">
-          <SectionHeading id="popular-heading" eyebrow="こんなものを比較できます" title="人気の比較" lead="気になるものから、ショップの価格を見られます。" />
+          <SectionHeading id="popular-heading" eyebrow="こんなものを比較できます" title="品目から探す" lead="選ぶと、その品目の検索が開きます。" />
           <ul className="mt-8 flex min-w-0 max-w-full gap-3 overflow-x-auto pb-2 snap-x md:grid md:grid-cols-5 md:overflow-visible">
             {popular.map((item) => (
               <li key={item.label} className="shrink-0 md:shrink">
