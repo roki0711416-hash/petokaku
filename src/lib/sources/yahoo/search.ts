@@ -50,6 +50,30 @@ function httpsUrl(value: unknown): string | null {
   }
 }
 
+// 商品検索APIの image_size の上限。76 / 106 / 132 / 146 / 300 / 600 のうち最大。
+export const yahooDetailImageSize = "600";
+
+const yahooShoppingImage = /^https:\/\/item-shopping\.c\.yimg\.jp\/i\/([a-z])\/([^/?#]+)$/;
+const smallYahooImageCodes = new Set(["b", "c", "d", "e", "g", "h", "i", "j", "k", "m", "o"]);
+
+export function preferDetailImageUrl(value: string): string {
+  const match = yahooShoppingImage.exec(value);
+  if (!match || !smallYahooImageCodes.has(match[1] ?? "")) {
+    return value;
+  }
+  return `https://item-shopping.c.yimg.jp/i/l/${match[2]}`;
+}
+
+function detailImageUrl(...candidates: unknown[]): string | null {
+  for (const candidate of candidates) {
+    const url = httpsUrl(candidate);
+    if (url) {
+      return preferDetailImageUrl(url);
+    }
+  }
+  return null;
+}
+
 function genreCategoryIds(record: Record<string, unknown>): number[] {
   const genre = asRecord(record.genreCategory);
   const parents = Array.isArray(record.parentGenreCategories) ? record.parentGenreCategories : [];
@@ -86,7 +110,7 @@ export function readYahooItem(value: unknown): YahooItem | null {
     inStock: typeof record.inStock === "boolean" ? record.inStock : null,
     code: text(record.code),
     price: integer(record.price),
-    imageUrl: httpsUrl(exImage?.url) ?? httpsUrl(image?.medium) ?? httpsUrl(image?.small),
+    imageUrl: detailImageUrl(exImage?.url, image?.medium, image?.small),
     brandName: text(brand?.name),
     genreName: text(genre?.name),
     parentGenreNames: parents
@@ -120,7 +144,7 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
   }
   url.searchParams.set("genre_category_id", String(petSupplyGenreCategoryId));
   url.searchParams.set("results", String(params.results));
-  url.searchParams.set("image_size", "300");
+  url.searchParams.set("image_size", yahooDetailImageSize);
 
   let response: Response;
   try {

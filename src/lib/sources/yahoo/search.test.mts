@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isPetSupplyHit, petSupplyGenreCategoryId, searchYahooItems } from "./search.ts";
+import { isPetSupplyHit, petSupplyGenreCategoryId, preferDetailImageUrl, searchYahooItems, yahooDetailImageSize } from "./search.ts";
 
 const rice = {
   name: "令和7年産 米 15kg",
@@ -22,6 +22,18 @@ const sheets = {
     { id: 4782, name: "犬用品" },
   ],
 };
+
+test("商品詳細の画像は300px以下のYahoo画像を600pxのURLへ替える", () => {
+  assert.equal(
+    preferDetailImageUrl("https://item-shopping.c.yimg.jp/i/j/sweet-pet_77687275"),
+    "https://item-shopping.c.yimg.jp/i/l/sweet-pet_77687275",
+  );
+  assert.equal(
+    preferDetailImageUrl("https://item-shopping.c.yimg.jp/i/l/sweet-pet_77687275"),
+    "https://item-shopping.c.yimg.jp/i/l/sweet-pet_77687275",
+  );
+  assert.equal(preferDetailImageUrl("https://example.com/item.jpg"), "https://example.com/item.jpg");
+});
 
 test("ペット用品ジャンルIDはYahooカテゴリ一覧のペット用品、生き物", () => {
   assert.equal(petSupplyGenreCategoryId, 2509);
@@ -60,6 +72,8 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     assert.equal(janUrl.searchParams.get("genre_category_id"), "2509");
     assert.equal(janUrl.searchParams.get("jan_code"), "3182550849647");
     assert.equal(janUrl.searchParams.get("query"), null);
+    assert.equal(janUrl.searchParams.get("image_size"), yahooDetailImageSize);
+    assert.equal(yahooDetailImageSize, "600");
   } finally {
     globalThis.fetch = previousFetch;
     if (previousAppId == null) {
