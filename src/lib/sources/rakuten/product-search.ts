@@ -1,6 +1,7 @@
 import { hasUnresolvedPackNotation } from "../../pricing/pack-count.ts";
 import { parseTitleQuantity } from "../../pricing/quantity-parse.ts";
 import type { Offer } from "../../types.ts";
+import { officialRakutenAffiliateUrl, rakutenAffiliateIdReflected } from "./affiliate-url.ts";
 import { rakutenGet, rakutenSiteOrigin } from "./http.ts";
 
 const endpoint = "https://openapi.rakuten.co.jp/ichibaproduct/api/Product/Search/20250801";
@@ -12,6 +13,9 @@ export type RakutenProductProbe = {
   hasPrice: boolean;
   hasProductUrl: boolean;
   hasAffiliateUrl: boolean;
+  affiliateIdReflected: boolean;
+  purchaseHost: string | null;
+  markedAsAdvertisement: boolean;
   fieldNames: string[];
   priceKinds: Record<string, string>;
 };
@@ -101,7 +105,7 @@ function productRecords(payload: unknown): Record<string, unknown>[] {
   });
 }
 
-export function rakutenProductOfferFromPayload(payload: unknown, janCode: string, observedAt: string, affiliateRequested: boolean): Offer | null {
+export function rakutenProductOfferFromPayload(payload: unknown, janCode: string, observedAt: string, affiliateId = ""): Offer | null {
   const product = productRecords(payload).find((record) => janOf(record.productCode) === janCode);
   if (!product) {
     return null;
@@ -115,7 +119,7 @@ export function rakutenProductOfferFromPayload(payload: unknown, janCode: string
   const price = newGoods ? excludedPrice : salesPrice;
   const purchasable = newGoods ? excludedCount : salesCount;
   const productUrl = rakutenHttps(product.productUrlPC);
-  const affiliateUrl = affiliateRequested ? rakutenHttps(product.affiliateUrl) : null;
+  const affiliateUrl = officialRakutenAffiliateUrl(product.affiliateUrl, affiliateId);
   if (name === "" || price == null || purchasable == null || purchasable < 1 || productUrl == null) {
     return null;
   }
@@ -159,13 +163,17 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     hasPrice: false,
     hasProductUrl: false,
     hasAffiliateUrl: false,
+    affiliateIdReflected: false,
+    purchaseHost: null,
+    markedAsAdvertisement: false,
     fieldNames: [],
     priceKinds: {},
   });
   if (applicationId === "" || accessKey === "" || !/^[0-9]{13}$/.test(janCode)) {
     return empty("not-configured", null);
   }
-  const { url, headers } = rakutenProductSearchRequest(applicationId, accessKey, janCode);
+  const affiliateId = process.env.RAKUTEN_AFFILIATE_ID?.trim() ?? "";
+  const { url, headers } = rakutenProductSearchRequest(applicationId, accessKey, janCode, affiliateId);
   let status = 0;
   let text = "";
   try {
@@ -187,13 +195,27 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     return empty("request-failed", status);
   }
   const product = productRecords(payload).find((record) => janOf(record.productCode) === janCode) ?? null;
+  const affiliateUrl = officialRakutenAffiliateUrl(product?.affiliateUrl, affiliateId);
+  const productUrl = rakutenHttps(product?.productUrlPC);
+  const purchaseUrl = affiliateUrl ?? productUrl;
+  let purchaseHost: string | null = null;
+  if (purchaseUrl) {
+    try {
+      purchaseHost = new URL(purchaseUrl).hostname;
+    } catch {
+      purchaseHost = null;
+    }
+  }
   return {
     httpStatus: status,
     reason: product ? "matched" : "unmatched",
     matchedJan: product != null,
     hasPrice: yen(product?.usedExcludeSalesMinPrice) != null,
-    hasProductUrl: rakutenHttps(product?.productUrlPC) != null,
-    hasAffiliateUrl: rakutenHttps(product?.affiliateUrl) != null,
+    hasProductUrl: productUrl != null,
+    hasAffiliateUrl: affiliateUrl != null,
+    affiliateIdReflected: rakutenAffiliateIdReflected(affiliateUrl, affiliateId),
+    purchaseHost,
+    markedAsAdvertisement: affiliateUrl != null,
     fieldNames: product ? Object.keys(product).sort() : [],
     priceKinds: Object.fromEntries(
       ["usedExcludeSalesMinPrice", "salesMinPrice", "minPrice", "usedExcludeSalesItemCount", "salesItemCount", "itemCount"].map((key) => {

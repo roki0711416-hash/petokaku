@@ -30,7 +30,7 @@ test("同じJANの中古を除く購入可能価格だけを楽天の掲載に�
             usedExcludeSalesItemCount: 12,
             minPrice: 1000,
             productUrlPC: "https://product.rakuten.co.jp/product/-/example/",
-            affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/example/",
+            affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/affiliate-id/",
           },
         },
         { Product: { productCode: "4900000000000", productName: "別商品", usedExcludeSalesMinPrice: 100, usedExcludeSalesItemCount: 1, productUrlPC: "https://product.rakuten.co.jp/product/-/other/" } },
@@ -38,12 +38,12 @@ test("同じJANの中古を除く購入可能価格だけを楽天の掲載に�
     },
     jan,
     observedAt,
-    true,
+    "affiliate-id",
   );
   assert.equal(offer?.price, 5980);
   assert.equal(offer?.shopName, "楽天市場");
   assert.equal(offer?.productUrl, "https://product.rakuten.co.jp/product/-/example/");
-  assert.equal(offer?.affiliateUrl, "https://hb.afl.rakuten.co.jp/hgc/example/");
+  assert.equal(offer?.affiliateUrl, "https://hb.afl.rakuten.co.jp/hgc/affiliate-id/");
   assert.equal(offer?.shippingFee, null);
   assert.equal(offer?.packCount, null);
   assert.equal(offer?.itemCode, "new");
@@ -67,7 +67,7 @@ test("中古を除く価格が無いときは購入可能最安を出し、上�
     },
     jan,
     observedAt,
-    false,
+    "",
   );
   assert.equal(offer?.price, 6120);
   assert.equal(offer?.itemCode, null);
@@ -82,19 +82,35 @@ test("JAN不一致、購入可能数なし、楽天以外のURL、曖昧なセ�
     usedExcludeSalesItemCount: 2,
     productUrlPC: "https://product.rakuten.co.jp/product/-/item/",
   };
-  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, productCode: "4900000000000" }] }, jan, observedAt, false), null);
-  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, usedExcludeSalesItemCount: 0 }] }, jan, observedAt, false), null);
-  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, usedExcludeSalesMinPrice: null }] }, jan, observedAt, false), null);
-  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, productUrlPC: "https://shopping.yahoo.co.jp/item" }] }, jan, observedAt, false), null);
+  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, productCode: "4900000000000" }] }, jan, observedAt, ""), null);
+  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, usedExcludeSalesItemCount: 0 }] }, jan, observedAt, ""), null);
+  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, usedExcludeSalesMinPrice: null }] }, jan, observedAt, ""), null);
+  assert.equal(rakutenProductOfferFromPayload({ products: [{ ...base, productUrlPC: "https://shopping.yahoo.co.jp/item" }] }, jan, observedAt, ""), null);
   assert.equal(
-    rakutenProductOfferFromPayload({ products: [{ ...base, productName: "猫砂 2個 3個" }] }, jan, observedAt, false),
+    rakutenProductOfferFromPayload({ products: [{ ...base, productName: "猫砂 2個 3個" }] }, jan, observedAt, ""),
     null,
   );
-  const withoutAffiliate = rakutenProductOfferFromPayload(
-    { products: [{ ...base, affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/example/" }] },
+  const unofficial = rakutenProductOfferFromPayload(
+    { products: [{ ...base, affiliateUrl: "https://product.rakuten.co.jp/product/-/item/" }] },
     jan,
     observedAt,
-    false,
+    "affiliate-id",
+  );
+  assert.equal(unofficial?.affiliateUrl, null);
+  assert.equal(unofficial?.productUrl, "https://product.rakuten.co.jp/product/-/item/");
+  const withoutAffiliate = rakutenProductOfferFromPayload(
+    { products: [{ ...base, affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/affiliate-id/" }] },
+    jan,
+    observedAt,
+    "",
   );
   assert.equal(withoutAffiliate?.affiliateUrl, null);
+  const otherId = rakutenProductOfferFromPayload(
+    { products: [{ ...base, affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/someone-else/" }] },
+    jan,
+    observedAt,
+    "affiliate-id",
+  );
+  assert.equal(otherId?.affiliateUrl, null);
+  assert.equal(otherId?.productUrl, "https://product.rakuten.co.jp/product/-/item/");
 });

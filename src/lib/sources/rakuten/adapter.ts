@@ -1,5 +1,6 @@
 import type { PetokakuOffer, PetokakuProduct } from "../../catalog/petokaku-listing.ts";
 import type { ShippingStatus, StockStatus } from "../../types.ts";
+import { officialRakutenAffiliateUrl } from "./affiliate-url.ts";
 import type { RakutenSourceItem } from "./types.ts";
 
 function validJan(value: string | null): string | null {
@@ -64,7 +65,7 @@ function offerFrom(item: RakutenSourceItem, observedAt: string): PetokakuOffer |
     itemCode: item.itemCode?.trim() || null,
     shopName,
     productUrl: httpUrl(item.url),
-    affiliateUrl: null,
+    affiliateUrl: officialRakutenAffiliateUrl(item.affiliateUrl, process.env.RAKUTEN_AFFILIATE_ID?.trim() ?? ""),
     listingTitle: name,
     packCount: null,
     packUnit: null,

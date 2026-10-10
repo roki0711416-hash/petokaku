@@ -4,6 +4,7 @@ export type RakutenSourceItem = {
   name: string | null;
   price: number | null;
   url: string | null;
+  affiliateUrl?: string | null;
   imageUrl: string | null;
   shopName: string | null;
   shopCode: string | null;

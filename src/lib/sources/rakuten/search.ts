@@ -33,7 +33,7 @@ export async function loadRakutenJanOffers(
     if (response.status < 200 || response.status >= 300) {
       return { ok: true, offers: [] };
     }
-    const offer = rakutenProductOfferFromPayload(JSON.parse(response.text) as unknown, janCode, new Date().toISOString(), affiliateId !== "");
+    const offer = rakutenProductOfferFromPayload(JSON.parse(response.text) as unknown, janCode, new Date().toISOString(), affiliateId);
     return { ok: true, offers: offer ? [offer] : [] };
   } catch {
     return { ok: true, offers: [] };

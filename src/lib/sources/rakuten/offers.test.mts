@@ -34,10 +34,28 @@ test("楽天の掲載は一致したJANだけを共通形式にし、送料不�
     name: "ロイヤルカナン ミニ インドア アダルト 4kg 2個セット",
     shopCode: "set-shop",
     itemCode: "set-shop:1",
+    affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/affiliate-id/",
   };
-  const offers = rakutenOffersForJan([...rakutenFixtureItems, unknown, otherJan, setItem], "3182550849647", observedAt);
-  assert.deepEqual(offers.map((offer) => offer.shopName), ["楽天サンプル店", "送料不明店", "楽天サンプル店"]);
-  assert.equal(offers.every((offer) => offer.provider === "rakuten" && offer.affiliateUrl == null && offer.isSample === false), true);
+  const foreignAffiliate: RakutenSourceItem = {
+    ...rakutenFixtureItems[0],
+    shopCode: "foreign-shop",
+    itemCode: "foreign-shop:1",
+    affiliateUrl: "https://shopping.yahoo.co.jp/item",
+  };
+  const previousAffiliate = process.env.RAKUTEN_AFFILIATE_ID;
+  process.env.RAKUTEN_AFFILIATE_ID = "affiliate-id";
+  let offers: ReturnType<typeof rakutenOffersForJan> = [];
+  try {
+    offers = rakutenOffersForJan([...rakutenFixtureItems, unknown, otherJan, setItem, foreignAffiliate], "3182550849647", observedAt);
+  } finally {
+    if (previousAffiliate == null) delete process.env.RAKUTEN_AFFILIATE_ID;
+    else process.env.RAKUTEN_AFFILIATE_ID = previousAffiliate;
+  }
+  assert.deepEqual(offers.map((offer) => offer.shopName), ["楽天サンプル店", "送料不明店", "楽天サンプル店", "楽天サンプル店"]);
+  assert.equal(offers[0]?.affiliateUrl, null);
+  assert.equal(offers[2]?.affiliateUrl, "https://hb.afl.rakuten.co.jp/hgc/affiliate-id/");
+  assert.equal(offers[3]?.affiliateUrl, null);
+  assert.equal(offers.every((offer) => offer.provider === "rakuten" && offer.isSample === false), true);
   const free = offers[0];
   const missingFee = offers[1];
   const setOffer = offers[2];
