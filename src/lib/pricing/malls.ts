@@ -43,6 +43,10 @@ export function groupOffersByMall<T extends { provider: string; isSample: boolea
   });
 }
 
+export function offersComparableAsNew<T extends { provider: string; itemCode: string | null }>(offers: T[]): T[] {
+  return offers.filter((offer) => offer.provider !== "rakuten" || offer.itemCode === "new");
+}
+
 export function confirmedJanOffers(pageJan: string, batches: { janCode: string | null; offers: Offer[] }[]): Offer[] {
   if (!/^[0-9]{13}$/.test(pageJan)) {
     return [];

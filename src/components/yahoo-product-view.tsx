@@ -9,6 +9,7 @@ import { readableListingTitle as compactVisibleTitle } from "@/lib/pricing/displ
 import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
 import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
 import { shopProductLink } from "@/lib/pricing/shop-link";
+import { offersComparableAsNew } from "@/lib/pricing/malls";
 import { comparisonCountLabel } from "@/lib/pricing/visible-offers";
 import { productStructuredData } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
@@ -42,7 +43,7 @@ export function YahooProductView({
   priceCheckedAt?: string;
 }) {
   const quote = quoteSingleSize({
-    offers: product.offers,
+    offers: offersComparableAsNew(product.offers),
     quantity: product.quantity,
     quantityUnit: product.quantityUnit,
     quantityConfidence: product.quantityConfidence,
@@ -68,7 +69,7 @@ export function YahooProductView({
     imageUrl,
     pageUrl: new URL(pageHref, getSiteUrl()).toString(),
     sizeLabel: capacity,
-    offers: product.offers.map((offer) => ({
+    offers: offersComparableAsNew(product.offers).map((offer) => ({
       shopName: offer.shopName,
       price: offer.price,
       url: safeHttpUrl(offer.productUrl) ?? shopProductLink(offer).href,

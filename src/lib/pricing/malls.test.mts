@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { confirmedJanOffers, groupOffersByMall } from "./malls.ts";
+import { confirmedJanOffers, groupOffersByMall, offersComparableAsNew } from "./malls.ts";
 import type { Offer } from "../types.ts";
 
 function offer(patch: Partial<Offer> & Pick<Offer, "id" | "provider" | "shopName">): Offer {
@@ -41,6 +41,13 @@ test("掲載があるモールだけを出し、サンプルと未対応モー�
       ["rakuten", "楽天市場", 1, ["r1"]],
     ],
   );
+});
+
+test("中古を除けた楽天価格だけを上部の商品価格に入れる", () => {
+  const yahoo = offer({ id: "y1", provider: "yahoo", shopName: "A店" });
+  const excluded = offer({ id: "r1", provider: "rakuten", shopName: "楽天市場", itemCode: "new" });
+  const mixed = offer({ id: "r2", provider: "rakuten", shopName: "楽天市場", itemCode: null });
+  assert.deepEqual(offersComparableAsNew([yahoo, excluded, mixed]).map((item) => item.id), ["y1", "r1"]);
 });
 
 test("同じJANの掲載だけをまとめ、別JANとサンプルは落とす", () => {

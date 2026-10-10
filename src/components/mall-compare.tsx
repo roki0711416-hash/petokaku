@@ -34,7 +34,7 @@ export function MallCompare({
           {group.mall === "rakuten" ? (
             <div className="mt-2 px-1">
               <p className="text-xs leading-5 text-muted">
-                同じJANコードの商品価格ナビです。価格は中古を除く購入可能な最安で、個別の販売店名と送料の金額は含まれていません。
+                同じJANコードの商品価格ナビです。価格は購入できる出品の最安で、個別の販売店名と送料の金額は含まれていません。中古品を除いた価格が取れた掲載だけ、ページ上部の商品価格に入ります。
               </p>
               <div className="mt-2" dangerouslySetInnerHTML={{ __html: rakutenCreditHtml }} />
             </div>

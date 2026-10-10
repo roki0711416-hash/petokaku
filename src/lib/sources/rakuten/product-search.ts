@@ -107,8 +107,13 @@ export function rakutenProductOfferFromPayload(payload: unknown, janCode: string
     return null;
   }
   const name = typeof product.productName === "string" ? product.productName.trim() : "";
-  const price = yen(product.usedExcludeSalesMinPrice);
-  const purchasable = countOf(product.usedExcludeSalesItemCount);
+  const excludedPrice = yen(product.usedExcludeSalesMinPrice);
+  const excludedCount = countOf(product.usedExcludeSalesItemCount);
+  const salesPrice = yen(product.salesMinPrice);
+  const salesCount = countOf(product.salesItemCount);
+  const newGoods = excludedPrice != null && excludedCount != null && excludedCount >= 1;
+  const price = newGoods ? excludedPrice : salesPrice;
+  const purchasable = newGoods ? excludedCount : salesCount;
   const productUrl = rakutenHttps(product.productUrlPC);
   const affiliateUrl = affiliateRequested ? rakutenHttps(product.affiliateUrl) : null;
   if (name === "" || price == null || purchasable == null || purchasable < 1 || productUrl == null) {
@@ -135,7 +140,7 @@ export function rakutenProductOfferFromPayload(payload: unknown, janCode: string
     source: "rakuten",
     provider: "rakuten",
     sellerId: null,
-    itemCode: null,
+    itemCode: newGoods ? "new" : null,
     packCount,
     packUnit: reading.packConfidence === "high" ? reading.packUnit : null,
     totalQuantity: null,

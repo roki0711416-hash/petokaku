@@ -46,7 +46,32 @@ test("同じJANの中古を除く購入可能価格だけを楽天の掲載に�
   assert.equal(offer?.affiliateUrl, "https://hb.afl.rakuten.co.jp/hgc/example/");
   assert.equal(offer?.shippingFee, null);
   assert.equal(offer?.packCount, null);
+  assert.equal(offer?.itemCode, "new");
   assert.equal(offer?.isSample, false);
+});
+
+test("中古を除く価格が無いときは購入可能最安を出し、上部の商品価格には使わない", () => {
+  const offer = rakutenProductOfferFromPayload(
+    {
+      products: [
+        {
+          productCode: jan,
+          productName: "ロイヤルカナン 猫 4kg",
+          usedExcludeSalesMinPrice: null,
+          usedExcludeSalesItemCount: null,
+          salesMinPrice: 6120,
+          salesItemCount: 4,
+          productUrlPC: "https://product.rakuten.co.jp/product/-/example/",
+        },
+      ],
+    },
+    jan,
+    observedAt,
+    false,
+  );
+  assert.equal(offer?.price, 6120);
+  assert.equal(offer?.itemCode, null);
+  assert.equal(offer?.stockStatus, "in_stock");
 });
 
 test("JAN不一致、購入可能数なし、楽天以外のURL、曖昧なセットは出さない", () => {
