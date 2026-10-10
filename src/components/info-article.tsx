@@ -29,7 +29,7 @@ export function InfoArticle({
           この文章は公開前の下書きです。法律の助言ではありません。サイトを公開する前に、実際の運営方法と合っているか確認してください。
         </p>
       ) : null}
-      <div className="mt-8 grid gap-4 leading-8">{children}</div>
+      <div className="mt-8 grid gap-4 leading-8 [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:text-ink [&_ol]:grid [&_ol]:gap-3 [&_ol]:pl-5">{children}</div>
     </article>
   );
 }

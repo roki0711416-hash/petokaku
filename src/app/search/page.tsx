@@ -22,7 +22,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   return (
     <article className="mx-auto max-w-6xl px-4 py-6 md:py-8">
       <h1 className="text-4xl font-medium tracking-tight md:text-5xl">商品を探す</h1>
-      <p className="mt-3 leading-8 text-muted">商品名やブランド名で、販売店の掲載を検索します。</p>
+      <p className="mt-3 leading-8 text-muted">商品名、ブランド名、JANコードで、販売店の掲載を検索します。</p>
+      <p className="mt-2 text-sm leading-7 text-muted">販売店へのリンクは、現在アフィリエイトリンクではありません。価格、送料、在庫は取得後に変わることがあります。</p>
       <SearchForm
         id="yahoo-search"
         action="/search"

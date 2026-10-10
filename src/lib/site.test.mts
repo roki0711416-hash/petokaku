@@ -47,6 +47,7 @@ const publicSitemap = [
   "https://petokaku.com/guide",
   "https://petokaku.com/contact",
   "https://petokaku.com/privacy",
+  "https://petokaku.com/cookies",
   "https://petokaku.com/terms",
   "https://petokaku.com/affiliate",
   "https://petokaku.com/products/jan/3182550706933",

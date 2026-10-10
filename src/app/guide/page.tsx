@@ -1,33 +1,56 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
 
 export const metadata: Metadata = {
   title: "サイトの使い方",
-  description: "ペトカクで商品を探し、ショップごとの価格と送料を見比べる手順です。",
+  description: "商品名、ブランド名、JANコードから販売店を探し、価格と送料を見比べて、外部ショップで購入する手順です。",
+  alternates: { canonical: "/guide" },
 };
+
+const steps = [
+  {
+    title: "商品名・ブランド名・JANコードで検索",
+    body: "トップまたはヘッダーの検索窓に、探したい言葉を入れてください。カテゴリーのカードからも、その品目の検索を開けます。",
+  },
+  {
+    title: "商品詳細ページを開く",
+    body: "JANコードでまとまった商品は「価格を見る」から詳細ページへ進みます。JANコードがない掲載は、その場で販売店のページを開きます。",
+  },
+  {
+    title: "販売ショップの価格や送料を比較",
+    body: "詳細ページでは、ショップ名、商品価格、確認できた送料、在庫を並べます。送料が確認できた掲載だけ合計額を出します。送料が未確認の合計は「情報なし」です。",
+  },
+  {
+    title: "外部ショップで購入",
+    body: "「商品を見る」を開くと、販売店のページへ移動します。ペトカクでは決済しません。移動後の価格、送料、在庫、内容量は、そのショップで確認してください。",
+  },
+];
 
 export default function GuidePage() {
   return (
-    <InfoArticle
-      title="サイトの使い方"
-      path="/guide"
-      lead="商品を探して、ショップごとの金額を見比べ、買う前に販売店で最終確認します。"
-    >
-      <h2 className="text-xl font-bold">1. 商品を探す</h2>
+    <InfoArticle title="サイトの使い方" path="/guide" lead="検索して、見比べて、買う場所は販売店のページです。">
+      <ol className="list-none pl-0">
+        {steps.map((step, index) => (
+          <li key={step.title} className="rounded-3xl bg-card px-5 py-5">
+            <p className="text-sm text-sage">0{index + 1}</p>
+            <h2 className="mt-1">{step.title}</h2>
+            <p className="mt-2 text-sm leading-7 text-muted">{step.body}</p>
+          </li>
+        ))}
+      </ol>
+      <h2>価格は変わることがあります</h2>
       <p>
-        トップの検索窓に商品名やブランド名を入れると、販売店の掲載から商品を探します。犬・猫からは、フードやトイレなどの検索にも進めます。
+        価格、送料、在庫は、取得した時点の掲載です。その後にショップ側で変わることがあります。ページに出している金額が、いまの販売価格と一致するとは限りません。
       </p>
-      <h2 className="text-xl font-bold">2. 条件を狭める</h2>
-      <p>検索結果では、犬・猫などの種類で絞れます。カードの金額は、在庫がある通常販売の販売価格です。セットは通常販売の価格に混ぜません。</p>
-      <h2 className="text-xl font-bold">3. ショップを見比べる</h2>
+      <h2>内容量が違う商品</h2>
+      <p>名前が似ていても、4kgと10kgのように内容量が違う商品は別のJANコードとして扱います。同じ一覧の最安としては混ぜません。</p>
       <p>
-        商品のページでは、ショップごとに商品価格、送料、在庫を表示します。送料が確認できたときは、送料込みの金額も出します。送料が未確認のときは、送料込みの合計を計算せず、送料はショップで確認する旨を出します。取得した日時そのものは、ページには出していません。
-      </p>
-      <h2 className="text-xl font-bold">4. 内容量の違いに注意する</h2>
-      <p>名前が同じでも、1.5kgと4kgのように内容量が違う商品は、別の商品として並べます。同じ一覧には混ぜません。</p>
-      <h2 className="text-xl font-bold">5. 買う前に販売店を確認する</h2>
-      <p>
-        検索して開いた商品は、取得時点の販売店の価格です。買う前に、販売店のページで価格、送料、在庫を確認してください。
+        操作で分からないことは、
+        <Link href="/contact" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          お問い合わせ
+        </Link>
+        からメールで連絡できます。
       </p>
     </InfoArticle>
   );

@@ -116,6 +116,11 @@ export function YahooProductView({
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
           商品価格、送料、在庫は取得時点の掲載です。送料が確認できた掲載だけ合計額を出します。購入前に、各ショップのページで確認してください。
         </p>
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
+          {product.offers.some((offer) => shopProductLink(offer).affiliate)
+            ? "報酬のあるリンクには「広告」と表示しています。表示価格は、成果報酬では決めていません。"
+            : "このページの販売店へのリンクは、各ショップの商品ページです。アフィリエイトリンクではありません。"}
+        </p>
         <div className="mt-6">
           <OfferList
             offers={product.offers}

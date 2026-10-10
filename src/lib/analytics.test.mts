@@ -16,6 +16,7 @@ test("GA4は1か所だけで、自動ページビューと手動送信を重ね�
   const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
   const tag = readFileSync(new URL("../components/google-analytics.tsx", import.meta.url), "utf8");
   assert.equal(layout.match(/<GoogleAnalytics/g)?.length, 1);
+  assert.match(tag, /choice !== "granted"/);
   assert.match(tag, /send_page_view:false/);
   assert.equal(tag.match(/gtag\/js/g)?.length, 1);
   assert.doesNotMatch(layout, /googletagmanager|gtag\/js/);

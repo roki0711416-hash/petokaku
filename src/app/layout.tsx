@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
 import { Suspense } from "react";
+import { CookieBanner } from "@/components/cookie-consent";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { NoticeBar } from "@/components/notice-bar";
 import { SampleBanner } from "@/components/sample-banner";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {children}
         </main>
         <SiteFooter />
+        <CookieBanner />
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
