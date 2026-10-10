@@ -1,7 +1,7 @@
 import https from "node:https";
 
 const endpoint = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
-const siteReferrer = "https://petokaku.com/";
+const siteOrigin = "https://petokaku.com";
 
 export type RakutenProbeResult = {
   ok: boolean;
@@ -75,7 +75,8 @@ export function rakutenProbeRequest(applicationId: string, keyword: string, acce
     url,
     headers: {
       Accept: "application/json",
-      Referer: siteReferrer,
+      Origin: siteOrigin,
+      Referer: `${siteOrigin}/`,
       ...(accessKey === "" ? {} : { accessKey }),
     },
   };

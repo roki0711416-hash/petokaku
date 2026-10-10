@@ -9,6 +9,7 @@ test("接続確認はアフィリエイトIDを送らず、アクセスキーを
   assert.equal(url.searchParams.get("affiliateId"), null);
   assert.equal(url.searchParams.get("accessKey"), null);
   assert.equal(headers.accessKey, "access-key");
+  assert.equal(headers.Origin, "https://petokaku.com");
   assert.equal(headers.Referer, "https://petokaku.com/");
   assert.equal(url.searchParams.get("hits"), "1");
 });
