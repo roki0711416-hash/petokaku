@@ -4,6 +4,7 @@ import { InfoArticle } from "@/components/info-article";
 export const metadata: Metadata = {
   title: "お問い合わせ",
   description: "ペトカク運営事務局への連絡先です。",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
