@@ -26,9 +26,37 @@ const columns = [
 ];
 
 const socials = [
-  { label: "Instagram", href: "https://www.instagram.com/petokaku/" },
-  { label: "X", href: "https://x.com/petokaku" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/petokaku/",
+    icon: InstagramIcon,
+    mark: "bg-moss text-forest group-hover:bg-forest group-hover:text-card",
+  },
+  {
+    label: "X",
+    href: "https://x.com/petokaku",
+    icon: XIcon,
+    mark: "bg-ink text-card group-hover:bg-forest",
+  },
 ];
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
+      <rect x="4" y="4" width="16" height="16" rx="5" />
+      <circle cx="12" cy="12" r="3.5" />
+      <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-current">
+      <path d="M14.7 4h2.6l-5.7 6.5L18.6 20h-4.3l-3.4-4.9L7 20H4.4l6.1-7L4.2 4h4.4l3 4.4L14.7 4Zm-.9 14.4h1.4L8.3 5.5H6.8l7 12.9Z" />
+    </svg>
+  );
+}
 
 export function SiteFooter() {
   return (
@@ -41,16 +69,20 @@ export function SiteFooter() {
             <FooterPriceNote />
           </div>
           <div>
-            <p className="text-xs tracking-[0.14em] text-muted">SNS</p>
-            <ul className="mt-3 flex flex-wrap gap-2" aria-label="SNS">
+            <p className="text-xs tracking-[0.14em] text-muted">公式アカウント</p>
+            <ul className="mt-3 flex flex-wrap gap-3" aria-label="公式アカウント">
               {socials.map((item) => (
                 <li key={item.href}>
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-10 items-center rounded-full border border-line px-4 text-sm text-ink hover:bg-paper"
+                    aria-label={`${item.label}（新しいタブで開く）`}
+                    className="lift group inline-flex min-h-12 items-center gap-2.5 rounded-full border border-line bg-card py-1 pr-4 pl-1 text-sm text-ink shadow-[0_10px_24px_rgba(32,77,56,0.06)] hover:border-sage"
                   >
+                    <span className={`grid h-10 w-10 place-items-center rounded-full transition-colors ${item.mark}`}>
+                      <item.icon />
+                    </span>
                     {item.label}
                   </a>
                 </li>
