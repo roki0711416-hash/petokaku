@@ -1,4 +1,7 @@
+import https from "node:https";
+
 const endpoint = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
+const siteReferrer = "https://petokaku.com/";
 
 export type RakutenProbeResult = {
   ok: boolean;
@@ -61,14 +64,33 @@ function hasJanField(value: unknown): boolean {
   return Object.entries(record).some(([key, nested]) => /jan/i.test(key) || hasJanField(nested));
 }
 
-export function rakutenProbeRequest(applicationId: string, keyword: string): { url: URL; headers: Headers } {
+export function rakutenProbeRequest(applicationId: string, keyword: string, accessKey = ""): { url: URL; headers: Record<string, string> } {
   const url = new URL(endpoint);
   url.searchParams.set("applicationId", applicationId);
   url.searchParams.set("keyword", keyword);
   url.searchParams.set("hits", "1");
   url.searchParams.set("format", "json");
   url.searchParams.set("formatVersion", "2");
-  return { url, headers: new Headers({ Accept: "application/json" }) };
+  return {
+    url,
+    headers: {
+      Accept: "application/json",
+      Referer: siteReferrer,
+      ...(accessKey === "" ? {} : { accessKey }),
+    },
+  };
+}
+
+function requestRakuten(url: URL, headers: Record<string, string>): Promise<{ status: number; text: string }> {
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, { method: "GET", headers }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk: Buffer) => chunks.push(chunk));
+      res.on("end", () => resolve({ status: res.statusCode ?? 0, text: Buffer.concat(chunks).toString("utf8") }));
+    });
+    req.on("error", reject);
+    req.end();
+  });
 }
 
 export async function probeRakutenItemSearch(keyword: string): Promise<RakutenProbeResult> {
@@ -78,17 +100,16 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
     return emptyProbe("not-configured", null, null);
   }
 
-  const { url, headers } = rakutenProbeRequest(applicationId, keyword);
-  headers.set("accessKey", accessKey);
-  headers.set("Referer", "https://petokaku.com/");
-  let response: Response;
+  const { url, headers } = rakutenProbeRequest(applicationId, keyword, accessKey);
+  let status = 0;
+  let text = "";
   try {
-    response = await fetch(url, { headers, cache: "no-store" });
+    const response = await requestRakuten(url, headers);
+    status = response.status;
+    text = response.text;
   } catch {
     return emptyProbe("request-failed", null, null);
   }
-
-  const text = await response.text();
   let payload: unknown = null;
   try {
     payload = JSON.parse(text);
@@ -104,20 +125,20 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
     .slice(0, 240);
 
   const errorText = safeError(payload) ?? (excerpt === "" ? null : excerpt);
-  if (response.status === 429) {
-    return { ...emptyProbe("rate-limited", response.status, errorText), httpStatus: response.status };
+  if (status === 429) {
+    return { ...emptyProbe("rate-limited", status, errorText), httpStatus: status };
   }
-  if (response.status === 404) {
-    return { ...emptyProbe("not-found", response.status, errorText) };
+  if (status === 404) {
+    return { ...emptyProbe("not-found", status, errorText) };
   }
-  if (response.status === 400) {
-    return { ...emptyProbe("parameter", response.status, errorText) };
+  if (status === 400) {
+    return { ...emptyProbe("parameter", status, errorText) };
   }
-  if (response.status === 503 || response.status >= 500) {
-    return { ...emptyProbe("unavailable", response.status, errorText) };
+  if (status === 503 || status >= 500) {
+    return { ...emptyProbe("unavailable", status, errorText) };
   }
-  if (!response.ok) {
-    return { ...emptyProbe("request-failed", response.status, errorText) };
+  if (status < 200 || status >= 300) {
+    return { ...emptyProbe("request-failed", status, errorText) };
   }
 
   const body = asRecord(payload);
@@ -128,7 +149,7 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
   const hasImageUrl = Array.isArray(images) && images.some((image) => typeof image === "string" || typeof asRecord(image)?.imageUrl === "string");
   return {
     ok: true,
-    httpStatus: response.status,
+    httpStatus: status,
     reason: "connected",
     error: null,
     fieldNames,
