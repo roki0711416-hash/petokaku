@@ -1,7 +1,7 @@
 import { hasUnresolvedPackNotation } from "../../pricing/pack-count.ts";
 import { parseTitleQuantity } from "../../pricing/quantity-parse.ts";
 import type { Offer } from "../../types.ts";
-import { officialRakutenAffiliateUrl, rakutenAffiliateIdReflected } from "./affiliate-url.ts";
+import { describeRakutenAffiliateField, officialRakutenAffiliateUrl, rakutenAffiliateIdReflected } from "./affiliate-url.ts";
 import { rakutenGet, rakutenSiteOrigin } from "./http.ts";
 
 const endpoint = "https://openapi.rakuten.co.jp/ichibaproduct/api/Product/Search/20250801";
@@ -13,6 +13,8 @@ export type RakutenProductProbe = {
   hasPrice: boolean;
   hasProductUrl: boolean;
   hasAffiliateUrl: boolean;
+  affiliateFieldKind: "null" | "empty" | "url" | "other";
+  affiliateHost: string | null;
   affiliateIdReflected: boolean;
   purchaseHost: string | null;
   markedAsAdvertisement: boolean;
@@ -163,6 +165,8 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     hasPrice: false,
     hasProductUrl: false,
     hasAffiliateUrl: false,
+    affiliateFieldKind: "null",
+    affiliateHost: null,
     affiliateIdReflected: false,
     purchaseHost: null,
     markedAsAdvertisement: false,
@@ -195,6 +199,7 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     return empty("request-failed", status);
   }
   const product = productRecords(payload).find((record) => janOf(record.productCode) === janCode) ?? null;
+  const affiliateField = describeRakutenAffiliateField(product?.affiliateUrl, affiliateId);
   const affiliateUrl = officialRakutenAffiliateUrl(product?.affiliateUrl, affiliateId);
   const productUrl = rakutenHttps(product?.productUrlPC);
   const purchaseUrl = affiliateUrl ?? productUrl;
@@ -213,6 +218,8 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     hasPrice: yen(product?.usedExcludeSalesMinPrice) != null,
     hasProductUrl: productUrl != null,
     hasAffiliateUrl: affiliateUrl != null,
+    affiliateFieldKind: affiliateField.kind,
+    affiliateHost: affiliateField.host,
     affiliateIdReflected: rakutenAffiliateIdReflected(affiliateUrl, affiliateId),
     purchaseHost,
     markedAsAdvertisement: affiliateUrl != null,
