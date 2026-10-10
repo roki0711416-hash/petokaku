@@ -87,27 +87,36 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
     return emptyProbe("request-failed", null, null);
   }
 
+  const text = await response.text();
   let payload: unknown = null;
   try {
-    payload = await response.json();
+    payload = JSON.parse(text);
   } catch {
     payload = null;
   }
+  const excerpt = text
+    .split(applicationId)
+    .join("[redacted]")
+    .split(accessKey)
+    .join("[redacted]")
+    .replace(/\s+/g, " ")
+    .slice(0, 240);
 
+  const errorText = safeError(payload) ?? (excerpt === "" ? null : excerpt);
   if (response.status === 429) {
-    return { ...emptyProbe("rate-limited", response.status, safeError(payload)), httpStatus: response.status };
+    return { ...emptyProbe("rate-limited", response.status, errorText), httpStatus: response.status };
   }
   if (response.status === 404) {
-    return { ...emptyProbe("not-found", response.status, safeError(payload)) };
+    return { ...emptyProbe("not-found", response.status, errorText) };
   }
   if (response.status === 400) {
-    return { ...emptyProbe("parameter", response.status, safeError(payload)) };
+    return { ...emptyProbe("parameter", response.status, errorText) };
   }
   if (response.status === 503 || response.status >= 500) {
-    return { ...emptyProbe("unavailable", response.status, safeError(payload)) };
+    return { ...emptyProbe("unavailable", response.status, errorText) };
   }
   if (!response.ok) {
-    return { ...emptyProbe("request-failed", response.status, safeError(payload)) };
+    return { ...emptyProbe("request-failed", response.status, errorText) };
   }
 
   const body = asRecord(payload);
