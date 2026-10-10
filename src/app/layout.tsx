@@ -23,19 +23,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "ペトカク | ペット用品の価格を、かんたん比較",
+    default: "ペット用品の価格比較",
     template: "%s | ペトカク",
   },
-  description:
-    "犬・猫などの用品を、ショップごとの価格と送料で見比べるサイトです。表示は取得時点の掲載です。購入前にショップで確認してください。",
+  description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
   applicationName: "ペトカク",
   robots: robotsMetadata(),
   openGraph: {
     siteName: "ペトカク",
     locale: "ja_JP",
     type: "website",
-    title: "ペトカク | ペット用品の価格を、かんたん比較",
-    description: "犬・猫などの用品を、ショップごとの価格と送料で見比べるサイトです。購入前にショップで確認してください。",
+    title: "ペット用品の価格比較 | ペトカク",
+    description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
   },
 };
 

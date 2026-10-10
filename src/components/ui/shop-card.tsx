@@ -115,23 +115,25 @@ export function ShopCard({
   lowestTotal: number | null;
   rank: number;
 }) {
-  const { total, isLowestTotal, headline } = offerHeadline(offer, lowestTotal, rank);
+  const { total, isLowestTotal } = offerHeadline(offer, lowestTotal, rank);
 
   return (
     <li className={isLowestTotal ? "rounded-2xl border border-forest bg-moss px-3 py-3" : "rounded-2xl border border-line bg-card px-3 py-3"}>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className={isLowestTotal ? "text-xs font-medium text-forest-deep" : "text-xs text-muted"}>
-            {isLowestTotal ? "最安" : `${rank}位`}
+            {isLowestTotal ? "合計が低い" : `${rank}位`}
           </p>
           <h3 className="mt-0.5 truncate text-sm font-medium text-ink">{offer.shopName}</h3>
           {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
-          <p className="price-num mt-1 text-2xl leading-none text-ink">{headline == null ? "価格未確認" : formatYen(headline)}</p>
+          <p className="mt-2 text-xs text-muted">商品価格</p>
+          <p className="price-num text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
           <p className="mt-1 text-xs text-muted">
             {shippingLine(offer)} ・ {stockLabel(offer.stockStatus, offer.isSample)}
           </p>
+          <p className="mt-1 text-xs text-ink">合計 {total == null ? "情報なし" : formatYen(total)}</p>
           {total == null ? (
-            <p className="mt-1 text-xs leading-5 text-muted">送料が未確認のため、送料込み最安には含めていません。</p>
+            <p className="mt-1 text-xs leading-5 text-muted">送料が未確認のため、送料込みの比較には含めていません。</p>
           ) : null}
         </div>
         <ShopVisit offer={offer} compact />
@@ -169,20 +171,20 @@ export function ShopTable({
       <tbody>
         {offers.map((offer, index) => {
           const rank = index + 1;
-          const { total, isLowestTotal, headline } = offerHeadline(offer, lowestTotal, rank);
+          const { total, isLowestTotal } = offerHeadline(offer, lowestTotal, rank);
           const unit = offerUnitLabel(offer, quantity, quantityUnit, unitPriceType);
           return (
             <tr key={offer.id} className={isLowestTotal ? "border-b border-line bg-moss" : "border-b border-line"}>
               <td className="py-3 pr-2 align-middle">
                 {isLowestTotal ? (
-                  <span className="rounded-full bg-forest px-2 py-0.5 text-xs text-white">最安</span>
+                  <span className="rounded-full bg-forest px-2 py-0.5 text-xs text-white">合計が低い</span>
                 ) : (
                   <span className="text-muted">{rank}位</span>
                 )}
               </td>
               <td className="price-num py-3 pr-2 align-middle text-xl text-ink">
-                {headline == null ? "価格未確認" : formatYen(headline)}
-                {total == null ? <span className="mt-1 block text-xs font-normal text-muted">送料未確認</span> : null}
+                {offer.price == null ? "情報なし" : formatYen(offer.price)}
+                <span className="mt-1 block text-xs font-normal text-muted">合計 {total == null ? "情報なし" : formatYen(total)}</span>
               </td>
               <td className="py-3 pr-2 align-middle">{shippingCell(offer)}</td>
               <td className="py-3 pr-2 align-middle">{stockLabel(offer.stockStatus, offer.isSample)}</td>

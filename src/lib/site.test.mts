@@ -135,10 +135,14 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.match(jan, /janPageRobots\(true\)/);
   assert.match(jan, /janPageRobots\(false\)/);
   const home = read("../app/page.tsx");
+  const cards = read("../components/comparable-products.tsx");
   const site = read("./site.ts");
-  assert.match(home, /価格比較できる商品/);
   assert.match(home, /selectIndexedJans\(indexedJanProducts\)/);
-  assert.match(home, /indexedJanPath\(product\.janCode\)/);
+  assert.match(home, /ComparableProducts/);
+  assert.match(cards, /価格比較できる商品/);
+  assert.match(cards, /indexedJanPath\(card\.janCode\)/);
+  assert.match(cards, /loadYahooJan/);
+  assert.doesNotMatch(cards, /searchYahooItems|loadYahooKeywordSearch/);
   assert.match(site, /3182550706933/);
   assert.doesNotMatch(home, /searchYahooItems|loadYahooJan|loadYahooKeywordSearch/);
   assert.doesNotMatch(site, /searchYahooItems|loadYahooJan/);

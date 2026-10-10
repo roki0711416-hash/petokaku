@@ -10,9 +10,9 @@ export function SearchBar({ id, showExamples = false }: { id: string; showExampl
         id={id}
         prominent
         action="/search"
-        label="商品名を検索する"
+        label="商品名・ブランド・JANコード"
         buttonLabel="検索"
-        placeholder="例：ロイヤルカナン、猫砂、ペットシーツ"
+        placeholder="商品名・ブランド・JANコード"
       />
       {showExamples ? (
         <ul className="mt-3 flex flex-wrap gap-2 md:mt-4" aria-label="検索例">

@@ -2,6 +2,7 @@ export function SearchForm({
   id,
   defaultValue = "",
   prominent = false,
+  compact = false,
   hidden,
   action = "/products",
   placeholder = "例：チモシー、金魚のえさ",
@@ -11,6 +12,7 @@ export function SearchForm({
   id: string;
   defaultValue?: string;
   prominent?: boolean;
+  compact?: boolean;
   hidden?: { name: string; value: string }[];
   action?: string;
   placeholder?: string;
@@ -18,14 +20,22 @@ export function SearchForm({
   buttonLabel?: string;
 }) {
   return (
-    <form action={action} method="get" role="search" className={prominent ? "" : "mt-4"}>
+    <form action={action} method="get" role="search" className={prominent || compact ? "" : "mt-4"}>
       {hidden?.map((field) => (
         <input key={field.name} type="hidden" name={field.name} value={field.value} />
       ))}
-      <label htmlFor={id} className={prominent ? "sr-only" : "mb-2 block text-sm font-medium"}>
+      <label htmlFor={id} className={prominent || compact ? "sr-only" : "mb-2 block text-sm font-medium"}>
         {label}
       </label>
-      <div className={`flex gap-2 ${prominent ? "flex-col rounded-[1.8rem] bg-card p-2 shadow-[0_10px_30px_rgba(44,40,36,0.06)] md:flex-row" : "max-w-2xl flex-col sm:flex-row"}`}>
+      <div
+        className={`flex gap-2 ${
+          compact
+            ? "items-center rounded-full border border-line bg-card py-1 pr-1 pl-4"
+            : prominent
+              ? "flex-col rounded-[1.4rem] border border-line bg-card p-2 md:flex-row"
+              : "max-w-2xl flex-col sm:flex-row"
+        }`}
+      >
         <input
           id={id}
           name="q"
@@ -34,11 +44,11 @@ export function SearchForm({
           maxLength={80}
           enterKeyHint="search"
           placeholder={placeholder}
-          className={`w-full bg-card px-4 text-base text-ink ${prominent ? "h-14 rounded-[1.4rem]" : "h-14 rounded-full border border-line px-5"}`}
+          className={`w-full bg-card text-ink ${compact ? "h-10 min-w-0 flex-1 text-sm" : prominent ? "h-14 rounded-xl px-4 text-base" : "h-14 rounded-full border border-line px-5 text-base"}`}
         />
         <button
           type="submit"
-          className={`inline-flex shrink-0 items-center justify-center rounded-full bg-accent text-white hover:bg-forest-deep ${prominent ? "h-14 w-full px-4 md:w-auto md:min-w-14" : "h-14 px-8"}`}
+          className={`inline-flex shrink-0 items-center justify-center rounded-full bg-accent text-white hover:bg-forest-deep ${compact ? "h-10 px-4 text-sm" : prominent ? "h-14 w-full px-5 md:w-auto" : "h-14 px-8"}`}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />

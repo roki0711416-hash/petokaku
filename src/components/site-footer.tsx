@@ -9,7 +9,7 @@ const columns = [
       { href: "/search", label: "商品を探す" },
       { href: categorySearchHref("dog"), label: "犬用品" },
       { href: categorySearchHref("cat"), label: "猫用品" },
-      { href: "/#pets", label: "犬と猫から探す" },
+      { href: "/#categories", label: "カテゴリー" },
     ],
   },
   {
@@ -35,9 +35,9 @@ const socials = ["Instagram", "X", "YouTube"];
 export function SiteFooter() {
   return (
     <footer className="mt-8 border-t border-line bg-card">
-      <div className="mx-auto grid max-w-5xl gap-10 px-4 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
         <div>
-          <p className="font-display text-2xl text-ink">ペトカク</p>
+          <img src="/logo.png" alt="ペトカク" className="h-8 w-auto" />
           <p className="mt-2 text-sm text-muted">かしこく買って、もっと一緒に。</p>
           <FooterPriceNote />
           <div className="mt-6">
@@ -67,7 +67,7 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-5xl px-4 py-5 text-xs leading-6 text-muted">
+        <p className="mx-auto max-w-6xl px-4 py-5 text-xs leading-6 text-muted">
           © 2026 ペトカク。商品の販売は行っていません。購入前に、販売店のページで価格・送料・在庫を確認してください。
         </p>
       </div>

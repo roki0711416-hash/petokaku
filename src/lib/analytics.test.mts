@@ -4,8 +4,8 @@ import test from "node:test";
 import { googleAnalyticsId } from "./analytics.ts";
 
 test("測定IDはG-で始まる値だけを使う", () => {
-  assert.equal(googleAnalyticsId("G-L1X99G7567"), "G-L1X99G7567");
-  assert.equal(googleAnalyticsId("  G-L1X99G7567  "), "G-L1X99G7567");
+  assert.equal(googleAnalyticsId("G-CC65BDRSTL"), "G-CC65BDRSTL");
+  assert.equal(googleAnalyticsId("  G-CC65BDRSTL  "), "G-CC65BDRSTL");
   assert.equal(googleAnalyticsId(""), null);
   assert.equal(googleAnalyticsId(undefined), null);
   assert.equal(googleAnalyticsId("GTM-ABC123"), null);

@@ -16,9 +16,11 @@ export function CategoryCard({
   return (
     <Link
       href={href}
-      className="lift flex min-h-32 min-w-[9.75rem] snap-start flex-col justify-between rounded-[1.6rem] bg-card p-4"
+      className="lift flex min-h-36 flex-col justify-between rounded-[1.6rem] border border-line bg-card p-4 hover:border-sage"
     >
-      <CategoryIcon category={icon} />
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-moss">
+        <CategoryIcon category={icon} />
+      </span>
       <span>
         <span className="block text-base font-medium text-ink">{label}</span>
         {note ? <span className="mt-1 block text-xs leading-5 text-muted">{note}</span> : null}

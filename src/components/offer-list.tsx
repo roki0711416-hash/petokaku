@@ -9,18 +9,16 @@ export function OfferList({
   quantity,
   quantityUnit,
   unitPriceType,
+  emptyLabel = "この商品のサンプル価格は、まだ登録されていません。",
 }: {
   offers: Offer[];
   quantity: number | null;
   quantityUnit: QuantityUnit | null;
   unitPriceType: UnitPriceType;
+  emptyLabel?: string;
 }) {
   if (offers.length === 0) {
-    return (
-      <p className="rounded-[1.75rem] border border-dashed border-line bg-card px-5 py-8 text-muted">
-        この商品のサンプル価格は、まだ登録されていません。
-      </p>
-    );
+    return <p className="rounded-[1.75rem] border border-dashed border-line bg-card px-5 py-8 text-muted">{emptyLabel}</p>;
   }
 
   const groups: CompareGroup[] = groupOffersBySalesUnit(offers).map((group) => {

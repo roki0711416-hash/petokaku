@@ -103,9 +103,13 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
   if (!result.ok) {
     return { title: "商品を表示できません", robots: janPageRobots(false) };
   }
-  const name = result.adapted.detail.name.trim();
+  const detail = result.adapted.detail;
+  const name = detail.name.trim();
   const title = name || "商品の価格比較";
-  const description = `${title}の販売価格と送料を、ショップごとに見比べられます。購入前にショップで確認してください。`;
+  const brand = detail.brand.trim();
+  const brandPrefix = brand && !title.includes(brand) ? `${brand}の` : "";
+  const janLabel = detail.janCode ? `（JAN ${detail.janCode}）` : "";
+  const description = `${brandPrefix}${title}${janLabel}の販売価格と送料を、ショップごとに見比べられます。購入前にショップで確認してください。`;
   const imageUrl = safeHttpUrl(result.adapted.detail.imageUrl);
   const canonical = `/products/jan/${jan}`;
   return {

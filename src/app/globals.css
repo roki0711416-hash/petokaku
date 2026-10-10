@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f7f3ec;
-  --color-ink: #2c2824;
-  --color-forest: #2f6b56;
-  --color-forest-deep: #234e3e;
-  --color-clay: #a85a45;
-  --color-accent: #2f6b56;
-  --color-sand: #f4e6d6;
-  --color-card: #fffdfb;
-  --color-muted: #5e564e;
-  --color-line: #eadfd0;
-  --color-moss: #e7f3ec;
-  --color-dog: #f6e4d6;
-  --color-cat: #e5f0e8;
-  --color-honey: #f6e7c3;
-  --font-sans: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+  --color-paper: #f7f3eb;
+  --color-ink: #262b27;
+  --color-forest: #204d38;
+  --color-forest-deep: #16382a;
+  --color-sage: #6f8c64;
+  --color-clay: #8a4e3c;
+  --color-accent: #204d38;
+  --color-sand: #efe8dc;
+  --color-card: #ffffff;
+  --color-muted: #5c655f;
+  --color-line: #e4ddd2;
+  --color-moss: #e7eee4;
+  --color-dog: #efe4d6;
+  --color-cat: #e4ebe3;
+  --color-honey: #f3ead6;
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
 }
 
 html {
@@ -31,7 +32,7 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-fraunces), "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-family: var(--font-fraunces), "Hiragino Sans", "Yu Gothic", sans-serif;
 }
 
 .price-num {
@@ -61,7 +62,7 @@ button:focus-visible,
 summary:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid var(--color-clay);
+  outline: 2px solid var(--color-ink);
   outline-offset: 3px;
 }
 

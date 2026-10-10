@@ -1,18 +1,39 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { ComparableProducts } from "@/components/comparable-products";
 import { CategoryCard } from "@/components/ui/category-card";
 import { Hero } from "@/components/ui/hero";
-import { PetSelector } from "@/components/ui/pet-selector";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { categories, categorySearchHref } from "@/lib/categories";
-import { indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
+import { indexedJanProducts, selectIndexedJans } from "@/lib/site";
 import type { CategoryId } from "@/lib/types";
 
-const popular = [
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: { absolute: "ペット用品の価格比較 | ペトカク" },
+  description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "ペット用品の価格比較 | ペトカク",
+    description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
+    url: "/",
+  },
+};
+
+const catalog = [
   { label: "ドッグフード", note: "犬のごはん", query: "犬 フード", icon: "dog" as CategoryId },
   { label: "キャットフード", note: "猫のごはん", query: "猫 フード", icon: "cat" as CategoryId },
-  { label: "ペットシーツ", note: "トイレまわり", query: "ペットシーツ", icon: "dog" as CategoryId },
   { label: "猫砂", note: "猫のトイレ", query: "猫砂", icon: "cat" as CategoryId },
-  { label: "デンタルケア", note: "歯みがき", query: "デンタルケア", icon: "other" as CategoryId },
+  { label: "ペットシーツ", note: "トイレまわり", query: "ペットシーツ", icon: "dog" as CategoryId },
+  { label: "おやつ", note: "犬と猫のおやつ", query: "ペット おやつ", icon: "other" as CategoryId },
+  { label: "ケア用品", note: "日常のケア", query: "ペット ケア用品", icon: "other" as CategoryId },
+];
+
+const steps = [
+  { title: "商品を検索", body: "商品名、ブランド名、JANコードで、販売店の掲載を探します。" },
+  { title: "価格・送料を比較", body: "ショップごとの商品価格と、確認できた送料を並べます。" },
+  { title: "販売ショップで購入", body: "ペトカクは販売しません。購入は各ショップのページで行います。" },
 ];
 
 export default function HomePage() {
@@ -21,42 +42,38 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <PetSelector />
-      {comparableProducts.length > 0 ? (
-        <section aria-labelledby="comparable-products" className="px-4 py-10 md:py-14">
-          <div className="mx-auto max-w-5xl">
-            <SectionHeading id="comparable-products" title="価格比較できる商品" lead="表示を確認した商品です。ショップごとの価格は、商品ページで見られます。" />
-            <ul className="mt-6 grid gap-3">
-              {comparableProducts.map((product) => (
-                <li key={product.janCode}>
-                  <Link
-                    href={indexedJanPath(product.janCode)}
-                    className="flex min-h-14 items-center justify-between gap-3 rounded-[1.6rem] bg-card px-4 py-3 text-sm"
-                  >
-                    <span>{product.label}</span>
-                    <span className="shrink-0 text-forest">価格を比較する</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ) : null}
-      <section aria-labelledby="popular-heading" className="overflow-hidden bg-honey/40 px-4 py-14 md:py-20">
-        <div className="mx-auto max-w-5xl">
-          <SectionHeading id="popular-heading" eyebrow="こんなものを比較できます" title="品目から探す" lead="選ぶと、その品目の検索が開きます。" />
-          <ul className="mt-8 flex min-w-0 max-w-full gap-3 overflow-x-auto pb-2 snap-x md:grid md:grid-cols-5 md:overflow-visible">
-            {popular.map((item) => (
-              <li key={item.label} className="shrink-0 md:shrink">
+      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 py-14 md:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading id="categories-heading" title="カテゴリー" lead="選ぶと、その品目の検索が開きます。" />
+          <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            {catalog.map((item) => (
+              <li key={item.label}>
                 <CategoryCard href={`/search?q=${encodeURIComponent(item.query)}`} label={item.label} note={item.note} icon={item.icon} />
               </li>
             ))}
           </ul>
         </div>
       </section>
+      <Suspense fallback={null}>
+        <ComparableProducts products={comparableProducts} />
+      </Suspense>
+      <section aria-labelledby="howto-heading" className="bg-white px-4 py-14 md:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading id="howto-heading" title="使い方" lead="価格を見比べてから、販売店のページで購入します。" />
+          <ol className="mt-8 grid gap-4 md:grid-cols-3">
+            {steps.map((step, index) => (
+              <li key={step.title} className="rounded-3xl bg-paper px-5 py-6">
+                <p className="text-sm text-sage">0{index + 1}</p>
+                <h3 className="mt-2 text-lg font-medium text-ink">{step.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-muted">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
       <section aria-labelledby="more-pets" className="px-4 py-14 md:py-20">
-        <div className="mx-auto max-w-5xl">
-          <SectionHeading id="more-pets" title="ほかのペット" />
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading id="more-pets" title="ほかのペット" lead="小動物、鳥、魚の用品も、同じ検索から探せます。" />
           <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
             {categories
               .filter((category) => category.id !== "dog" && category.id !== "cat")
@@ -66,22 +83,6 @@ export default function HomePage() {
                 </li>
               ))}
           </ul>
-        </div>
-      </section>
-      <section aria-labelledby="together" className="px-4 pb-16">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.2rem] bg-forest px-6 py-12 text-white md:px-12">
-          <div className="pointer-events-none absolute -right-8 -bottom-10 h-36 w-36 rounded-[55%_45%_60%_40%] bg-white/10" aria-hidden="true" />
-          <h2 id="together" className="max-w-xl text-3xl leading-tight font-medium md:text-5xl">
-            かしこく買って、
-            <br />
-            もっと一緒に。
-          </h2>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-white/85">
-            ペトカクは商品を売りません。価格と送料を並べて、買う前にショップで確かめられるようにしています。
-          </p>
-          <Link href="/about" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-white px-5 text-sm text-forest">
-            ペトカクについて
-          </Link>
         </div>
       </section>
     </>

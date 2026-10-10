@@ -12,7 +12,7 @@ function shippingLine(quote: SingleSizeQuote): string | null {
     return "送料無料";
   }
   if (quote.shippingTotal != null) {
-    return `送料込み最安 ${formatYen(quote.shippingTotal)}`;
+    return `送料込みの掲載 ${formatYen(quote.shippingTotal)}`;
   }
   return "送料はショップで確認";
 }
@@ -22,7 +22,8 @@ export function PriceSummary({ quote, shopLabel }: { quote: SingleSizeQuote; sho
 
   return (
     <div>
-      <p className="text-sm text-muted">最安価格</p>
+      <p className="text-sm text-muted">商品価格</p>
+      <p className="mt-1 text-xs leading-5 text-muted">在庫がある単品の掲載で、商品価格がいちばん低いものです。送料の条件が違う掲載とは、合計では比べていません。</p>
       <p className="price-num mt-1 text-5xl leading-none text-ink lg:text-6xl">
         {quote.sellingPrice == null ? "確認できません" : formatYen(quote.sellingPrice)}
       </p>

@@ -1,37 +1,51 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { MobileMenu } from "@/components/mobile-menu";
+import { SearchForm } from "@/components/search-form";
+import { categorySearchHref } from "@/lib/categories";
 
-const mainLinks = [
-  { href: "/search", label: "商品を探す" },
-  { href: "/#dog", label: "犬" },
-  { href: "/#cat", label: "猫" },
+const navLinks = [
+  { href: categorySearchHref("dog"), label: "犬用品" },
+  { href: categorySearchHref("cat"), label: "猫用品" },
+  { href: "/#categories", label: "カテゴリー" },
+  { href: "/about", label: "サイトについて" },
 ];
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-line/80 bg-paper/90 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-1.5 md:py-2.5">
+    <header className="sticky top-0 z-30 border-b border-line/80 bg-paper/95 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2 md:gap-5 lg:gap-8">
         <Logo />
-        <nav className="hidden items-center gap-1 md:flex" aria-label="主なメニュー">
-          {mainLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="rounded-full px-3 py-2 text-sm">
+        <div className="hidden min-w-0 flex-1 md:block">
+          <SearchForm
+            id="header-search"
+            compact
+            action="/search"
+            label="商品名・ブランド・JANコード"
+            buttonLabel="検索"
+            placeholder="商品名・ブランド・JANコード"
+          />
+        </div>
+        <nav className="ml-auto hidden items-center gap-1 lg:flex" aria-label="主なメニュー">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="rounded-full px-3 py-2 text-sm text-ink hover:bg-white">
               {link.label}
             </Link>
           ))}
-          <span className="px-3 py-2 text-sm text-muted" title="準備中">
-            お気に入り
-          </span>
         </nav>
-        <div className="flex items-center gap-1 md:hidden">
-          <Link href="/search" aria-label="商品を探す" className="grid h-10 w-10 place-items-center rounded-full">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-              <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M16 16.5 20 20.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </Link>
-          <MobileMenu links={[...mainLinks, { href: "/about", label: "ペトカクについて" }]} />
+        <div className="ml-auto lg:ml-0 lg:hidden">
+          <MobileMenu links={navLinks} />
         </div>
+      </div>
+      <div className="mx-auto max-w-6xl px-4 pb-2.5 md:hidden">
+        <SearchForm
+          id="header-search-mobile"
+          compact
+          action="/search"
+          label="商品名・ブランド・JANコード"
+          buttonLabel="検索"
+          placeholder="商品名・ブランド・JANコード"
+        />
       </div>
     </header>
   );
