@@ -47,6 +47,7 @@ test("接続できた応答から項目の有無だけを残し、JANが無け�
     assert.equal(url.searchParams.get("affiliateId"), null);
     assert.equal(url.searchParams.get("accessKey"), null);
     assert.equal(new Headers(init?.headers).get("accessKey"), "access-key");
+    assert.equal(new Headers(init?.headers).get("Referer"), "https://petokaku.com/");
     return new Response(
       JSON.stringify({
         count: 12,

@@ -80,6 +80,7 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
 
   const { url, headers } = rakutenProbeRequest(applicationId, keyword);
   headers.set("accessKey", accessKey);
+  headers.set("Referer", "https://petokaku.com/");
   let response: Response;
   try {
     response = await fetch(url, { headers, cache: "no-store" });
