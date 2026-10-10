@@ -105,12 +105,12 @@ test("JAN不一致、購入可能数なし、楽天以外のURL、曖昧なセ�
     "",
   );
   assert.equal(withoutAffiliate?.affiliateUrl, null);
-  const otherId = rakutenProductOfferFromPayload(
+  const officialWithoutLiteralId = rakutenProductOfferFromPayload(
     { products: [{ ...base, affiliateUrl: "https://hb.afl.rakuten.co.jp/hgc/someone-else/" }] },
     jan,
     observedAt,
     "affiliate-id",
   );
-  assert.equal(otherId?.affiliateUrl, null);
-  assert.equal(otherId?.productUrl, "https://product.rakuten.co.jp/product/-/item/");
+  assert.equal(officialWithoutLiteralId?.affiliateUrl, "https://hb.afl.rakuten.co.jp/hgc/someone-else/");
+  assert.equal(officialWithoutLiteralId?.productUrl, "https://product.rakuten.co.jp/product/-/item/");
 });

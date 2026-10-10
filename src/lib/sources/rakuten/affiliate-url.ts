@@ -61,7 +61,7 @@ export function describeRakutenAffiliateField(value: unknown, affiliateId: strin
 
 export function officialRakutenAffiliateUrl(value: unknown, affiliateId: string): string | null {
   const url = rakutenAffiliateUrl(value);
-  if (!rakutenAffiliateIdReflected(url, affiliateId)) {
+  if (url == null || affiliateId.length < 8) {
     return null;
   }
   return url;

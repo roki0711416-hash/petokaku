@@ -16,6 +16,7 @@ export type RakutenProductProbe = {
   affiliateFieldKind: "null" | "empty" | "url" | "other";
   affiliateHost: string | null;
   affiliateIdReflected: boolean;
+  affiliateIdLength: number;
   purchaseHost: string | null;
   markedAsAdvertisement: boolean;
   fieldNames: string[];
@@ -168,6 +169,7 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     affiliateFieldKind: "null",
     affiliateHost: null,
     affiliateIdReflected: false,
+    affiliateIdLength: 0,
     purchaseHost: null,
     markedAsAdvertisement: false,
     fieldNames: [],
@@ -221,6 +223,7 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     affiliateFieldKind: affiliateField.kind,
     affiliateHost: affiliateField.host,
     affiliateIdReflected: rakutenAffiliateIdReflected(affiliateUrl, affiliateId),
+    affiliateIdLength: affiliateId.length,
     purchaseHost,
     markedAsAdvertisement: affiliateUrl != null,
     fieldNames: product ? Object.keys(product).sort() : [],
