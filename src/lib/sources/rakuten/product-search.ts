@@ -13,6 +13,7 @@ export type RakutenProductProbe = {
   hasProductUrl: boolean;
   hasAffiliateUrl: boolean;
   fieldNames: string[];
+  priceKinds: Record<string, string>;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -154,6 +155,7 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     hasProductUrl: false,
     hasAffiliateUrl: false,
     fieldNames: [],
+    priceKinds: {},
   });
   if (applicationId === "" || accessKey === "" || !/^[0-9]{13}$/.test(janCode)) {
     return empty("not-configured", null);
@@ -188,5 +190,12 @@ export async function probeRakutenProduct(janCode: string): Promise<RakutenProdu
     hasProductUrl: rakutenHttps(product?.productUrlPC) != null,
     hasAffiliateUrl: rakutenHttps(product?.affiliateUrl) != null,
     fieldNames: product ? Object.keys(product).sort() : [],
+    priceKinds: Object.fromEntries(
+      ["usedExcludeSalesMinPrice", "salesMinPrice", "minPrice", "usedExcludeSalesItemCount", "salesItemCount", "itemCount"].map((key) => {
+        const value = product?.[key];
+        const kind = value == null ? "null" : typeof value === "number" ? (Number.isInteger(value) ? "int" : "float") : typeof value;
+        return [key, kind];
+      }),
+    ),
   };
 }
