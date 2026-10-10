@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { FooterPriceNote } from "@/components/footer-price-note";
-import { categorySearchHref } from "@/lib/categories";
 
 const columns = [
-  {
-    title: "商品を探す",
-    links: [
-      { href: "/search", label: "商品を探す" },
-      { href: categorySearchHref("dog"), label: "犬用品" },
-      { href: categorySearchHref("cat"), label: "猫用品" },
-      { href: "/#categories", label: "カテゴリー" },
-    ],
-  },
   {
     title: "ペトカクについて",
     links: [
@@ -30,22 +20,32 @@ const columns = [
   },
 ];
 
-const socials = ["Instagram", "X", "YouTube"];
+const socials = [
+  { label: "Instagram", href: "https://www.instagram.com/petokaku/" },
+  { label: "X", href: "https://x.com/petokaku" },
+];
 
 export function SiteFooter() {
   return (
     <footer className="mt-8 border-t border-line bg-card">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <img src="/logo.png" alt="ペトカク" className="h-8 w-auto" />
           <p className="mt-2 text-sm text-muted">かしこく買って、もっと一緒に。</p>
           <FooterPriceNote />
           <div className="mt-6">
             <p className="text-xs tracking-[0.14em] text-muted">SNS</p>
-            <ul className="mt-2 flex flex-wrap gap-2" aria-label="SNS（準備中）">
-              {socials.map((name) => (
-                <li key={name} className="rounded-full bg-paper px-3 py-1 text-xs text-muted">
-                  {name}
+            <ul className="mt-2 flex flex-wrap gap-2" aria-label="SNS">
+              {socials.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-8 items-center rounded-full bg-paper px-3 text-xs text-ink underline-offset-4 hover:underline"
+                  >
+                    {item.label}
+                  </a>
                 </li>
               ))}
             </ul>
