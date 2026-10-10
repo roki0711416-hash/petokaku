@@ -137,18 +137,6 @@ export function YahooProductView({
       {priceSummary !== undefined ? (
         <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} chart />
       ) : null}
-
-      <section aria-labelledby="notice-heading" className="mt-8 rounded-[1.6rem] bg-honey/50 px-4 py-5">
-        <h2 id="notice-heading" className="text-base font-medium">
-          購入前に確認すること
-        </h2>
-        <ul className="mt-2 grid list-disc gap-1 pl-5 text-xs leading-6">
-          <li>金額、送料、在庫は取得時点の情報です。ショップ側で変わることがあります。</li>
-          <li>購入前に、ショップのページで価格、送料、在庫、内容量を確認してください。</li>
-          <li>このページは最安を保証しません。ペトカクは商品を販売せず、購入の契約には入りません。</li>
-          {product.janCode ? <li>JAN {product.janCode}</li> : null}
-        </ul>
-      </section>
     </article>
   );
 }
