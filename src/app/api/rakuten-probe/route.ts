@@ -1,4 +1,5 @@
 import { authorizePriceRefresh } from "@/lib/pricing/price-refresh-auth";
+import { probeRakutenProduct } from "@/lib/sources/rakuten/product-search";
 import { probeRakutenItemSearch } from "@/lib/sources/rakuten/probe";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +9,9 @@ export async function GET(request: Request) {
   if (secret === "" || !authorizePriceRefresh(request.headers.get("authorization"), secret)) {
     return new Response(null, { status: 404 });
   }
-  const result = await probeRakutenItemSearch("猫砂");
-  return Response.json(result);
+  const [itemSearch, productSearch] = await Promise.all([
+    probeRakutenItemSearch("猫砂"),
+    probeRakutenProduct("3182550706933"),
+  ]);
+  return Response.json({ itemSearch, productSearch });
 }

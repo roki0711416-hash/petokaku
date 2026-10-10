@@ -71,7 +71,7 @@ export function YahooProductView({
     offers: product.offers.map((offer) => ({
       shopName: offer.shopName,
       price: offer.price,
-      url: shopProductLink(offer).href,
+      url: safeHttpUrl(offer.productUrl) ?? shopProductLink(offer).href,
       stockStatus: offer.stockStatus,
     })),
   });

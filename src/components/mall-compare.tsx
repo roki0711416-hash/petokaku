@@ -1,4 +1,8 @@
 import { OfferList } from "@/components/offer-list";
+
+const rakutenCreditHtml = `<!-- Rakuten Web Services Attribution Snippet FROM HERE -->
+<a href="https://webservice.rakuten.co.jp/" target="_blank"><img src="https://webservice.rakuten.co.jp/img/credit/200709/credit_22121.gif" border="0" alt="Rakuten Web Service Center" title="Rakuten Web Service Center" width="221" height="21"/></a>
+<!-- Rakuten Web Services Attribution Snippet TO HERE -->`;
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { groupOffersByMall } from "@/lib/pricing/malls";
 import type { Offer } from "@/lib/types";
@@ -28,11 +32,12 @@ export function MallCompare({
             <p className="text-xs text-muted">{group.shopCount}ショップ</p>
           </div>
           {group.mall === "rakuten" ? (
-            <p className="mt-1 px-1 text-xs text-muted">
-              <a href="https://webservice.rakuten.co.jp/" target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-                Supported by Rakuten Developers
-              </a>
-            </p>
+            <div className="mt-2 px-1">
+              <p className="text-xs leading-5 text-muted">
+                同じJANコードの商品価格ナビです。価格は中古を除く購入可能な最安で、個別の販売店名と送料の金額は含まれていません。
+              </p>
+              <div className="mt-2" dangerouslySetInnerHTML={{ __html: rakutenCreditHtml }} />
+            </div>
           ) : null}
           <div className="mt-3">
             <OfferList

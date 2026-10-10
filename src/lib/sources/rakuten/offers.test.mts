@@ -46,36 +46,50 @@ test("楽天の掲載は一致したJANだけを共通形式にし、送料不�
   assert.equal(setOffer?.packCount, 2);
 });
 
-test("楽天の認証が無いときは接続せず、あってもJANのショップ掲載としては取得しない", async () => {
+test("楽天の認証が無いときは接続せず、JANが一致した製品だけを載せる", async () => {
   const previousId = process.env.RAKUTEN_APPLICATION_ID;
   const previousKey = process.env.RAKUTEN_ACCESS_KEY;
-  const previousFetch = globalThis.fetch;
+  const previousAffiliate = process.env.RAKUTEN_AFFILIATE_ID;
   let called = 0;
-  globalThis.fetch = (() => {
+  const transport = () => {
     called += 1;
-    return Promise.resolve(new Response(""));
-  }) as typeof fetch;
+    return Promise.resolve({
+      status: 200,
+      text: JSON.stringify({
+        products: [
+          {
+            productCode: "3182550849647",
+            productName: "ロイヤルカナン ミニ インドア アダルト 4kg",
+            usedExcludeSalesMinPrice: 5900,
+            usedExcludeSalesItemCount: 3,
+            productUrlPC: "https://product.rakuten.co.jp/product/-/3182550849647/",
+          },
+        ],
+      }),
+    });
+  };
   try {
     delete process.env.RAKUTEN_APPLICATION_ID;
     delete process.env.RAKUTEN_ACCESS_KEY;
-    const missing = await loadRakutenJanOffers("3182550849647");
+    delete process.env.RAKUTEN_AFFILIATE_ID;
+    const missing = await loadRakutenJanOffers("3182550849647", transport);
     assert.deepEqual(missing, { ok: false, reason: "not-configured" });
+    assert.equal(called, 0);
     process.env.RAKUTEN_APPLICATION_ID = "test-app";
     process.env.RAKUTEN_ACCESS_KEY = "test-key";
-    const present = await loadRakutenJanOffers("3182550849647");
-    assert.deepEqual(present, { ok: false, reason: "not-shop-level" });
-    assert.equal(called, 0);
+    const present = await loadRakutenJanOffers("3182550849647", transport);
+    assert.equal(present.ok, true);
+    assert.equal(present.ok ? present.offers[0]?.price : null, 5900);
+    assert.equal(present.ok ? present.offers[0]?.affiliateUrl : "sent", null);
+    const other = await loadRakutenJanOffers("4900000000000", transport);
+    assert.deepEqual(other, { ok: true, offers: [] });
+    assert.equal(called, 2);
   } finally {
-    globalThis.fetch = previousFetch;
-    if (previousId == null) {
-      delete process.env.RAKUTEN_APPLICATION_ID;
-    } else {
-      process.env.RAKUTEN_APPLICATION_ID = previousId;
-    }
-    if (previousKey == null) {
-      delete process.env.RAKUTEN_ACCESS_KEY;
-    } else {
-      process.env.RAKUTEN_ACCESS_KEY = previousKey;
-    }
+    if (previousId == null) delete process.env.RAKUTEN_APPLICATION_ID;
+    else process.env.RAKUTEN_APPLICATION_ID = previousId;
+    if (previousKey == null) delete process.env.RAKUTEN_ACCESS_KEY;
+    else process.env.RAKUTEN_ACCESS_KEY = previousKey;
+    if (previousAffiliate == null) delete process.env.RAKUTEN_AFFILIATE_ID;
+    else process.env.RAKUTEN_AFFILIATE_ID = previousAffiliate;
   }
 });

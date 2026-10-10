@@ -1,4 +1,4 @@
-import https from "node:https";
+import { rakutenGet } from "./http.ts";
 
 const endpoint = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
 const siteOrigin = "https://petokaku.com";
@@ -111,17 +111,6 @@ export function rakutenProbeRequest(applicationId: string, keyword: string, acce
   };
 }
 
-function requestRakuten(url: URL, headers: Record<string, string>): Promise<{ status: number; text: string }> {
-  return new Promise((resolve, reject) => {
-    const req = https.request(url, { method: "GET", headers }, (res) => {
-      const chunks: Buffer[] = [];
-      res.on("data", (chunk: Buffer) => chunks.push(chunk));
-      res.on("end", () => resolve({ status: res.statusCode ?? 0, text: Buffer.concat(chunks).toString("utf8") }));
-    });
-    req.on("error", reject);
-    req.end();
-  });
-}
 
 export async function probeRakutenItemSearch(keyword: string): Promise<RakutenProbeResult> {
   const applicationId = process.env.RAKUTEN_APPLICATION_ID?.trim() ?? "";
@@ -134,7 +123,7 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
   let status = 0;
   let text = "";
   try {
-    const response = await requestRakuten(url, headers);
+    const response = await rakutenGet(url, headers);
     status = response.status;
     text = response.text;
   } catch {
