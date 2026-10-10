@@ -8,6 +8,7 @@ export type RakutenProbeResult = {
   httpStatus: number | null;
   reason: "not-configured" | "request-failed" | "parameter" | "not-found" | "rate-limited" | "unavailable" | "connected";
   error: string | null;
+  topLevelKeys: string[];
   fieldNames: string[];
   hasItemName: boolean;
   hasItemPrice: boolean;
@@ -24,6 +25,7 @@ function emptyProbe(reason: RakutenProbeResult["reason"], httpStatus: number | n
     httpStatus,
     reason,
     error,
+    topLevelKeys: [],
     fieldNames: [],
     hasItemName: false,
     hasItemPrice: false,
@@ -51,6 +53,33 @@ function safeError(value: unknown): string | null {
     return null;
   }
   return text.replace(/applicationId|accessKey|affiliateId/gi, "[redacted]").slice(0, 180);
+}
+
+export function summarizeRakutenSearchPayload(payload: unknown): Pick<
+  RakutenProbeResult,
+  "topLevelKeys" | "fieldNames" | "hasItemName" | "hasItemPrice" | "hasItemUrl" | "hasShopName" | "hasImageUrl" | "janFieldPresent" | "itemCount"
+> {
+  const body = asRecord(payload);
+  const topLevelKeys = body ? Object.keys(body).sort() : [];
+  const rawItems = body?.items ?? body?.Items;
+  const items = Array.isArray(rawItems) ? rawItems : [];
+  const wrapped = asRecord(items[0]);
+  const first = asRecord(wrapped?.item) ?? wrapped;
+  const fieldNames = first ? Object.keys(first).sort() : [];
+  const images = first?.mediumImageUrls ?? first?.smallImageUrls;
+  const hasImageUrl = Array.isArray(images) && images.some((image) => typeof image === "string" || typeof asRecord(image)?.imageUrl === "string");
+  const price = first?.itemPrice;
+  return {
+    topLevelKeys,
+    fieldNames,
+    hasItemName: typeof first?.itemName === "string",
+    hasItemPrice: typeof price === "number" || (typeof price === "string" && price !== ""),
+    hasItemUrl: typeof first?.itemUrl === "string",
+    hasShopName: typeof first?.shopName === "string",
+    hasImageUrl,
+    janFieldPresent: hasJanField(first),
+    itemCount: typeof body?.count === "number" ? body.count : items.length > 0 ? items.length : null,
+  };
 }
 
 function hasJanField(value: unknown): boolean {
@@ -142,24 +171,11 @@ export async function probeRakutenItemSearch(keyword: string): Promise<RakutenPr
     return { ...emptyProbe("request-failed", status, errorText) };
   }
 
-  const body = asRecord(payload);
-  const items = Array.isArray(body?.items) ? body.items : [];
-  const first = asRecord(items[0]);
-  const fieldNames = first ? Object.keys(first).sort() : [];
-  const images = first?.mediumImageUrls ?? first?.smallImageUrls;
-  const hasImageUrl = Array.isArray(images) && images.some((image) => typeof image === "string" || typeof asRecord(image)?.imageUrl === "string");
   return {
     ok: true,
     httpStatus: status,
     reason: "connected",
     error: null,
-    fieldNames,
-    hasItemName: typeof first?.itemName === "string",
-    hasItemPrice: typeof first?.itemPrice === "number",
-    hasItemUrl: typeof first?.itemUrl === "string",
-    hasShopName: typeof first?.shopName === "string",
-    hasImageUrl,
-    janFieldPresent: hasJanField(first),
-    itemCount: typeof body?.count === "number" ? body.count : items.length,
+    ...summarizeRakutenSearchPayload(payload),
   };
 }
