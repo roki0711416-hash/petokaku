@@ -23,7 +23,7 @@ export const stockStatuses = ["in_stock", "out_of_stock", "unknown"] as const;
 
 export type StockStatus = (typeof stockStatuses)[number];
 
-export const priceProviders = ["sample", "yahoo"] as const;
+export const priceProviders = ["sample", "yahoo", "rakuten"] as const;
 
 export type PriceProvider = (typeof priceProviders)[number];
 

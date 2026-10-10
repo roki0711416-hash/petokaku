@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
-import { OfferList } from "@/components/offer-list";
+import { MallCompare } from "@/components/mall-compare";
 import { PriceHistory } from "@/components/ui/price-history";
 import { PriceSummary } from "@/components/ui/price-summary";
 import { categorySearchHref, getCategory } from "@/lib/categories";
@@ -111,10 +111,10 @@ export function YahooProductView({
       </div>
       <section id="compare" aria-labelledby="compare-heading" className="mt-12 scroll-mt-24 border-t border-line pt-10 lg:mt-16">
         <h2 id="compare-heading" className="text-2xl font-medium tracking-tight text-ink">
-          ショップごとの価格
+          モールごとの価格
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          商品価格、送料、在庫は取得時点の掲載です。送料が確認できた掲載だけ合計額を出します。購入前に、各ショップのページで確認してください。
+          同じJANコードの掲載だけを、モールごとに並べています。容量違い、セット、別商品は混ぜていません。送料が確認できた掲載だけ合計額を出します。
         </p>
         {product.offers.some((offer) => shopProductLink(offer).affiliate) ? (
           <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
@@ -122,7 +122,7 @@ export function YahooProductView({
           </p>
         ) : null}
         <div className="mt-6">
-          <OfferList
+          <MallCompare
             offers={product.offers}
             quantity={product.quantity}
             quantityUnit={product.quantityUnit}
