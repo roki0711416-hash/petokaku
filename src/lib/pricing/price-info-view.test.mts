@@ -129,6 +129,7 @@ test("価格情報の画面文言に内部用語を出さない", () => {
     .join("\n");
   assert.match(visible, /いまの価格/);
   assert.match(visible, /送料込み最安/);
-  assert.match(visible, /商品価格の最安/);
+  assert.match(visible, /商品価格/);
+  assert.doesNotMatch(visible, /商品価格の最安/);
   assert.doesNotMatch(visible, /offer|variant|observation|confidence|provider|Supabase|Yahoo|買い時/);
 });

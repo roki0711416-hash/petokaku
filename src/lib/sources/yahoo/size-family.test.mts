@@ -178,10 +178,36 @@ test("送料不明の安い販売価格は送料込み単価に使わない", ()
       { price: 500, shippingFee: 0, stockStatus: "in_stock", packCount: 2, listingTitle: "インドア 4kg×2袋" },
     ],
   });
-  assert.equal(quote.sellingPrice, 1000);
-  assert.equal(quote.sellingShippingKnown, false);
+  assert.equal(quote.sellingPrice, 2000);
+  assert.equal(quote.sellingShippingKnown, true);
+  assert.equal(quote.sellingPriceWithheld, false);
   assert.equal(quote.shippingTotal, 2000);
   assert.equal(quote.shippingUnitYen, 50);
+});
+
+test("送料不明だけ、または別個数の掲載では最安値を出さない", () => {
+  const unknownOnly = quoteSingleSize({
+    quantity: 4000,
+    quantityUnit: "g",
+    quantityConfidence: "high",
+    unitPriceType: "per_100g",
+    offers: [
+      { price: 1000, shippingFee: null, stockStatus: "in_stock", packCount: null, listingTitle: "インドア 4kg" },
+      { price: 800, shippingFee: null, stockStatus: "in_stock", packCount: 2, listingTitle: "インドア 4kg 2袋セット" },
+    ],
+  });
+  assert.equal(unknownOnly.sellingPrice, null);
+  assert.equal(unknownOnly.sellingPriceWithheld, true);
+
+  const setOnly = quoteSingleSize({
+    quantity: 4000,
+    quantityUnit: "g",
+    quantityConfidence: "high",
+    unitPriceType: "per_100g",
+    offers: [{ price: 500, shippingFee: 0, stockStatus: "in_stock", packCount: 2, listingTitle: "インドア 4kg×2袋" }],
+  });
+  assert.equal(setOnly.sellingPrice, null);
+  assert.equal(setOnly.sellingPriceWithheld, false);
 });
 
 test("容量が確定していないときは単価を出さない", () => {

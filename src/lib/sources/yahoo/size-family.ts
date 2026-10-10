@@ -88,6 +88,7 @@ export type SingleSizeQuote = {
   shippingUnitExact: boolean;
   shippingTotal: number | null;
   sellingShippingKnown: boolean;
+  sellingPriceWithheld: boolean;
   unitLabel: string | null;
 };
 
@@ -284,6 +285,7 @@ export function quoteSingleSize(input: {
     shippingUnitExact: false,
     shippingTotal: null,
     sellingShippingKnown: false,
+    sellingPriceWithheld: false,
     unitLabel: null,
   };
   const singles = input.offers.filter(
@@ -293,10 +295,15 @@ export function quoteSingleSize(input: {
       (offer.packCount == null || offer.packCount === 1) &&
       !hasUnresolvedPackNotation(offer.listingTitle ?? ""),
   );
-  if (singles.length === 0) {
-    return empty;
+  const knownShipping = singles.filter((offer) => offer.shippingFee != null);
+  if (knownShipping.length === 0) {
+    return { ...empty, sellingPriceWithheld: singles.length > 0 };
   }
-  const selling = singles.reduce((best, offer) => ((offer.price ?? Number.POSITIVE_INFINITY) < (best.price ?? Number.POSITIVE_INFINITY) ? offer : best));
+  const selling = knownShipping.reduce((best, offer) => {
+    const total = (offer.price ?? 0) + (offer.shippingFee ?? 0);
+    const bestTotal = (best.price ?? 0) + (best.shippingFee ?? 0);
+    return total < bestTotal ? offer : best;
+  });
   const confirmed = input.quantityConfidence === "high" && input.quantity != null && input.unitPriceType !== "none";
   const item = confirmed
     ? calculateUnitPrices({
@@ -307,7 +314,7 @@ export function quoteSingleSize(input: {
         unitPriceType: input.unitPriceType,
       })
     : null;
-  const shipping = lowestShippingTotal(singles.map((offer) => ({ price: offer.price, shipping: offer.shippingFee })));
+  const shipping = lowestShippingTotal(knownShipping.map((offer) => ({ price: offer.price, shipping: offer.shippingFee })));
   const shippingQuote =
     confirmed && shipping
       ? calculateUnitPrices({
@@ -325,7 +332,8 @@ export function quoteSingleSize(input: {
     shippingUnitYen: shippingQuote?.effectiveUnit?.yen ?? null,
     shippingUnitExact: shippingQuote?.effectiveUnit?.exact ?? false,
     shippingTotal: shipping?.total ?? null,
-    sellingShippingKnown: selling.shippingFee != null,
+    sellingShippingKnown: true,
+    sellingPriceWithheld: false,
     unitLabel: item?.unitLabel ?? shippingQuote?.unitLabel ?? null,
   };
 }

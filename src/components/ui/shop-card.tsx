@@ -44,6 +44,16 @@ export function shippingCell(offer: Offer): string {
   }
 }
 
+export function offerRankLabel(isLowestTotal: boolean, total: number | null, rank: number): string {
+  if (isLowestTotal) {
+    return "合計が低い";
+  }
+  if (total == null) {
+    return "送料未確認";
+  }
+  return `${rank}位`;
+}
+
 export function offerHeadline(offer: Offer, lowestTotal: number | null, rank: number) {
   const total = payableTotal(offer);
   const isLowestTotal = rank === 1 && total != null && total === lowestTotal;
@@ -122,7 +132,7 @@ export function ShopCard({
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className={isLowestTotal ? "text-xs font-medium text-forest-deep" : "text-xs text-muted"}>
-            {isLowestTotal ? "合計が低い" : `${rank}位`}
+            {offerRankLabel(isLowestTotal, total, rank)}
           </p>
           <h3 className="mt-0.5 truncate text-sm font-medium text-ink">{offer.shopName}</h3>
           {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
@@ -179,7 +189,7 @@ export function ShopTable({
                 {isLowestTotal ? (
                   <span className="rounded-full bg-forest px-2 py-0.5 text-xs text-white">合計が低い</span>
                 ) : (
-                  <span className="text-muted">{rank}位</span>
+                  <span className="text-muted">{offerRankLabel(false, total, rank)}</span>
                 )}
               </td>
               <td className="price-num py-3 pr-2 align-middle text-xl text-ink">

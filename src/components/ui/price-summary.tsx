@@ -23,9 +23,15 @@ export function PriceSummary({ quote, shopLabel }: { quote: SingleSizeQuote; sho
   return (
     <div>
       <p className="text-sm text-muted">商品価格</p>
-      <p className="mt-1 text-xs leading-5 text-muted">在庫がある単品の掲載で、商品価格がいちばん低いものです。送料の条件が違う掲載とは、合計では比べていません。</p>
+      <p className="mt-1 text-xs leading-5 text-muted">
+        {quote.sellingPrice == null
+          ? quote.sellingPriceWithheld
+            ? "送料が確認できた単品がないため、最安値は出していません。"
+            : "同じ容量の単品として比べられる掲載がないため、最安値は出していません。"
+          : "在庫がある単品で、送料が確認できた掲載のうち、送料込みの合計がいちばん低い商品価格です。"}
+      </p>
       <p className="price-num mt-1 text-5xl leading-none text-ink lg:text-6xl">
-        {quote.sellingPrice == null ? "確認できません" : formatYen(quote.sellingPrice)}
+        {quote.sellingPrice == null ? "出していません" : formatYen(quote.sellingPrice)}
       </p>
       {shipping ? <p className="mt-2 text-base text-ink">{shipping}</p> : null}
       {quote.itemUnitYen != null && quote.unitLabel ? (

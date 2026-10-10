@@ -83,7 +83,7 @@ export function PriceInfoCard({
               <PriceFigure label="送料込み最安" value={view.shippingTotal} note="送料が分かるショップの支払総額" primary />
             ) : null}
             {view.sellingPrice != null ? (
-              <PriceFigure label="商品価格の最安" value={view.sellingPrice} note={view.sellingNote} primary={!shippingReady} />
+              <PriceFigure label="商品価格" value={view.sellingPrice} note={view.sellingNote} primary={!shippingReady} />
             ) : null}
             {shippingReady ? null : <p className="text-sm text-muted">送料が分かるショップがないため、送料込み最安は出していません。</p>}
           </div>
