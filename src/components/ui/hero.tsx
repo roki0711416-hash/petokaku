@@ -7,11 +7,9 @@ export function Hero() {
         <div className="min-w-0">
           <h1 className="max-w-xl text-[1.7rem] leading-snug font-medium tracking-tight text-ink min-[390px]:text-[1.85rem] md:text-5xl md:leading-tight">
             <span className="block">ペット用品を、</span>
-            <span className="block">かしこく比較。</span>
+            <span className="block">もっとお得に。</span>
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-muted md:text-base">
-            商品名やJANコードから、販売店の掲載を見比べられます。ペトカクは商品を販売しません。購入は各ショップのページで行います。
-          </p>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-muted md:text-base">いつものペット用品を、ショップごとに価格比較。</p>
           <SearchBar id="home-search" />
         </div>
         <HeroScene />

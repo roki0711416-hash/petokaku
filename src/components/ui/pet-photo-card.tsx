@@ -4,17 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { CatalogIcon } from "@/components/ui/catalog-card";
-import { petPhotos, type PetPhoto } from "@/components/ui/pet-photos";
+import { petIllustrations, type PetIllustration } from "@/components/ui/pet-illustrations";
 
-export function PetPhotoCard({ pet }: { pet: PetPhoto }) {
+export function PetPhotoCard({ pet }: { pet: PetIllustration }) {
   const [failed, setFailed] = useState(false);
 
   return (
     <Link
       href={pet.href}
-      className="lift flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-card shadow-[0_8px_20px_rgba(32,77,56,0.06)] hover:border-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl bg-card shadow-[0_10px_24px_rgba(38,43,39,0.08)] transition-shadow duration-300 hover:shadow-[0_14px_28px_rgba(38,43,39,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest motion-reduce:transition-none"
     >
-      <span className="relative block aspect-[4/3] bg-sand">
+      <span className="relative block aspect-square overflow-hidden bg-[#f6f1e6]">
         {failed ? (
           <span className="grid h-full place-items-center text-forest">
             <CatalogIcon glyph={pet.glyph} />
@@ -24,24 +24,33 @@ export function PetPhotoCard({ pet }: { pet: PetPhoto }) {
             src={pet.image}
             alt={pet.alt}
             fill
-            sizes="(max-width: 767px) 46vw, (max-width: 1279px) 30vw, 16vw"
-            className={`object-cover ${pet.position}`}
+            sizes="(max-width: 1023px) 45vw, 180px"
+            className="object-cover transition-transform duration-300 ease-out motion-reduce:transition-none motion-safe:group-hover:scale-105"
             onError={() => setFailed(true)}
           />
         )}
       </span>
-      <span className="flex min-h-12 items-center justify-center px-2 py-2 text-center text-sm leading-5 font-medium break-words text-ink">
-        {pet.label}
+      <span className="flex min-h-12 items-center justify-between gap-2 border-t border-line bg-card px-3 py-2.5 text-[0.8125rem] leading-5 font-medium text-ink">
+        <span className="min-w-0">{pet.label}</span>
+        <CardArrow />
       </span>
     </Link>
   );
 }
 
+function CardArrow() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="size-4 shrink-0 text-forest">
+      <path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function PetPhotoGrid() {
   return (
-    <ul className="mt-6 grid min-w-0 grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      {petPhotos.map((pet) => (
-        <li key={pet.label} className="min-w-0">
+    <ul className="mt-6 grid min-w-0 grid-cols-2 gap-3 md:gap-4 lg:grid-cols-6">
+      {petIllustrations.map((pet) => (
+        <li key={pet.href} className="min-w-0">
           <PetPhotoCard pet={pet} />
         </li>
       ))}
