@@ -38,6 +38,24 @@ function byItemPrice<T extends { price: number | null }>(offers: T[]): T[] {
   return [...offers].sort((left, right) => (left.price ?? Number.POSITIVE_INFINITY) - (right.price ?? Number.POSITIVE_INFINITY));
 }
 
+export function cheapestPrices<T extends { price: number | null; shippingFee: number | null }>(offers: T[]): {
+  itemPrice: number | null;
+  shippingTotal: number | null;
+} {
+  let itemPrice: number | null = null;
+  let shippingTotal: number | null = null;
+  for (const offer of offers) {
+    if (offer.price != null && (itemPrice == null || offer.price < itemPrice)) {
+      itemPrice = offer.price;
+    }
+    const total = payableTotal(offer);
+    if (total != null && (shippingTotal == null || total < shippingTotal)) {
+      shippingTotal = total;
+    }
+  }
+  return { itemPrice, shippingTotal };
+}
+
 export function sortComparedOffers<T extends { price: number | null; shippingFee: number | null }>(offers: T[], sort: CompareSort): T[] {
   if (sort === "item") {
     return byItemPrice(offers);

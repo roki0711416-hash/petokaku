@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
 function offer(partial: {
@@ -69,6 +69,20 @@ test("最初の5件に本体価格の最安を含め、表示を切っても判�
   assert.equal(firstPage[0]?.id, ranked[0]?.id);
   assert.equal(ranked[0]?.price, 1890);
   assert.equal(compareWindow(ranked.length, initialCompareCount).next, 12);
+});
+
+test("最安バッジは本体価格と、送料が分かる合計を別々に見る", () => {
+  const prices = cheapestPrices([
+    offer({ id: "unknown-cheap", price: 1000, shippingFee: null }),
+    offer({ id: "known-lower", price: 1800, shippingFee: 500 }),
+    offer({ id: "known-higher", price: 2500, shippingFee: 0 }),
+  ]);
+  assert.deepEqual(prices, { itemPrice: 1000, shippingTotal: 2300 });
+  const both = cheapestPrices([
+    offer({ id: "same", price: 1000, shippingFee: 0 }),
+    offer({ id: "tie", price: 1000, shippingFee: 0 }),
+  ]);
+  assert.deepEqual(both, { itemPrice: 1000, shippingTotal: 1000 });
 });
 
 test("もっと見るは10件ずつ増やす", () => {

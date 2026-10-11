@@ -7,11 +7,10 @@ import type { Offer } from "@/lib/types";
 export function OfferStack({
   initial,
   rest,
-  lowestTotal,
 }: {
   initial: Offer[];
   rest: Offer[];
-  lowestTotal: number | null;
+  lowestTotal?: number | null;
 }) {
   const [open, setOpen] = useState(false);
   const shown = open ? [...initial, ...rest] : initial;
@@ -23,7 +22,7 @@ export function OfferStack({
       ) : (
         <ol className="grid gap-2">
           {shown.map((offer, index) => (
-            <ShopCard key={offer.id} offer={offer} lowestTotal={lowestTotal} rank={index + 1} />
+            <ShopCard key={offer.id} offer={offer} rank={index + 1} />
           ))}
         </ol>
       )}

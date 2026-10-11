@@ -25,7 +25,7 @@ export function shippingLine(offer: Offer): string {
     case "free":
       return "送料無料";
     case "unknown":
-      return "送料未確認";
+      return "送料はショップで確認";
     case "amount":
       return `送料 ${formatYen(offer.shippingFee ?? 0)}`;
   }
@@ -72,19 +72,20 @@ export function offerUnitLabel(
   return `${prefix}${formatUnitAmount(unitPrice.itemUnit, unitPrice.unitLabel)}`;
 }
 
-function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
+function ShopVisit({ offer, wide }: { offer: Offer; wide?: boolean }) {
   const link = shopProductLink(offer);
   const href = link.href;
   const isAdvertisement = link.affiliate;
-  const className = compact
-    ? "inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-full bg-accent px-3 text-sm whitespace-nowrap text-white hover:bg-forest-deep"
-    : "inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-4 text-sm whitespace-nowrap text-white hover:bg-forest-deep";
+  const label = wide ? "ショップで商品を見る" : "商品を見る";
+  const className = wide
+    ? "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-forest px-4 text-sm font-medium text-white hover:bg-forest-deep"
+    : "inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-forest px-4 text-sm whitespace-nowrap text-white hover:bg-forest-deep";
 
   if (!href) {
     return (
-      <div className={compact ? "text-right" : ""}>
+      <div>
         <button type="button" className={`${className} cursor-not-allowed opacity-80`} disabled>
-          商品を見る
+          {label}
         </button>
         <p className="mt-1 text-xs leading-5 text-muted">サンプルのため、販売ページはありません。</p>
       </div>
@@ -92,7 +93,7 @@ function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
   }
 
   return (
-    <div className={compact ? "text-right" : ""}>
+    <div>
       {isAdvertisement ? <p className="mb-1 text-xs font-medium text-clay">広告</p> : null}
       <a
         href={href}
@@ -100,7 +101,7 @@ function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
         rel={isAdvertisement ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
         className={className}
       >
-        商品を見る
+        {label}
       </a>
     </div>
   );
@@ -108,41 +109,66 @@ function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
 
 export function ShopCard({
   offer,
-  lowestTotal,
   rank,
   mallLabel = null,
   reference = false,
-  mark = null,
+  itemCheapest = false,
+  totalCheapest = false,
+  quantity = null,
+  quantityUnit = null,
+  unitPriceType = "none",
 }: {
   offer: Offer;
-  lowestTotal: number | null;
   rank: number;
   mallLabel?: string | null;
   reference?: boolean;
-  mark?: string | null;
+  itemCheapest?: boolean;
+  totalCheapest?: boolean;
+  quantity?: number | null;
+  quantityUnit?: QuantityUnit | null;
+  unitPriceType?: UnitPriceType;
 }) {
-  const { total } = offerHeadline(offer, lowestTotal, rank);
-  const label = reference ? "参考価格" : mark ? mark : `${rank}位`;
+  const total = payableTotal(offer);
+  const highlighted = itemCheapest || totalCheapest;
+  const unit = offerUnitLabel(offer, quantity, quantityUnit, unitPriceType);
+  const showRank = !reference && !mallLabel && rank > 0;
 
   return (
-    <li className="min-w-0 overflow-hidden rounded-2xl border border-line bg-card px-3 py-2.5">
-      <div className="flex min-w-0 items-baseline justify-between gap-3">
-        <p className="min-w-0 text-xs text-muted">
-          {label}
-          {mallLabel ? ` · ${mallLabel}` : ""}
-        </p>
-        <p className="price-num shrink-0 text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+    <li className={highlighted ? "flex min-w-0 flex-col rounded-2xl border border-forest bg-moss/60 p-4" : "flex min-w-0 flex-col rounded-2xl border border-line bg-card p-4"}>
+      <div className="min-w-0">
+        {mallLabel ? <p className="text-xs font-medium tracking-wide text-sage">{mallLabel}</p> : null}
+        {reference ? <p className="text-xs text-muted">参考価格</p> : null}
+        {showRank ? <p className="text-xs text-muted">{rank}位</p> : null}
+        <h3 className="mt-0.5 break-words text-base font-medium leading-6 text-ink">{offer.shopName}</h3>
       </div>
-      <h3 className="mt-1 break-words text-sm font-medium leading-5 text-ink">{offer.shopName}</h3>
+      {itemCheapest || totalCheapest ? (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {itemCheapest ? <span className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-forest-deep">本体価格 最安</span> : null}
+          {totalCheapest ? <span className="rounded-full bg-forest px-2.5 py-0.5 text-xs font-medium text-white">送料込み 最安</span> : null}
+        </div>
+      ) : null}
+      <p className="price-num mt-3 text-3xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+      {unit ? <p className="mt-1 text-xs text-muted">参考単価 {unit}</p> : null}
+      {total == null ? (
+        <p className="mt-3 text-sm leading-6 text-muted">{shippingLine(offer)}</p>
+      ) : (
+        <dl className="mt-3 grid grid-cols-2 gap-3">
+          <div className="min-w-0">
+            <dt className="text-xs text-muted">送料</dt>
+            <dd className="mt-0.5 text-sm text-ink">{shippingCell(offer)}</dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="text-xs text-muted">送料込み</dt>
+            <dd className="price-num mt-0.5 text-lg text-ink">{formatYen(total)}</dd>
+          </div>
+        </dl>
+      )}
+      <p className="mt-2 text-xs text-muted">{stockLabel(offer.stockStatus, offer.isSample)}</p>
       {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
-      <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
-        <p className="min-w-0 text-xs leading-5 text-muted">
-          {shippingLine(offer)} · {stockLabel(offer.stockStatus, offer.isSample)}
-          {total == null ? "" : ` · 合計 ${formatYen(total)}`}
-        </p>
-        <ShopVisit offer={offer} compact />
+      {reference ? <p className="mt-2 text-xs leading-5 text-muted">店舗ごとの個数と送料は未確認です。単品の順位には入れていません。</p> : null}
+      <div className="mt-auto pt-4">
+        <ShopVisit offer={offer} wide />
       </div>
-      {reference ? <p className="mt-1 text-xs leading-5 text-muted">店舗ごとの個数と送料は未確認です。単品の順位には入れていません。</p> : null}
     </li>
   );
 }
@@ -191,7 +217,7 @@ export function ShopTable({
               </td>
               <td className="price-num py-3 pr-2 align-middle text-xl text-ink">
                 {offer.price == null ? "情報なし" : formatYen(offer.price)}
-                <span className="mt-1 block text-xs font-normal text-muted">合計 {total == null ? "情報なし" : formatYen(total)}</span>
+                {total == null ? null : <span className="mt-1 block text-xs font-normal text-muted">合計 {formatYen(total)}</span>}
               </td>
               <td className="py-3 pr-2 align-middle">{shippingCell(offer)}</td>
               <td className="py-3 pr-2 align-middle">{stockLabel(offer.stockStatus, offer.isSample)}</td>

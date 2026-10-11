@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ShopCard, ShopTable } from "@/components/ui/shop-card";
+import { ShopCard } from "@/components/ui/shop-card";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { comparisonMallOf, type ComparisonMall } from "@/lib/pricing/malls";
 import {
+  cheapestPrices,
   compareWindow,
   type CompareSort,
   groupOtherSalesUnits,
@@ -25,20 +26,6 @@ type MallFilter = "all" | ComparisonMall;
 function mallName(offer: Offer): string | null {
   const mall = comparisonMallOf(offer);
   return mall ? mallLabels[mall] : null;
-}
-
-function lowestKnownTotal(offers: Offer[]): number | null {
-  let lowest: number | null = null;
-  for (const offer of offers) {
-    const total = payableTotal(offer);
-    if (total == null) {
-      continue;
-    }
-    if (lowest == null || total < lowest) {
-      lowest = total;
-    }
-  }
-  return lowest;
 }
 
 export function ShopPriceCompare({
@@ -67,9 +54,8 @@ export function ShopPriceCompare({
   const reference = sortComparedOffers(parts.reference, "item");
   const otherUnits = groupOtherSalesUnits(parts.otherUnits, sort);
   const unavailable = sortComparedOffers(parts.unavailable, sort);
-  const lowestTotal = lowestKnownTotal(ranked);
-  const showMall = mall === "all" && present.length > 1;
-  const listProps = { quantity, quantityUnit, unitPriceType, showMall, lowestTotal };
+  const cheapest = cheapestPrices(ranked);
+  const listProps = { quantity, quantityUnit, unitPriceType, cheapest };
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -98,7 +84,6 @@ export function ShopPriceCompare({
           resetKey={`${mall}:${sort}:ranked`}
           offers={ranked}
           emptyLabel="この条件で順位に入れられる掲載はありません。"
-          mark={sort === "item" ? "本体最安" : "送料込み最安"}
           {...listProps}
         />
         {reference.length > 0 ? (
@@ -107,9 +92,9 @@ export function ShopPriceCompare({
             <p className="mt-1 text-xs leading-5 text-muted">
               楽天市場の商品価格ナビです。店舗ごとの個数と送料は未確認のため、単品の順位には入れていません。
             </p>
-            <ol className="mt-3 grid min-w-0 gap-2">
+            <ol className="mt-3 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
               {reference.map((offer) => (
-                <ShopCard key={offer.id} offer={offer} lowestTotal={null} rank={0} mallLabel={mallName(offer)} reference />
+                <ShopCard key={offer.id} offer={offer} rank={0} mallLabel={mallName(offer)} reference />
               ))}
             </ol>
           </div>
@@ -126,9 +111,8 @@ export function ShopPriceCompare({
                   resetKey={`${mall}:${sort}:unit:${group.key}`}
                   offers={group.offers}
                   emptyLabel="この販売単位の掲載はありません。"
-                  mark={null}
                   {...listProps}
-                  lowestTotal={null}
+                  cheapest={{ itemPrice: null, shippingTotal: null }}
                 />
               </div>
             ))}
@@ -141,9 +125,8 @@ export function ShopPriceCompare({
             resetKey={`${mall}:${sort}:stock`}
             offers={unavailable}
             emptyLabel="在庫が確認できない掲載はありません。"
-            mark={null}
             {...listProps}
-            lowestTotal={null}
+            cheapest={{ itemPrice: null, shippingTotal: null }}
           />
         </SideFrame>
       ) : null}
@@ -180,24 +163,20 @@ function SideFrame({ title, note, children }: { title: string; note: string; chi
 
 function PagedOffers({
   offers,
-  lowestTotal,
+  cheapest,
   quantity,
   quantityUnit,
   unitPriceType,
-  showMall,
   emptyLabel,
   resetKey,
-  mark,
 }: {
   offers: Offer[];
-  lowestTotal: number | null;
+  cheapest: { itemPrice: number | null; shippingTotal: number | null };
   quantity: number | null;
   quantityUnit: QuantityUnit | null;
   unitPriceType: UnitPriceType;
-  showMall: boolean;
   emptyLabel: string;
   resetKey: string;
-  mark: string | null;
 }) {
   const [visible, setVisible] = useState(initialCompareCount);
   const [seenKey, setSeenKey] = useState(resetKey);
@@ -207,7 +186,6 @@ function PagedOffers({
   }
   const window = compareWindow(offers.length, visible);
   const shown = offers.slice(0, window.shown);
-  const label = showMall ? mallName : undefined;
 
   if (offers.length === 0) {
     return <p className="mt-3 text-sm leading-7 text-muted">{emptyLabel}</p>;
@@ -218,32 +196,24 @@ function PagedOffers({
       <p className="mb-2 text-xs text-muted">
         {shown.length} / {offers.length}件
       </p>
-      <div className="min-w-0 lg:hidden">
-        <ol className="grid min-w-0 gap-2">
-          {shown.map((offer, index) => (
+      <ol className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
+        {shown.map((offer, index) => {
+          const total = payableTotal(offer);
+          return (
             <ShopCard
               key={offer.id}
               offer={offer}
-              lowestTotal={lowestTotal}
               rank={index + 1}
-              mallLabel={label?.(offer) ?? null}
-              mark={index === 0 ? mark : null}
+              mallLabel={mallName(offer)}
+              itemCheapest={cheapest.itemPrice != null && offer.price === cheapest.itemPrice}
+              totalCheapest={cheapest.shippingTotal != null && total != null && total === cheapest.shippingTotal}
+              quantity={quantity}
+              quantityUnit={quantityUnit}
+              unitPriceType={unitPriceType}
             />
-          ))}
-        </ol>
-      </div>
-      <div className="hidden min-w-0 lg:block">
-        <div className="min-w-0 overflow-x-auto">
-          <ShopTable
-            offers={shown}
-            lowestTotal={lowestTotal}
-            quantity={quantity}
-            quantityUnit={quantityUnit}
-            unitPriceType={unitPriceType}
-            mallLabel={label}
-          />
-        </div>
-      </div>
+          );
+        })}
+      </ol>
       {window.remaining > 0 ? (
         <button
           type="button"
