@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ComparableProducts } from "@/components/comparable-products";
 import { CatalogCard, type CatalogGlyph } from "@/components/ui/catalog-card";
-import { CategoryCard } from "@/components/ui/category-card";
 import { Hero } from "@/components/ui/hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { categories, categorySearchHref } from "@/lib/categories";
+import { categorySearchHref } from "@/lib/categories";
 import { indexedJanProducts, selectIndexedJans } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +20,24 @@ export const metadata: Metadata = {
   },
 };
 
-const catalog: { label: string; note: string; query: string; glyph: CatalogGlyph }[] = [
-  { label: "ドッグフード", note: "犬のごはん", query: "犬 フード", glyph: "dog-food" },
-  { label: "キャットフード", note: "猫のごはん", query: "猫 フード", glyph: "cat-food" },
-  { label: "猫砂", note: "猫のトイレ", query: "猫砂", glyph: "litter" },
-  { label: "ペットシーツ", note: "トイレまわり", query: "ペットシーツ", glyph: "sheet" },
-  { label: "おやつ", note: "犬と猫のおやつ", query: "ペット おやつ", glyph: "treat" },
-  { label: "ケア用品", note: "日常のケア", query: "ペット ケア用品", glyph: "care" },
+const cardGrid = "mt-6 grid min-w-0 grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 xl:grid-cols-6";
+
+const pets: { label: string; href: string; glyph: CatalogGlyph }[] = [
+  { label: "犬", href: categorySearchHref("dog"), glyph: "dog" },
+  { label: "猫", href: categorySearchHref("cat"), glyph: "cat" },
+  { label: "うさぎ・小動物", href: categorySearchHref("small-animal"), glyph: "rabbit" },
+  { label: "鳥", href: categorySearchHref("bird"), glyph: "bird" },
+  { label: "魚・アクアリウム", href: categorySearchHref("fish"), glyph: "fish" },
+  { label: "爬虫類・両生類", href: `/search?q=${encodeURIComponent("爬虫類 用品")}`, glyph: "reptile" },
+];
+
+const genres: { label: string; query: string; glyph: CatalogGlyph }[] = [
+  { label: "フード", query: "ペット フード", glyph: "food" },
+  { label: "おやつ", query: "ペット おやつ", glyph: "treat" },
+  { label: "トイレ用品", query: "ペット トイレ", glyph: "toilet" },
+  { label: "おもちゃ", query: "ペット おもちゃ", glyph: "toy" },
+  { label: "ケア用品", query: "ペット ケア用品", glyph: "care" },
+  { label: "飼育用品", query: "ペット 飼育用品", glyph: "habitat" },
 ];
 
 const steps = [
@@ -42,13 +52,25 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 py-14 md:py-20">
+      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-14 pb-4 md:pt-20">
         <div className="mx-auto max-w-6xl">
-          <SectionHeading id="categories-heading" title="カテゴリー" lead="選ぶと、その品目の検索が開きます。" />
-          <ul className="mt-8 grid min-w-0 grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            {catalog.map((item) => (
+          <SectionHeading id="categories-heading" title="ペットの種類から探す" lead="種類を選ぶと、その用品の検索が開きます。" />
+          <ul className={cardGrid}>
+            {pets.map((item) => (
               <li key={item.label} className="min-w-0">
-                <CatalogCard href={`/search?q=${encodeURIComponent(item.query)}`} label={item.label} note={item.note} glyph={item.glyph} />
+                <CatalogCard href={item.href} label={item.label} glyph={item.glyph} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+      <section aria-labelledby="genres-heading" className="px-4 pt-8 pb-14 md:pb-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading id="genres-heading" title="商品ジャンルから探す" lead="品目を選ぶと、その検索が開きます。" />
+          <ul className={cardGrid}>
+            {genres.map((item) => (
+              <li key={item.label} className="min-w-0">
+                <CatalogCard href={`/search?q=${encodeURIComponent(item.query)}`} label={item.label} glyph={item.glyph} />
               </li>
             ))}
           </ul>
@@ -69,20 +91,6 @@ export default function HomePage() {
               </li>
             ))}
           </ol>
-        </div>
-      </section>
-      <section aria-labelledby="more-pets" className="px-4 py-14 md:py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionHeading id="more-pets" title="ほかのペット" lead="小動物、鳥、魚の用品も、同じ検索から探せます。" />
-          <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {categories
-              .filter((category) => category.id !== "dog" && category.id !== "cat")
-              .map((category) => (
-                <li key={category.id}>
-                  <CategoryCard href={categorySearchHref(category.id)} label={category.label} note={category.description} icon={category.id} />
-                </li>
-              ))}
-          </ul>
         </div>
       </section>
     </>
