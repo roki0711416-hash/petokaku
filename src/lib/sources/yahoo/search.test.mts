@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isPetSupplyHit, petSupplyGenreCategoryId, preferDetailImageUrl, searchYahooItems, yahooDetailImageSize } from "./search.ts";
+import { isPetSupplyHit, petSupplyGenreCategoryId, preferDetailImageUrl, searchYahooItems, yahooDetailImageSize, yahooJanSearchLimit } from "./search.ts";
 
 const rice = {
   name: "令和7年産 米 15kg",
@@ -74,6 +74,11 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     assert.equal(janUrl.searchParams.get("query"), null);
     assert.equal(janUrl.searchParams.get("image_size"), yahooDetailImageSize);
     assert.equal(yahooDetailImageSize, "600");
+    assert.equal(yahooJanSearchLimit, 50);
+    if (keyword.ok) {
+      assert.equal(keyword.totalAvailable, null);
+      assert.equal(keyword.returnedCount, 2);
+    }
   } finally {
     globalThis.fetch = previousFetch;
     if (previousAppId == null) {

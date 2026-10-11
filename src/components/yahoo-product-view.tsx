@@ -34,6 +34,7 @@ export function YahooProductView({
   priceSummary,
   priceSeries = [],
   priceCheckedAt,
+  retrievalLimited = false,
 }: {
   product: ProductDetail;
   pageHref: string;
@@ -41,6 +42,7 @@ export function YahooProductView({
   priceSummary?: PriceHistorySummary | null;
   priceSeries?: DailyPricePoint[];
   priceCheckedAt?: string;
+  retrievalLimited?: boolean;
 }) {
   const quote = quoteSingleSize({
     offers: offersComparableAsNew(product.offers),
@@ -52,14 +54,16 @@ export function YahooProductView({
   const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
-  const shopLabel = comparisonCountLabel(product.offers);
+  const shopLabel = retrievalLimited
+    ? `取得できた範囲で${comparisonCountLabel(product.offers)}`
+    : comparisonCountLabel(product.offers);
   const crumbs: Crumb[] = [
     { label: "ホーム", href: "/" },
     { label: category.label, href: categorySearchHref(category.id) },
     { label: visibleName, href: pageHref, current: true },
   ];
 
-  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} />;
+  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} retrievalLimited={retrievalLimited} />;
   const sizes = <SizeChoices choices={sizeChoices} />;
   const capacity = product.sizeLabel && product.sizeLabel !== unknownQuantityLabel ? product.sizeLabel : null;
   const structured = productStructuredData({
@@ -115,7 +119,8 @@ export function YahooProductView({
           モールごとの価格
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          同じJANコードの掲載だけを、モールごとに並べています。容量違い、セット、別商品は混ぜていません。送料が確認できた掲載だけ合計額を出します。
+          同じJANコードの掲載だけを比べています。送料込みの安い順に、最初は5件、続きは10件ずつ表示します。送料未確認と、セットなど販売単位が違う掲載は別の欄です。
+          {retrievalLimited ? " Yahoo!ショッピングは取得上限があるため、この最安は取得できた掲載の範囲です。" : ""}
         </p>
         {product.offers.some((offer) => shopProductLink(offer).affiliate) ? (
           <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">

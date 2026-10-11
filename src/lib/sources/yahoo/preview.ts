@@ -1,10 +1,10 @@
 import { cache } from "react";
 import { adaptYahooGroup, validJanCode, type AdaptedYahooProduct } from "@/lib/sources/yahoo/adapter";
-import { searchYahooItems } from "@/lib/sources/yahoo/search";
+import { searchYahooItems, yahooJanSearchLimit, yahooRetrievalLimited } from "@/lib/sources/yahoo/search";
 import { buildSearchCandidates, type SearchCandidateCard } from "@/lib/sources/yahoo/search-candidates";
 
 export type YahooPreviewResult =
-  | { ok: true; adapted: AdaptedYahooProduct }
+  | { ok: true; adapted: AdaptedYahooProduct; retrievalLimited: boolean }
   | { ok: false; reason: "not-configured" | "request-failed" | "no-jan" };
 
 export type YahooPreviewCase = "dog" | "litter" | "sheets";
@@ -26,7 +26,7 @@ export const loadYahooPreview = cache(async (): Promise<YahooPreviewResult> => {
     return { ok: false, reason: "no-jan" };
   }
 
-  const matched = await searchYahooItems({ janCode, results: 20 });
+  const matched = await searchYahooItems({ janCode, results: yahooJanSearchLimit });
   if (!matched.ok) {
     return matched;
   }
@@ -35,7 +35,15 @@ export const loadYahooPreview = cache(async (): Promise<YahooPreviewResult> => {
   if (!adapted) {
     return { ok: false, reason: "request-failed" };
   }
-  return { ok: true, adapted };
+  return {
+    ok: true,
+    adapted,
+    retrievalLimited: yahooRetrievalLimited({
+      totalAvailable: matched.totalAvailable,
+      returnedCount: matched.returnedCount,
+      requested: yahooJanSearchLimit,
+    }),
+  };
 });
 
 export const loadYahooPreviewCase = cache(async (previewCase: YahooPreviewCase): Promise<YahooPreviewResult> => {
@@ -43,7 +51,7 @@ export const loadYahooPreviewCase = cache(async (previewCase: YahooPreviewCase):
     return loadYahooPreview();
   }
   const observedAt = new Date().toISOString();
-  const matched = await searchYahooItems({ janCode: fixedPreviewJan[previewCase], results: 20 });
+  const matched = await searchYahooItems({ janCode: fixedPreviewJan[previewCase], results: yahooJanSearchLimit });
   if (!matched.ok) {
     return matched;
   }
@@ -51,7 +59,15 @@ export const loadYahooPreviewCase = cache(async (previewCase: YahooPreviewCase):
   if (!adapted) {
     return { ok: false, reason: "request-failed" };
   }
-  return { ok: true, adapted };
+  return {
+    ok: true,
+    adapted,
+    retrievalLimited: yahooRetrievalLimited({
+      totalAvailable: matched.totalAvailable,
+      returnedCount: matched.returnedCount,
+      requested: yahooJanSearchLimit,
+    }),
+  };
 });
 
 export const loadYahooJan = cache(async (janCode: string): Promise<YahooPreviewResult> => {
@@ -59,7 +75,7 @@ export const loadYahooJan = cache(async (janCode: string): Promise<YahooPreviewR
     return { ok: false, reason: "no-jan" };
   }
   const observedAt = new Date().toISOString();
-  const matched = await searchYahooItems({ janCode, results: 20 });
+  const matched = await searchYahooItems({ janCode, results: yahooJanSearchLimit });
   if (!matched.ok) {
     return matched;
   }
@@ -67,7 +83,15 @@ export const loadYahooJan = cache(async (janCode: string): Promise<YahooPreviewR
   if (!adapted) {
     return { ok: false, reason: "no-jan" };
   }
-  return { ok: true, adapted };
+  return {
+    ok: true,
+    adapted,
+    retrievalLimited: yahooRetrievalLimited({
+      totalAvailable: matched.totalAvailable,
+      returnedCount: matched.returnedCount,
+      requested: yahooJanSearchLimit,
+    }),
+  };
 });
 
 export type YahooKeywordSearchResult =

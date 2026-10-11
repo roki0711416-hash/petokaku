@@ -202,6 +202,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
       priceSummary={priceSummary}
       priceSeries={priceSeries}
       priceCheckedAt={now}
+      retrievalLimited={result.retrievalLimited}
     />
   );
 }

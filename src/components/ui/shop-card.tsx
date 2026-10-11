@@ -120,10 +120,12 @@ export function ShopCard({
   offer,
   lowestTotal,
   rank,
+  mallLabel = null,
 }: {
   offer: Offer;
   lowestTotal: number | null;
   rank: number;
+  mallLabel?: string | null;
 }) {
   const { total, isLowestTotal } = offerHeadline(offer, lowestTotal, rank);
 
@@ -135,6 +137,7 @@ export function ShopCard({
             {offerRankLabel(isLowestTotal, total, rank)}
           </p>
           <h3 className="mt-0.5 truncate text-sm font-medium text-ink">{offer.shopName}</h3>
+          {mallLabel ? <p className="mt-0.5 text-xs text-muted">{mallLabel}</p> : null}
           {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
           <p className="mt-2 text-xs text-muted">商品価格</p>
           <p className="price-num text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
@@ -158,12 +161,14 @@ export function ShopTable({
   quantity,
   quantityUnit,
   unitPriceType,
+  mallLabel,
 }: {
   offers: Offer[];
   lowestTotal: number | null;
   quantity: number | null;
   quantityUnit: QuantityUnit | null;
   unitPriceType: UnitPriceType;
+  mallLabel?: (offer: Offer) => string | null;
 }) {
   return (
     <table className="w-full table-fixed border-collapse text-left text-sm">
@@ -201,6 +206,7 @@ export function ShopTable({
               <td className="py-3 pr-2 align-middle text-forest-deep">{unit ?? "—"}</td>
               <td className="truncate py-3 pr-2 align-middle font-medium text-ink">
                 {offer.shopName}
+                {mallLabel?.(offer) ? <span className="mt-0.5 block truncate text-xs font-normal text-muted">{mallLabel(offer)}</span> : null}
                 {offer.isSample ? <span className="ml-2 text-xs font-normal text-clay">サンプル</span> : null}
               </td>
               <td className="py-3 align-middle">

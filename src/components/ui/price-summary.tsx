@@ -17,19 +17,29 @@ function shippingLine(quote: SingleSizeQuote): string | null {
   return "送料はショップで確認";
 }
 
-export function PriceSummary({ quote, shopLabel }: { quote: SingleSizeQuote; shopLabel: string }) {
+export function PriceSummary({
+  quote,
+  shopLabel,
+  retrievalLimited = false,
+}: {
+  quote: SingleSizeQuote;
+  shopLabel: string;
+  retrievalLimited?: boolean;
+}) {
   const shipping = shippingLine(quote);
+  const priced =
+    quote.sellingPrice == null
+      ? quote.sellingPriceWithheld
+        ? "送料が確認できた単品がないため、最安値は出していません。"
+        : "同じ容量の単品として比べられる掲載がないため、最安値は出していません。"
+      : retrievalLimited
+        ? "取得できた掲載のうち、在庫がある単品で送料が確認できたものの、送料込み合計がいちばん低い商品価格です。全店舗の最安値ではありません。"
+        : "在庫がある単品で、送料が確認できた掲載のうち、送料込みの合計がいちばん低い商品価格です。";
 
   return (
     <div>
       <p className="text-sm text-muted">商品価格</p>
-      <p className="mt-1 text-xs leading-5 text-muted">
-        {quote.sellingPrice == null
-          ? quote.sellingPriceWithheld
-            ? "送料が確認できた単品がないため、最安値は出していません。"
-            : "同じ容量の単品として比べられる掲載がないため、最安値は出していません。"
-          : "在庫がある単品で、送料が確認できた掲載のうち、送料込みの合計がいちばん低い商品価格です。"}
-      </p>
+      <p className="mt-1 text-xs leading-5 text-muted">{priced}</p>
       <p className="price-num mt-1 text-5xl leading-none text-ink lg:text-6xl">
         {quote.sellingPrice == null ? "出していません" : formatYen(quote.sellingPrice)}
       </p>

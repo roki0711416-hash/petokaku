@@ -5,7 +5,22 @@ const endpoint = "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch
 // Yahooカテゴリ一覧APIの第1階層で「ペット用品、生き物」として返るID。商品名の語では判定しない。
 export const petSupplyGenreCategoryId = 2509;
 
-export type YahooSearchResult = { ok: true; items: YahooItem[] } | { ok: false; reason: "not-configured" | "request-failed" };
+export const yahooJanSearchLimit = 50;
+
+export type YahooSearchResult =
+  | { ok: true; items: YahooItem[]; totalAvailable: number | null; returnedCount: number }
+  | { ok: false; reason: "not-configured" | "request-failed" };
+
+export function yahooRetrievalLimited(input: {
+  totalAvailable: number | null;
+  returnedCount: number;
+  requested: number;
+}): boolean {
+  if (input.totalAvailable != null) {
+    return input.totalAvailable > input.returnedCount;
+  }
+  return input.requested > 0 && input.returnedCount >= input.requested;
+}
 
 type YahooSearchParams = {
   query?: string;
@@ -169,13 +184,16 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
 
   try {
     const payload: unknown = await response.json();
-    const hits = asRecord(payload)?.hits;
+    const record = asRecord(payload);
+    const hits = record?.hits;
     if (!Array.isArray(hits)) {
       return { ok: false, reason: "request-failed" };
     }
     return {
       ok: true,
       items: hits.filter(isPetSupplyHit).map(readYahooItem).filter((item): item is YahooItem => item != null),
+      totalAvailable: integer(record?.totalResultsAvailable),
+      returnedCount: hits.length,
     };
   } catch {
     return { ok: false, reason: "request-failed" };
