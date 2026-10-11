@@ -57,6 +57,11 @@ body {
   top: 1rem;
 }
 
+.official-api-credit a {
+  color: revert;
+  text-decoration: revert;
+}
+
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible,

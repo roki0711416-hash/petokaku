@@ -25,6 +25,13 @@ const columns = [
   },
 ];
 
+const dataProviderCreditsHtml = `<div><!-- Rakuten Web Services Attribution Snippet FROM HERE -->
+<a href="https://developers.rakuten.com/" target="_blank">Supported by Rakuten Developers</a>
+<!-- Rakuten Web Services Attribution Snippet TO HERE --></div>
+<div><!-- Begin Yahoo! JAPAN Web Services Attribution Snippet -->
+<span style="margin:15px 15px 15px 15px"><a href="https://developer.yahoo.co.jp/sitemap/">Webサービス by Yahoo! JAPAN</a></span>
+<!-- End Yahoo! JAPAN Web Services Attribution Snippet --></div>`;
+
 const socials = [
   {
     label: "Instagram",
@@ -92,18 +99,29 @@ export function SiteFooter() {
         </div>
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {columns.map((column) => (
-            <nav key={column.title} aria-label={column.title}>
-              <p className="text-sm font-medium text-ink">{column.title}</p>
-              <ul className="mt-3 grid gap-2">
-                {column.links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-muted underline-offset-4 hover:text-ink hover:underline">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div key={column.title} className="min-w-0">
+              <nav aria-label={column.title}>
+                <p className="text-sm font-medium text-ink">{column.title}</p>
+                <ul className="mt-3 grid gap-2">
+                  {column.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="text-sm text-muted underline-offset-4 hover:text-ink hover:underline">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              {column.title === "お問い合わせ" ? (
+                <section aria-label="データ提供・外部サービス" className="mt-6">
+                  <p className="text-sm font-medium text-ink">データ提供・外部サービス</p>
+                  <p className="mt-3 text-sm leading-7 text-muted">
+                    商品情報の取得には、楽天ウェブサービスおよびYahoo!ショッピングのAPIを利用しています。
+                  </p>
+                  <div className="official-api-credit mt-3 text-sm leading-7" dangerouslySetInnerHTML={{ __html: dataProviderCreditsHtml }} />
+                </section>
+              ) : null}
+            </div>
           ))}
         </div>
       </div>
