@@ -20,7 +20,7 @@ export function SearchForm({
   buttonLabel?: string;
 }) {
   return (
-    <form action={action} method="get" role="search" className={prominent || compact ? "" : "mt-4"}>
+    <form action={action} method="get" role="search" className={prominent || compact ? "min-w-0" : "mt-4"}>
       {hidden?.map((field) => (
         <input key={field.name} type="hidden" name={field.name} value={field.value} />
       ))}
@@ -28,7 +28,7 @@ export function SearchForm({
         {label}
       </label>
       <div
-        className={`flex gap-2 ${
+        className={`flex min-w-0 gap-2 ${
           compact
             ? "items-center rounded-full border border-line bg-card py-1 pr-1 pl-4"
             : prominent
@@ -44,17 +44,18 @@ export function SearchForm({
           maxLength={80}
           enterKeyHint="search"
           placeholder={placeholder}
-          className={`w-full bg-card text-ink ${compact ? "h-10 min-w-0 flex-1 text-sm" : prominent ? "h-14 rounded-xl px-4 text-base" : "h-14 rounded-full border border-line px-5 text-base"}`}
+          className={`min-w-0 bg-card text-ink ${compact ? "h-10 w-0 flex-1 text-sm" : prominent ? "h-14 w-full rounded-xl px-4 text-base" : "h-14 w-full rounded-full border border-line px-5 text-base"}`}
         />
         <button
           type="submit"
-          className={`inline-flex shrink-0 items-center justify-center rounded-full bg-accent text-white hover:bg-forest-deep ${compact ? "h-10 px-4 text-sm" : prominent ? "h-14 w-full px-5 md:w-auto" : "h-14 px-8"}`}
+          aria-label={buttonLabel}
+          className={`inline-flex shrink-0 items-center justify-center rounded-full bg-accent text-white hover:bg-forest-deep ${compact ? "h-10 w-10" : prominent ? "h-14 w-full px-5 md:w-auto" : "h-14 px-8"}`}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
             <path d="M16 16.5 20 20.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          <span className="ml-1">{buttonLabel}</span>
+          {compact ? <span className="sr-only">{buttonLabel}</span> : <span className="ml-1">{buttonLabel}</span>}
         </button>
       </div>
     </form>

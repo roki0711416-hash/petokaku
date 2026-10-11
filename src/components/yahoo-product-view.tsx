@@ -45,7 +45,7 @@ export function YahooProductView({
   retrievalLimited?: boolean;
 }) {
   const quote = quoteSingleSize({
-    offers: offersComparableAsNew(product.offers),
+    offers: offersComparableAsNew(product.offers).filter((offer) => offer.provider !== "rakuten"),
     quantity: product.quantity,
     quantityUnit: product.quantityUnit,
     quantityConfidence: product.quantityConfidence,
@@ -82,12 +82,12 @@ export function YahooProductView({
   });
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-6 md:py-10">
+    <article className="mx-auto min-w-0 max-w-6xl px-4 py-6 md:py-10">
       <Breadcrumbs items={crumbs} />
       {structured ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} /> : null}
-      <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14">
+      <div className="mt-6 grid min-w-0 items-start gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14">
         <ProductImage imageUrl={imageUrl} alt={visibleName} />
-        <div>
+        <div className="min-w-0">
           <p className="text-sm tracking-[0.08em] text-sage">{product.brand.trim() || "ブランド情報なし"}</p>
           <h1 className="mt-2 text-2xl leading-snug font-medium tracking-tight text-ink md:text-4xl">{visibleName}</h1>
           <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-line py-4">
@@ -116,11 +116,11 @@ export function YahooProductView({
       </div>
       <section id="compare" aria-labelledby="compare-heading" className="mt-12 scroll-mt-24 border-t border-line pt-10 lg:mt-16">
         <h2 id="compare-heading" className="text-2xl font-medium tracking-tight text-ink">
-          モールごとの価格
+          価格比較
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          同じJANコードの掲載だけを比べています。送料込みの安い順に、最初は5件、続きは10件ずつ表示します。送料未確認と、セットなど販売単位が違う掲載は別の欄です。
-          {retrievalLimited ? " Yahoo!ショッピングは取得上限があるため、この最安は取得できた掲載の範囲です。" : ""}
+          同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。初期表示は本体価格の安い順で5件、続きは10件ずつです。セットと在庫なしは別枠です。
+          {retrievalLimited ? " Yahoo!ショッピングは取得上限があるため、全店舗の最安値ではありません。" : ""}
         </p>
         {product.offers.some((offer) => shopProductLink(offer).affiliate) ? (
           <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
@@ -149,10 +149,10 @@ export function YahooProductView({
 
 function ProductImage({ imageUrl, alt }: { imageUrl: string | null; alt: string }) {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-line bg-card">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.75rem] border border-line bg-card">
       {imageUrl ? (
         // Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。
-        <img src={imageUrl} alt={alt} className="aspect-square w-full object-contain p-6 md:p-10" />
+        <img src={imageUrl} alt={alt} className="aspect-square w-full min-w-0 max-w-full object-contain p-6 md:p-10" />
       ) : (
         <div className="grid aspect-square place-items-center bg-moss px-8 text-center">
           <div>

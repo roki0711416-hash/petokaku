@@ -25,7 +25,7 @@ export function shippingLine(offer: Offer): string {
     case "free":
       return "送料無料";
     case "unknown":
-      return "送料はショップで確認";
+      return "送料未確認";
     case "amount":
       return `送料 ${formatYen(offer.shippingFee ?? 0)}`;
   }
@@ -42,16 +42,6 @@ export function shippingCell(offer: Offer): string {
     case "amount":
       return formatYen(offer.shippingFee ?? 0);
   }
-}
-
-export function offerRankLabel(isLowestTotal: boolean, total: number | null, rank: number): string {
-  if (isLowestTotal) {
-    return "合計が低い";
-  }
-  if (total == null) {
-    return "送料未確認";
-  }
-  return `${rank}位`;
 }
 
 export function offerHeadline(offer: Offer, lowestTotal: number | null, rank: number) {
@@ -87,8 +77,8 @@ function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
   const href = link.href;
   const isAdvertisement = link.affiliate;
   const className = compact
-    ? "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-accent px-3 text-sm whitespace-nowrap text-white hover:bg-forest-deep"
-    : "inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-4 text-sm whitespace-nowrap text-white hover:bg-forest-deep";
+    ? "inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-full bg-accent px-3 text-sm whitespace-nowrap text-white hover:bg-forest-deep"
+    : "inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-4 text-sm whitespace-nowrap text-white hover:bg-forest-deep";
 
   if (!href) {
     return (
@@ -110,7 +100,7 @@ function ShopVisit({ offer, compact }: { offer: Offer; compact?: boolean }) {
         rel={isAdvertisement ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
         className={className}
       >
-        商品を見る →
+        商品を見る
       </a>
     </div>
   );
@@ -121,36 +111,38 @@ export function ShopCard({
   lowestTotal,
   rank,
   mallLabel = null,
+  reference = false,
+  mark = null,
 }: {
   offer: Offer;
   lowestTotal: number | null;
   rank: number;
   mallLabel?: string | null;
+  reference?: boolean;
+  mark?: string | null;
 }) {
-  const { total, isLowestTotal } = offerHeadline(offer, lowestTotal, rank);
+  const { total } = offerHeadline(offer, lowestTotal, rank);
+  const label = reference ? "参考価格" : mark ? mark : `${rank}位`;
 
   return (
-    <li className={isLowestTotal ? "rounded-2xl border border-forest bg-moss px-3 py-3" : "rounded-2xl border border-line bg-card px-3 py-3"}>
-      <div className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className={isLowestTotal ? "text-xs font-medium text-forest-deep" : "text-xs text-muted"}>
-            {offerRankLabel(isLowestTotal, total, rank)}
-          </p>
-          <h3 className="mt-0.5 truncate text-sm font-medium text-ink">{offer.shopName}</h3>
-          {mallLabel ? <p className="mt-0.5 text-xs text-muted">{mallLabel}</p> : null}
-          {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
-          <p className="mt-2 text-xs text-muted">商品価格</p>
-          <p className="price-num text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
-          <p className="mt-1 text-xs text-muted">
-            {shippingLine(offer)} ・ {stockLabel(offer.stockStatus, offer.isSample)}
-          </p>
-          <p className="mt-1 text-xs text-ink">合計 {total == null ? "情報なし" : formatYen(total)}</p>
-          {total == null ? (
-            <p className="mt-1 text-xs leading-5 text-muted">送料が未確認のため、送料込みの比較には含めていません。</p>
-          ) : null}
-        </div>
+    <li className="min-w-0 overflow-hidden rounded-2xl border border-line bg-card px-3 py-2.5">
+      <div className="flex min-w-0 items-baseline justify-between gap-3">
+        <p className="min-w-0 text-xs text-muted">
+          {label}
+          {mallLabel ? ` · ${mallLabel}` : ""}
+        </p>
+        <p className="price-num shrink-0 text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+      </div>
+      <h3 className="mt-1 break-words text-sm font-medium leading-5 text-ink">{offer.shopName}</h3>
+      {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
+      <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
+        <p className="min-w-0 text-xs leading-5 text-muted">
+          {shippingLine(offer)} · {stockLabel(offer.stockStatus, offer.isSample)}
+          {total == null ? "" : ` · 合計 ${formatYen(total)}`}
+        </p>
         <ShopVisit offer={offer} compact />
       </div>
+      {reference ? <p className="mt-1 text-xs leading-5 text-muted">店舗ごとの個数と送料は未確認です。単品の順位には入れていません。</p> : null}
     </li>
   );
 }
@@ -186,15 +178,15 @@ export function ShopTable({
       <tbody>
         {offers.map((offer, index) => {
           const rank = index + 1;
-          const { total, isLowestTotal } = offerHeadline(offer, lowestTotal, rank);
+          const { total } = offerHeadline(offer, lowestTotal, rank);
           const unit = offerUnitLabel(offer, quantity, quantityUnit, unitPriceType);
           return (
-            <tr key={offer.id} className={isLowestTotal ? "border-b border-line bg-moss" : "border-b border-line"}>
+            <tr key={offer.id} className={total != null && total === lowestTotal ? "border-b border-line bg-moss" : "border-b border-line"}>
               <td className="py-3 pr-2 align-middle">
-                {isLowestTotal ? (
-                  <span className="rounded-full bg-forest px-2 py-0.5 text-xs text-white">合計が低い</span>
+                {total != null && total === lowestTotal ? (
+                  <span className="rounded-full bg-forest px-2 py-0.5 text-xs text-white">送料込み最安</span>
                 ) : (
-                  <span className="text-muted">{offerRankLabel(false, total, rank)}</span>
+                  <span className="text-muted">{rank}位</span>
                 )}
               </td>
               <td className="price-num py-3 pr-2 align-middle text-xl text-ink">
@@ -204,7 +196,7 @@ export function ShopTable({
               <td className="py-3 pr-2 align-middle">{shippingCell(offer)}</td>
               <td className="py-3 pr-2 align-middle">{stockLabel(offer.stockStatus, offer.isSample)}</td>
               <td className="py-3 pr-2 align-middle text-forest-deep">{unit ?? "—"}</td>
-              <td className="truncate py-3 pr-2 align-middle font-medium text-ink">
+              <td className="min-w-0 break-words py-3 pr-2 align-middle font-medium text-ink">
                 {offer.shopName}
                 {mallLabel?.(offer) ? <span className="mt-0.5 block truncate text-xs font-normal text-muted">{mallLabel(offer)}</span> : null}
                 {offer.isSample ? <span className="ml-2 text-xs font-normal text-clay">サンプル</span> : null}

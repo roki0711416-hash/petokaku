@@ -49,7 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <NoticeBar />
         <SampleBanner unexpected={getPriceMode() === "unexpected"} />
         <SiteHeader />
-        <main id="main" className="flex-1">
+        <main id="main" className="min-w-0 flex-1">
           {children}
         </main>
         <SiteFooter />

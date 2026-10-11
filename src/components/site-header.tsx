@@ -13,8 +13,8 @@ const navLinks = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-line/80 bg-paper/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2 md:gap-5 lg:gap-8">
+    <header className="sticky top-0 z-30 min-w-0 overflow-x-clip border-b border-line/80 bg-paper/95 backdrop-blur-md">
+      <div className="mx-auto flex min-w-0 max-w-6xl items-center gap-3 px-4 py-2 md:gap-5 lg:gap-8">
         <Logo />
         <div className="hidden min-w-0 flex-1 md:block">
           <SearchForm
@@ -33,11 +33,11 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto lg:ml-0 lg:hidden">
+        <div className="ml-auto shrink-0 lg:ml-0 lg:hidden">
           <MobileMenu links={navLinks} />
         </div>
       </div>
-      <div className="mx-auto max-w-6xl px-4 pb-2.5 md:hidden">
+      <div className="mx-auto min-w-0 max-w-6xl px-4 pb-2.5 md:hidden">
         <SearchForm
           id="header-search-mobile"
           compact

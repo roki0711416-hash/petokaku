@@ -82,6 +82,7 @@ export type SizeFamily = {
 
 export type SingleSizeQuote = {
   sellingPrice: number | null;
+  lowestItemPrice: number | null;
   itemUnitYen: number | null;
   itemUnitExact: boolean;
   shippingUnitYen: number | null;
@@ -279,6 +280,7 @@ export function quoteSingleSize(input: {
 }): SingleSizeQuote {
   const empty: SingleSizeQuote = {
     sellingPrice: null,
+    lowestItemPrice: null,
     itemUnitYen: null,
     itemUnitExact: false,
     shippingUnitYen: null,
@@ -296,8 +298,14 @@ export function quoteSingleSize(input: {
       !hasUnresolvedPackNotation(offer.listingTitle ?? ""),
   );
   const knownShipping = singles.filter((offer) => offer.shippingFee != null);
+  const lowestItemPrice = singles.reduce<number | null>((lowest, offer) => {
+    if (offer.price == null) {
+      return lowest;
+    }
+    return lowest == null || offer.price < lowest ? offer.price : lowest;
+  }, null);
   if (knownShipping.length === 0) {
-    return { ...empty, sellingPriceWithheld: singles.length > 0 };
+    return { ...empty, lowestItemPrice, sellingPriceWithheld: singles.length > 0 };
   }
   const selling = knownShipping.reduce((best, offer) => {
     const total = (offer.price ?? 0) + (offer.shippingFee ?? 0);
@@ -327,6 +335,7 @@ export function quoteSingleSize(input: {
       : null;
   return {
     sellingPrice: selling.price,
+    lowestItemPrice,
     itemUnitYen: item?.itemUnit?.yen ?? null,
     itemUnitExact: item?.itemUnit?.exact ?? false,
     shippingUnitYen: shippingQuote?.effectiveUnit?.yen ?? null,

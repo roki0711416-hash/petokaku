@@ -5,12 +5,15 @@ import type { PackUnit } from "../types.ts";
 export const initialCompareCount = 5;
 export const comparePageStep = 10;
 
+export type CompareSort = "item" | "total";
+
 type PricedOffer = {
   price: number | null;
   shippingFee: number | null;
   stockStatus: "in_stock" | "out_of_stock" | "unknown";
   packCount: number | null;
   listingTitle: string | null;
+  provider: string;
 };
 
 export function isPrimarySalesUnit(offer: { packCount: number | null; listingTitle: string | null }): boolean {
@@ -34,18 +37,28 @@ function byItemPrice<T extends { price: number | null }>(offers: T[]): T[] {
   return [...offers].sort((left, right) => (left.price ?? Number.POSITIVE_INFINITY) - (right.price ?? Number.POSITIVE_INFINITY));
 }
 
+export function sortComparedOffers<T extends { price: number | null; shippingFee: number | null }>(offers: T[], sort: CompareSort): T[] {
+  if (sort === "item") {
+    return byItemPrice(offers);
+  }
+  const known = byPayableTotal(offers.filter((offer) => payableTotal(offer) != null));
+  const unknown = byItemPrice(offers.filter((offer) => payableTotal(offer) == null));
+  return [...known, ...unknown];
+}
+
 export function partitionShopComparison<T extends PricedOffer>(offers: T[]): {
-  confirmed: T[];
-  unknownShipping: T[];
+  ranked: T[];
+  reference: T[];
   otherUnits: T[];
   unavailable: T[];
 } {
-  const confirmed: T[] = [];
-  const unknownShipping: T[] = [];
+  const ranked: T[] = [];
+  const reference: T[] = [];
   const otherUnits: T[] = [];
   const unavailable: T[] = [];
 
   for (const offer of offers) {
+    const referenceOffer = offer.provider === "rakuten";
     if (!isPrimarySalesUnit(offer)) {
       otherUnits.push(offer);
       continue;
@@ -54,19 +67,14 @@ export function partitionShopComparison<T extends PricedOffer>(offers: T[]): {
       unavailable.push(offer);
       continue;
     }
-    if (payableTotal(offer) == null) {
-      unknownShipping.push(offer);
+    if (referenceOffer) {
+      reference.push(offer);
       continue;
     }
-    confirmed.push(offer);
+    ranked.push(offer);
   }
 
-  return {
-    confirmed: byPayableTotal(confirmed),
-    unknownShipping: byItemPrice(unknownShipping),
-    otherUnits,
-    unavailable: byPayableTotal(unavailable),
-  };
+  return { ranked, reference, otherUnits, unavailable };
 }
 
 export type OtherUnitGroup<T> = {
@@ -76,7 +84,10 @@ export type OtherUnitGroup<T> = {
   offers: T[];
 };
 
-export function groupOtherSalesUnits<T extends PricedOffer & { packUnit: PackUnit | null }>(offers: T[]): OtherUnitGroup<T>[] {
+export function groupOtherSalesUnits<T extends PricedOffer & { packUnit: PackUnit | null }>(
+  offers: T[],
+  sort: CompareSort = "item",
+): OtherUnitGroup<T>[] {
   const buckets = new Map<string, T[]>();
   for (const offer of offers) {
     const key = offer.packCount == null ? "unknown" : String(offer.packCount);
@@ -88,13 +99,11 @@ export function groupOtherSalesUnits<T extends PricedOffer & { packUnit: PackUni
   return [...buckets.entries()]
     .map(([key, grouped]) => {
       const packCount = key === "unknown" ? null : Number(key);
-      const priced = grouped.filter((offer) => payableTotal(offer) != null);
-      const unpriced = grouped.filter((offer) => payableTotal(offer) == null);
       return {
         key,
         heading: salesUnitGroupHeading(packCount, grouped.map((offer) => offer.packUnit)),
         note: salesUnitGroupNote(packCount),
-        offers: [...byPayableTotal(priced), ...byItemPrice(unpriced)],
+        offers: sortComparedOffers(grouped, sort),
       };
     })
     .sort((left, right) => salesUnitSort(left.key === "unknown" ? null : Number(left.key)) - salesUnitSort(right.key === "unknown" ? null : Number(right.key)));

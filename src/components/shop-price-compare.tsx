@@ -6,9 +6,11 @@ import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { comparisonMallOf, type ComparisonMall } from "@/lib/pricing/malls";
 import {
   compareWindow,
+  type CompareSort,
   groupOtherSalesUnits,
   initialCompareCount,
   partitionShopComparison,
+  sortComparedOffers,
 } from "@/lib/pricing/shop-compare";
 import { payableTotal } from "@/lib/pricing/visible-offers";
 import type { Offer } from "@/lib/types";
@@ -29,6 +31,20 @@ function mallName(offer: Offer): string | null {
   return mall ? mallLabels[mall] : null;
 }
 
+function lowestKnownTotal(offers: Offer[]): number | null {
+  let lowest: number | null = null;
+  for (const offer of offers) {
+    const total = payableTotal(offer);
+    if (total == null) {
+      continue;
+    }
+    if (lowest == null || total < lowest) {
+      lowest = total;
+    }
+  }
+  return lowest;
+}
+
 export function ShopPriceCompare({
   offers,
   quantity,
@@ -42,6 +58,7 @@ export function ShopPriceCompare({
 }) {
   const present = (["yahoo", "rakuten"] as const).filter((mall) => offers.some((offer) => comparisonMallOf(offer) === mall));
   const [mall, setMall] = useState<MallFilter>("all");
+  const [sort, setSort] = useState<CompareSort>("item");
   const selected = offers.filter((offer) => {
     const offerMall = comparisonMallOf(offer);
     if (!offerMall) {
@@ -50,15 +67,18 @@ export function ShopPriceCompare({
     return mall === "all" || offerMall === mall;
   });
   const parts = partitionShopComparison(selected);
-  const otherUnits = groupOtherSalesUnits(parts.otherUnits);
-  const lowestTotal = payableTotal(parts.confirmed[0] ?? { price: null, shippingFee: null });
+  const ranked = sortComparedOffers(parts.ranked, sort);
+  const reference = sortComparedOffers(parts.reference, "item");
+  const otherUnits = groupOtherSalesUnits(parts.otherUnits, sort);
+  const unavailable = sortComparedOffers(parts.unavailable, sort);
+  const lowestTotal = lowestKnownTotal(ranked);
   const showMall = mall === "all" && present.length > 1;
-  const listProps = { quantity, quantityUnit, unitPriceType, showMall };
+  const listProps = { quantity, quantityUnit, unitPriceType, showMall, lowestTotal };
 
   return (
-    <div className="grid gap-6">
+    <div className="grid min-w-0 gap-6">
       {present.length > 1 ? (
-        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1" role="group" aria-label="モールで絞り込み">
+        <div className="flex min-w-0 flex-wrap gap-2" role="group" aria-label="モールで絞り込み">
           <FilterChip selected={mall === "all"} onClick={() => setMall("all")}>
             すべて
           </FilterChip>
@@ -69,65 +89,66 @@ export function ShopPriceCompare({
           ))}
         </div>
       ) : null}
-      {selected.some((offer) => offer.provider === "rakuten") ? (
-        <div className="px-1">
-          <p className="text-xs leading-5 text-muted">
-            楽天市場は同じJANコードの商品価格ナビです。店舗ごとの個数と送料は含まれていません。この金額はページ上部の最安値には入れていません。
-          </p>
-          <div className="mt-2" dangerouslySetInnerHTML={{ __html: rakutenCreditHtml }} />
-        </div>
-      ) : null}
-      <section aria-label="送料込みで比べられる掲載">
-        <h3 className="text-base font-medium text-ink">送料込みで比べられる掲載</h3>
-        <p className="mt-1 text-xs leading-5 text-muted">
-          在庫があり、送料が確認できた同じ販売単位です。送料込み合計の安い順に、最初は5件まで表示します。
-        </p>
+      <div className="flex min-w-0 flex-wrap gap-2" role="group" aria-label="並び順">
+        <FilterChip selected={sort === "item"} onClick={() => setSort("item")}>
+          本体価格が安い順
+        </FilterChip>
+        <FilterChip selected={sort === "total"} onClick={() => setSort("total")}>
+          送料込み合計が安い順
+        </FilterChip>
+      </div>
+      <section aria-label="価格比較" className="min-w-0">
         <PagedOffers
-          resetKey={`${mall}:confirmed`}
-          offers={parts.confirmed}
-          lowestTotal={lowestTotal}
-          emptyLabel="送料が確認できた同じ販売単位の掲載はありません。"
+          resetKey={`${mall}:${sort}:ranked`}
+          offers={ranked}
+          emptyLabel="この条件で順位に入れられる掲載はありません。"
+          mark={sort === "item" ? "本体最安" : "送料込み最安"}
           {...listProps}
         />
+        {reference.length > 0 ? (
+          <div className="mt-4 min-w-0">
+            <h4 className="text-sm font-medium text-ink">参考価格</h4>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              楽天市場の商品価格ナビです。店舗ごとの個数と送料は未確認のため、単品の順位には入れていません。
+            </p>
+            <ol className="mt-3 grid min-w-0 gap-2">
+              {reference.map((offer) => (
+                <ShopCard key={offer.id} offer={offer} lowestTotal={null} rank={0} mallLabel={mallName(offer)} reference />
+              ))}
+            </ol>
+            <div className="mt-2" dangerouslySetInnerHTML={{ __html: rakutenCreditHtml }} />
+          </div>
+        ) : null}
       </section>
-      {parts.unknownShipping.length > 0 ? (
-        <SideFrame title="送料未確認" note="送料が確認できないため、最安値の判定には入れていません。">
-          <PagedOffers
-            resetKey={`${mall}:unknown`}
-            offers={parts.unknownShipping}
-            lowestTotal={null}
-            emptyLabel="送料未確認の掲載はありません。"
-            {...listProps}
-          />
-        </SideFrame>
-      ) : null}
       {otherUnits.length > 0 ? (
-        <SideFrame title="セット・販売単位が違う掲載" note="個数やセットが違うため、単品の最安値には入れていません。">
-          <div className="grid gap-5">
+        <SideFrame title="セット・販売単位が違う掲載" note="個数やセットが違うため、単品の順位には入れていません。">
+          <div className="grid min-w-0 gap-5">
             {otherUnits.map((group) => (
-              <div key={group.key}>
+              <div key={group.key} className="min-w-0">
                 <h4 className="text-sm font-medium text-ink">{group.heading}</h4>
                 <p className="mt-1 text-xs leading-5 text-muted">{group.note}</p>
                 <PagedOffers
-                  resetKey={`${mall}:unit:${group.key}`}
+                  resetKey={`${mall}:${sort}:unit:${group.key}`}
                   offers={group.offers}
-                  lowestTotal={null}
                   emptyLabel="この販売単位の掲載はありません。"
+                  mark={null}
                   {...listProps}
+                  lowestTotal={null}
                 />
               </div>
             ))}
           </div>
         </SideFrame>
       ) : null}
-      {parts.unavailable.length > 0 ? (
-        <SideFrame title="在庫が確認できない掲載" note="在庫ありと確認できないため、最安値の判定には入れていません。">
+      {unavailable.length > 0 ? (
+        <SideFrame title="在庫なし" note="在庫ありと確認できないため、単品の順位には入れていません。">
           <PagedOffers
-            resetKey={`${mall}:stock`}
-            offers={parts.unavailable}
-            lowestTotal={null}
+            resetKey={`${mall}:${sort}:stock`}
+            offers={unavailable}
             emptyLabel="在庫が確認できない掲載はありません。"
+            mark={null}
             {...listProps}
+            lowestTotal={null}
           />
         </SideFrame>
       ) : null}
@@ -143,8 +164,8 @@ function FilterChip({ selected, onClick, children }: { selected: boolean; onClic
       onClick={onClick}
       className={
         selected
-          ? "inline-flex min-h-11 shrink-0 items-center rounded-full bg-ink px-4 text-sm text-card"
-          : "inline-flex min-h-11 shrink-0 items-center rounded-full bg-card px-4 text-sm text-ink"
+          ? "inline-flex min-h-11 items-center rounded-full bg-ink px-4 text-sm text-card"
+          : "inline-flex min-h-11 items-center rounded-full bg-card px-4 text-sm text-ink"
       }
     >
       {children}
@@ -154,9 +175,9 @@ function FilterChip({ selected, onClick, children }: { selected: boolean; onClic
 
 function SideFrame({ title, note, children }: { title: string; note: string; children: ReactNode }) {
   return (
-    <section aria-label={title} className="rounded-[1.5rem] border border-line bg-sand/50 p-3 sm:p-4">
-      <h3 className="px-1 text-base font-medium text-ink">{title}</h3>
-      <p className="mt-1 px-1 text-xs leading-5 text-muted">{note}</p>
+    <section aria-label={title} className="min-w-0 rounded-[1.5rem] border border-line bg-sand/50 p-3 sm:p-4">
+      <h3 className="text-base font-medium text-ink">{title}</h3>
+      <p className="mt-1 text-xs leading-5 text-muted">{note}</p>
       {children}
     </section>
   );
@@ -171,6 +192,7 @@ function PagedOffers({
   showMall,
   emptyLabel,
   resetKey,
+  mark,
 }: {
   offers: Offer[];
   lowestTotal: number | null;
@@ -180,6 +202,7 @@ function PagedOffers({
   showMall: boolean;
   emptyLabel: string;
   resetKey: string;
+  mark: string | null;
 }) {
   const [visible, setVisible] = useState(initialCompareCount);
   const [seenKey, setSeenKey] = useState(resetKey);
@@ -196,12 +219,12 @@ function PagedOffers({
   }
 
   return (
-    <div className="mt-3">
+    <div className="mt-3 min-w-0">
       <p className="mb-2 text-xs text-muted">
         {shown.length} / {offers.length}件
       </p>
-      <div className="lg:hidden">
-        <ol className="grid gap-2">
+      <div className="min-w-0 lg:hidden">
+        <ol className="grid min-w-0 gap-2">
           {shown.map((offer, index) => (
             <ShopCard
               key={offer.id}
@@ -209,19 +232,22 @@ function PagedOffers({
               lowestTotal={lowestTotal}
               rank={index + 1}
               mallLabel={label?.(offer) ?? null}
+              mark={index === 0 ? mark : null}
             />
           ))}
         </ol>
       </div>
-      <div className="hidden lg:block">
-        <ShopTable
-          offers={shown}
-          lowestTotal={lowestTotal}
-          quantity={quantity}
-          quantityUnit={quantityUnit}
-          unitPriceType={unitPriceType}
-          mallLabel={label}
-        />
+      <div className="hidden min-w-0 lg:block">
+        <div className="min-w-0 overflow-x-auto">
+          <ShopTable
+            offers={shown}
+            lowestTotal={lowestTotal}
+            quantity={quantity}
+            quantityUnit={quantityUnit}
+            unitPriceType={unitPriceType}
+            mallLabel={label}
+          />
+        </div>
       </div>
       {window.remaining > 0 ? (
         <button

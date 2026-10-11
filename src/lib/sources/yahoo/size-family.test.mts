@@ -179,6 +179,7 @@ test("送料不明の安い販売価格は送料込み単価に使わない", ()
     ],
   });
   assert.equal(quote.sellingPrice, 2000);
+  assert.equal(quote.lowestItemPrice, 1000);
   assert.equal(quote.sellingShippingKnown, true);
   assert.equal(quote.sellingPriceWithheld, false);
   assert.equal(quote.shippingTotal, 2000);
@@ -197,6 +198,8 @@ test("送料不明だけ、または別個数の掲載では最安値を出さ�
     ],
   });
   assert.equal(unknownOnly.sellingPrice, null);
+  assert.equal(unknownOnly.lowestItemPrice, 1000);
+  assert.equal(unknownOnly.shippingTotal, null);
   assert.equal(unknownOnly.sellingPriceWithheld, true);
 
   const setOnly = quoteSingleSize({
