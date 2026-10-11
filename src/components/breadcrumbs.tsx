@@ -24,10 +24,10 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
       <nav aria-label="パンくずリスト" className="text-sm text-muted">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {items.map((item, index) => (
-            <li key={`${item.label}-${index}`} className="flex items-center gap-2">
+            <li key={`${item.label}-${index}`} className="flex min-w-0 max-w-full items-center gap-2">
               {index > 0 ? <span aria-hidden="true">/</span> : null}
               {item.current ? (
-                <span aria-current="page" className="text-ink">
+                <span aria-current="page" className="line-clamp-1 min-w-0 text-ink">
                   {item.label}
                 </span>
               ) : (

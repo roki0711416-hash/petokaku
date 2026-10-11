@@ -56,17 +56,15 @@ export function YahooProductView({
   const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
-  const acquisitionLimited = retrievalLimited || rakutenShopScope === "limited";
-  const shopLabel = acquisitionLimited
-    ? `取得できた範囲で${comparisonCountLabel(product.offers)}`
-    : comparisonCountLabel(product.offers);
+  const shopLabel = comparisonCountLabel(product.offers);
+  const hasAffiliate = product.offers.some((offer) => shopProductLink(offer).affiliate);
   const crumbs: Crumb[] = [
     { label: "ホーム", href: "/" },
     { label: category.label, href: categorySearchHref(category.id) },
     { label: visibleName, href: pageHref, current: true },
   ];
 
-  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} retrievalLimited={acquisitionLimited} />;
+  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} />;
   const sizes = <SizeChoices choices={sizeChoices} />;
   const capacity = product.sizeLabel && product.sizeLabel !== unknownQuantityLabel ? product.sizeLabel : null;
   const structured = productStructuredData({
@@ -85,64 +83,51 @@ export function YahooProductView({
   });
 
   return (
-    <article className="mx-auto min-w-0 max-w-6xl px-4 py-6 md:py-10">
+    <article className="mx-auto min-w-0 max-w-6xl px-4 py-4 md:py-8">
       <Breadcrumbs items={crumbs} />
       {structured ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} /> : null}
-      <div className="mt-6 grid min-w-0 items-start gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14">
-        <ProductImage imageUrl={imageUrl} alt={visibleName} />
-        <div className="min-w-0">
+      <div className="mt-4 grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-3 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-10">
+        <div className="col-start-1 row-start-1 lg:row-span-2">
+          <ProductImage imageUrl={imageUrl} alt={visibleName} />
+        </div>
+        <div className="col-start-2 min-w-0">
           <p className="text-sm tracking-[0.08em] text-sage">{product.brand.trim() || "ブランド情報なし"}</p>
-          <h1 className="mt-2 text-2xl leading-snug font-medium tracking-tight text-ink md:text-4xl">{visibleName}</h1>
-          <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-line py-4">
+          <h1 className="mt-0.5 text-lg leading-snug font-medium tracking-tight text-ink md:text-3xl">{visibleName}</h1>
+        </div>
+        <div className="col-span-2 min-w-0 lg:col-span-1 lg:col-start-2">
+          <dl className="grid grid-cols-2 gap-3 border-y border-line py-2.5">
             <div>
               <dt className="text-xs text-muted">JANコード</dt>
-              <dd className="mt-1 text-sm text-ink">{product.janCode ?? "情報なし"}</dd>
+              <dd className="mt-0.5 text-sm text-ink">{product.janCode ?? "情報なし"}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted">容量</dt>
-              <dd className="mt-1 text-sm text-ink">{capacity ?? "情報なし"}</dd>
+              <dd className="mt-0.5 text-sm text-ink">{capacity ?? "情報なし"}</dd>
             </div>
           </dl>
-          {sizeChoices.length > 1 ? <div className="mt-4">{sizes}</div> : null}
-          <div className="mt-6">{summary}</div>
-          {product.offers.length > 0 ? (
-            <p className="mt-6">
-              <a
-                href="#compare"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-6 text-sm text-white hover:bg-forest-deep lg:w-auto"
-              >
-                価格比較を見る
-              </a>
-            </p>
-          ) : null}
+          {sizeChoices.length > 1 ? <div className="mt-3">{sizes}</div> : null}
+          <div className="mt-3">{summary}</div>
         </div>
       </div>
-      <section id="compare" aria-labelledby="compare-heading" className="mt-12 scroll-mt-24 border-t border-line pt-10 lg:mt-16">
-        <h2 id="compare-heading" className="text-2xl font-medium tracking-tight text-ink">
-          価格比較
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。楽天市場の店舗別掲載とYahoo!ショッピングを同じ順で見られます。初期表示は本体価格の安い順で5件、続きは10件ずつです。セットと在庫なしは別枠です。
-          {retrievalLimited ? " Yahoo!ショッピングは取得上限があるため、全店舗の最安値ではありません。" : ""}
-          {rakutenShopScope !== "off"
-            ? " 楽天市場の店舗別掲載は、商品検索APIがJANを返さないため、商品名か説明にこのJANコードが含まれる掲載だけです。1回の取得は30件までです。"
-            : ""}
-          {rakutenShopScope === "limited" ? " 楽天市場の検索結果はこの30件より多いため、載っていない店舗があります。" : ""}
-        </p>
-        {product.offers.some((offer) => shopProductLink(offer).affiliate) ? (
-          <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
-            報酬のあるリンクには「広告」と表示しています。表示価格は、成果報酬では決めていません。
-          </p>
-        ) : null}
-        <div className="mt-6">
-          <MallCompare
-            offers={product.offers}
-            quantity={product.quantity}
-            quantityUnit={product.quantityUnit}
-            unitPriceType={product.unitPriceType}
-          />
-        </div>
-      </section>
+      {product.offers.length > 0 ? (
+        <section id="compare" aria-labelledby="compare-heading" className="mt-5 scroll-mt-24">
+          <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
+            ショップ別の価格
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
+          <div className="mt-3">
+            <MallCompare
+              offers={product.offers}
+              quantity={product.quantity}
+              quantityUnit={product.quantityUnit}
+              unitPriceType={product.unitPriceType}
+            />
+          </div>
+          <CompareNotes retrievalLimited={retrievalLimited} rakutenShopScope={rakutenShopScope} hasAffiliate={hasAffiliate} />
+        </section>
+      ) : (
+        <p className="mt-5 text-sm text-muted">比較できる掲載はありません。</p>
+      )}
 
       {priceSummary !== undefined ? (
         <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} />
@@ -154,14 +139,42 @@ export function YahooProductView({
   );
 }
 
+function CompareNotes({
+  retrievalLimited,
+  rakutenShopScope,
+  hasAffiliate,
+}: {
+  retrievalLimited: boolean;
+  rakutenShopScope: "off" | "ready" | "limited";
+  hasAffiliate: boolean;
+}) {
+  return (
+    <details className="mt-6 rounded-2xl border border-line bg-sand/50 px-4 py-2">
+      <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">比較条件について</summary>
+      <div className="grid gap-2 pb-2 text-xs leading-6 text-muted">
+        <p>同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。セットや在庫なしは別の欄です。</p>
+        <p>楽天市場とYahoo!ショッピングを、同じ順で見られます。はじめに5件、続きは10件ずつ表示します。</p>
+        <p>送料が確認できない掲載は、送料を0円にしていません。送料込みの最安は、送料が分かる掲載があるときだけ出します。</p>
+        {rakutenShopScope !== "off" ? (
+          <p>楽天市場は、商品名や説明にこのJANコードが含まれる店舗の掲載を集めています。1回に取得できるのは30件までです。</p>
+        ) : null}
+        {rakutenShopScope === "limited" ? <p>楽天市場の該当掲載は30件より多いため、一覧にない店舗があります。</p> : null}
+        {retrievalLimited ? <p>Yahoo!ショッピングは取得できる件数に上限があるため、すべての店舗は含まれていません。</p> : null}
+        {hasAffiliate ? <p>「広告」は、報酬のあるショップリンクです。表示している価格は、その報酬では決めていません。</p> : null}
+        <p>表示は取得時点の掲載です。すべての販売店を含むとは限りません。</p>
+      </div>
+    </details>
+  );
+}
+
 function ProductImage({ imageUrl, alt }: { imageUrl: string | null; alt: string }) {
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.75rem] border border-line bg-card">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-line bg-card lg:rounded-[1.75rem]">
       {imageUrl ? (
         // Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。
-        <img src={imageUrl} alt={alt} className="aspect-square w-full min-w-0 max-w-full object-contain p-6 md:p-10" />
+        <img src={imageUrl} alt={alt} className="mx-auto max-h-36 w-full min-w-0 max-w-full object-contain p-3 lg:aspect-square lg:max-h-80 lg:p-8" />
       ) : (
-        <div className="grid aspect-square place-items-center bg-moss px-8 text-center">
+        <div className="grid aspect-square max-h-36 place-items-center bg-moss px-8 text-center lg:max-h-80">
           <div>
             <p className="text-xs tracking-[0.18em] text-sage">PETOKAKU</p>
             <p className="mt-3 text-base text-ink">商品画像なし</p>
