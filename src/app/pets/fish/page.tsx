@@ -1,6 +1,6 @@
 import { PetKindRoute, petPageMetadata } from "@/components/pet-kind-route";
 
-export const revalidate = 3600;
+export const revalidate = 4800;
 
 export const metadata = petPageMetadata("fish");
 

@@ -5,10 +5,31 @@ import { validJanCode, type YahooItem } from "./sources/yahoo/adapter.ts";
 import { searchYahooItems } from "./sources/yahoo/search.ts";
 import { listingFitsPet, type PetPage } from "./pets.ts";
 
-const listingRevalidateSeconds = 60 * 60;
 const listingLimit = 20;
+const rakutenGapMs = 1100;
+const rakutenTimeoutMs = 12_000;
+const failureRevalidateSeconds = 120;
 
-export type PetListingStatus = "ready" | "empty" | "not-configured" | "request-failed";
+// ビルド直後に6ページが同時に再取得しないよう、ペットごとに5分ずつずらす。
+export const petPageRevalidateSeconds = {
+  dog: 3600,
+  cat: 3900,
+  "small-animal": 4200,
+  bird: 4500,
+  fish: 4800,
+  reptile: 5100,
+} as const;
+
+export type PetListingStatus =
+  | "ready"
+  | "empty"
+  | "not-configured"
+  | "rate-limited"
+  | "unauthorized"
+  | "parameter"
+  | "timeout"
+  | "unavailable"
+  | "request-failed";
 
 export type PetListingCard = {
   id: string;
@@ -176,19 +197,89 @@ export function rakutenDiscoveryCards(payload: unknown, pet: PetPage): PetListin
   return cards;
 }
 
-async function fetchRakuten(url: URL, headers: Record<string, string>): Promise<{ status: number; text: string }> {
+export type RakutenTransportResponse = { status: number; text: string; retryAfter?: string | null };
+
+export type RakutenTransport = (url: URL, headers: Record<string, string>, revalidate: number | null) => Promise<RakutenTransportResponse>;
+
+export function rakutenStatus(status: number): Exclude<PetListingStatus, "ready" | "empty" | "not-configured" | "timeout"> {
+  if (status === 429) return "rate-limited";
+  if (status === 401 || status === 403) return "unauthorized";
+  if (status === 400) return "parameter";
+  if (status === 408 || status === 504 || status >= 500) return "unavailable";
+  return "request-failed";
+}
+
+export function retryAfterMs(value: string | null | undefined): number {
+  if (value && /^\d+$/.test(value)) {
+    const seconds = Number(value);
+    if (seconds >= 0 && seconds <= 5) {
+      return Math.max(rakutenGapMs, seconds * 1000);
+    }
+  }
+  return rakutenGapMs;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+let rakutenQueue: Promise<void> = Promise.resolve();
+
+function enqueueRakuten<T>(task: () => Promise<T>): Promise<T> {
+  const run = rakutenQueue.then(task, task);
+  rakutenQueue = run.then(
+    () => sleep(rakutenGapMs),
+    () => sleep(rakutenGapMs),
+  );
+  return run;
+}
+
+async function fetchRakuten(url: URL, headers: Record<string, string>, revalidate: number | null): Promise<RakutenTransportResponse> {
   const response = await fetch(url, {
     headers,
-    next: { revalidate: listingRevalidateSeconds },
+    signal: AbortSignal.timeout(rakutenTimeoutMs),
+    ...(revalidate == null ? { cache: "no-store" as const } : { next: { revalidate } }),
   });
-  return { status: response.status, text: await response.text() };
+  return { status: response.status, text: await response.text(), retryAfter: response.headers.get("retry-after") };
+}
+
+function cardsFromResponse(response: RakutenTransportResponse, pet: PetPage): PetListingGroup {
+  if (response.status === 404) {
+    return { status: "empty", cards: [] };
+  }
+  if (response.status < 200 || response.status >= 300) {
+    return { status: rakutenStatus(response.status), cards: [] };
+  }
+  let payload: unknown;
+  try {
+    payload = JSON.parse(response.text);
+  } catch {
+    return { status: "request-failed", cards: [] };
+  }
+  const cards = rakutenDiscoveryCards(payload, pet);
+  return { status: cards.length === 0 ? "empty" : "ready", cards };
+}
+
+function failureStatus(error: unknown): PetListingStatus {
+  if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+    return "timeout";
+  }
+  return "request-failed";
+}
+
+async function shortenFailureCache(): Promise<void> {
+  try {
+    await fetch("https://petokaku.com/robots.txt", { next: { revalidate: failureRevalidateSeconds } });
+  } catch {
+    // 失敗ページの再取得間隔を縮められない場合でも、Yahoo!の一覧は返す。
+  }
 }
 
 async function loadYahoo(pet: PetPage): Promise<PetListingGroup> {
   const result = await searchYahooItems({
     query: pet.query,
     results: listingLimit,
-    revalidate: listingRevalidateSeconds,
+    revalidate: petPageRevalidateSeconds[pet.id],
     sort: "-review_count",
   });
   if (!result.ok) {
@@ -198,32 +289,49 @@ async function loadYahoo(pet: PetPage): Promise<PetListingGroup> {
   return { status: cards.length === 0 ? "empty" : "ready", cards };
 }
 
-async function loadRakuten(pet: PetPage, transport: typeof fetchRakuten): Promise<PetListingGroup> {
+async function loadRakuten(pet: PetPage, transport: RakutenTransport, pause: (ms: number) => Promise<void>): Promise<PetListingGroup> {
   const applicationId = process.env.RAKUTEN_APPLICATION_ID?.trim() ?? "";
   const accessKey = process.env.RAKUTEN_ACCESS_KEY?.trim() ?? "";
   if (applicationId === "" || accessKey === "") {
     return { status: "not-configured", cards: [] };
   }
   const { url, headers } = rakutenReviewSearchRequest(applicationId, accessKey, pet.query);
-  try {
-    const response = await transport(url, headers);
-    if (response.status === 404) {
-      return { status: "empty", cards: [] };
+  const revalidate = petPageRevalidateSeconds[pet.id];
+  const once = async (cacheSeconds: number | null) => {
+    try {
+      const response = await transport(url, headers, cacheSeconds);
+      return { group: cardsFromResponse(response, pet), retryAfter: response.retryAfter ?? null };
+    } catch (error) {
+      return { group: { status: failureStatus(error), cards: [] } satisfies PetListingGroup, retryAfter: null };
     }
-    if (response.status < 200 || response.status >= 300) {
-      return { status: "request-failed", cards: [] };
+  };
+  const run = async () => {
+    const first = await once(revalidate);
+    if (first.group.status !== "rate-limited") {
+      return first.group;
     }
-    const cards = rakutenDiscoveryCards(JSON.parse(response.text) as unknown, pet);
-    return { status: cards.length === 0 ? "empty" : "ready", cards };
-  } catch {
-    return { status: "request-failed", cards: [] };
-  }
+    await pause(retryAfterMs(first.retryAfter));
+    const second = await once(revalidate);
+    return second.group;
+  };
+  return transport === fetchRakuten ? enqueueRakuten(run) : run();
 }
 
-export async function loadPetListings(pet: PetPage, transport: typeof fetchRakuten = fetchRakuten): Promise<PetListings> {
+function keepsHourlyCache(status: PetListingStatus): boolean {
+  return status === "ready" || status === "empty" || status === "not-configured";
+}
+
+export async function loadPetListings(
+  pet: PetPage,
+  transport: RakutenTransport = fetchRakuten,
+  pause: (ms: number) => Promise<void> = sleep,
+): Promise<PetListings> {
   const [yahoo, rakuten] = await Promise.all([
     loadYahoo(pet).catch(() => ({ status: "request-failed" as const, cards: [] })),
-    loadRakuten(pet, transport).catch(() => ({ status: "request-failed" as const, cards: [] })),
+    loadRakuten(pet, transport, pause).catch(() => ({ status: "request-failed" as const, cards: [] })),
   ]);
+  if (transport === fetchRakuten && (!keepsHourlyCache(yahoo.status) || !keepsHourlyCache(rakuten.status))) {
+    await shortenFailureCache();
+  }
   return { yahoo, rakuten };
 }

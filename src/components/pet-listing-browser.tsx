@@ -11,6 +11,11 @@ const pageSize = 8;
 const statusText: Record<Exclude<PetListingGroup["status"], "ready">, string> = {
   empty: "この条件に合う掲載は、取得結果のなかにありませんでした。下のカテゴリから検索できます。",
   "not-configured": "このモールの一覧はいま表示できません。カテゴリの検索は使えます。",
+  "rate-limited": "取得回数の上限に達したため、この欄はいま空です。しばらくすると再取得します。",
+  unauthorized: "認証できなかったため、この欄はいま空です。",
+  parameter: "検索条件が受け付けられなかったため、この欄はいま空です。",
+  timeout: "応答が時間内に返らなかったため、この欄はいま空です。",
+  unavailable: "サービスが一時的に応答しなかったため、この欄はいま空です。",
   "request-failed": "このモールの一覧を取得できませんでした。時間をおいて、もう一度開いてください。",
 };
 
@@ -83,7 +88,8 @@ function ListingGroup({
     <section className="mt-10">
       <h2 className="text-lg font-medium text-ink">{title}</h2>
       <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">{note}</p>
-      {group.status !== "ready" ? <p className="mt-4 text-sm leading-7 text-muted">{statusText[group.status]}</p> : null}
+      <p className="mt-2 text-xs text-muted">取得 {group.cards.length}件</p>
+      {group.status !== "ready" ? <p className="mt-2 text-sm leading-7 text-muted">{statusText[group.status]}</p> : null}
       {group.cards.length > 0 ? (
         <>
           <label className="mt-4 block max-w-md text-sm text-ink">

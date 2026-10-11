@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { listingFitsPet, petById, petPages } from "./pets.ts";
-import { rakutenDiscoveryCards } from "./pets-listings.ts";
+import { loadPetListings, petPageRevalidateSeconds, rakutenDiscoveryCards, rakutenStatus, retryAfterMs, type RakutenTransport } from "./pets-listings.ts";
 import { sitemapEntries } from "./site.ts";
 
 test("ペット別ページは6件で、見出しと説明が重複しない", () => {
@@ -95,5 +96,127 @@ test("サイトマップに6つのペット別ページがある", () => {
   } finally {
     if (previous == null) delete process.env.NEXT_PUBLIC_SITE_URL;
     else process.env.NEXT_PUBLIC_SITE_URL = previous;
+  }
+});
+
+test("楽天の失敗種別はステータスで分かれ、再試行の待ちはRetry-Afterに従う", () => {
+  assert.equal(rakutenStatus(429), "rate-limited");
+  assert.equal(rakutenStatus(401), "unauthorized");
+  assert.equal(rakutenStatus(403), "unauthorized");
+  assert.equal(rakutenStatus(400), "parameter");
+  assert.equal(rakutenStatus(503), "unavailable");
+  assert.equal(rakutenStatus(418), "request-failed");
+  assert.equal(retryAfterMs("1"), 1100);
+  assert.equal(retryAfterMs("60"), 1100);
+  assert.equal(retryAfterMs(null), 1100);
+});
+
+test("JANがない楽天掲載は商品名検索のまま、名前が似ていてもまとめない", () => {
+  const cards = rakutenDiscoveryCards(
+    {
+      items: [
+        { itemName: "犬用おもちゃ ロープ", itemPrice: 500, shopName: "A店", itemCode: "a:1", reviewCount: 3 },
+        { itemName: "犬用おもちゃ ボール", itemPrice: 600, shopName: "B店", itemCode: "b:2", reviewCount: 2 },
+      ],
+    },
+    petById("dog"),
+  );
+  assert.equal(cards.length, 2);
+  assert.deepEqual(
+    cards.map((card) => card.compare),
+    [false, false],
+  );
+  assert.equal(cards[0]?.href === cards[1]?.href, false);
+  assert.equal(cards.every((card) => card.href.startsWith("/search?q=")), true);
+});
+
+test("429のあと1回だけ再取得し、認証エラーと検索条件エラーは再試行しない", async () => {
+  const previous = {
+    app: process.env.RAKUTEN_APPLICATION_ID,
+    key: process.env.RAKUTEN_ACCESS_KEY,
+    yahoo: process.env.YAHOO_CLIENT_ID,
+  };
+  process.env.RAKUTEN_APPLICATION_ID = "app-id";
+  process.env.RAKUTEN_ACCESS_KEY = "access-key";
+  delete process.env.YAHOO_CLIENT_ID;
+  const pauses: number[] = [];
+  const calls: Array<{ revalidate: number | null; accessKeyInUrl: boolean; header: string | undefined }> = [];
+  const scripted = [
+    { status: 429, text: "", retryAfter: "1" },
+    {
+      status: 200,
+      text: JSON.stringify({
+        items: [{ itemName: "犬用フード", itemPrice: 1000, shopName: "A店", itemCode: "a:1", reviewCount: 4 }],
+      }),
+    },
+  ];
+  const transport: RakutenTransport = async (url, headers, revalidate) => {
+    calls.push({
+      revalidate,
+      accessKeyInUrl: url.search.includes("access-key") || url.search.includes("accessKey"),
+      header: headers.accessKey,
+    });
+    const next = scripted.shift();
+    if (!next) {
+      throw new Error("extra call");
+    }
+    return next;
+  };
+  try {
+    const listings = await loadPetListings(petById("dog"), transport, async (ms) => {
+      pauses.push(ms);
+    });
+    assert.deepEqual(pauses, [1100]);
+    assert.equal(calls.length, 2);
+    assert.equal(calls.every((call) => call.revalidate === 3600 && call.accessKeyInUrl === false && call.header === "access-key"), true);
+    assert.equal(listings.rakuten.status, "ready");
+    assert.equal(listings.rakuten.cards.length, 1);
+    assert.equal(listings.yahoo.status, "not-configured");
+
+    const blocked: number[] = [];
+    const denied = await loadPetListings(
+      petById("dog"),
+      async () => ({ status: 403, text: "{\"error\":\"forbidden\"}" }),
+      async (ms) => {
+        blocked.push(ms);
+      },
+    );
+    assert.equal(denied.rakuten.status, "unauthorized");
+    assert.deepEqual(blocked, []);
+
+    const invalid = await loadPetListings(
+      petById("fish"),
+      async () => ({ status: 400, text: "" }),
+      async () => {
+        throw new Error("should not retry");
+      },
+    );
+    assert.equal(invalid.rakuten.status, "parameter");
+
+    const timedOut = await loadPetListings(
+      petById("dog"),
+      async () => {
+        const error = new Error("timeout");
+        error.name = "TimeoutError";
+        throw error;
+      },
+      async () => undefined,
+    );
+    assert.equal(timedOut.rakuten.status, "timeout");
+    assert.equal(timedOut.rakuten.cards.length, 0);
+  } finally {
+    if (previous.app == null) delete process.env.RAKUTEN_APPLICATION_ID;
+    else process.env.RAKUTEN_APPLICATION_ID = previous.app;
+    if (previous.key == null) delete process.env.RAKUTEN_ACCESS_KEY;
+    else process.env.RAKUTEN_ACCESS_KEY = previous.key;
+    if (previous.yahoo == null) delete process.env.YAHOO_CLIENT_ID;
+    else process.env.YAHOO_CLIENT_ID = previous.yahoo;
+  }
+});
+
+test("ペット別ページの再取得間隔は5分ずつずれている", () => {
+  for (const pet of petPages()) {
+    const source = readFileSync(new URL(`../app/pets/${pet.id}/page.tsx`, import.meta.url), "utf8");
+    assert.match(source, new RegExp(`export const revalidate = ${petPageRevalidateSeconds[pet.id]};`));
   }
 });
