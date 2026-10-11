@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { YahooProductView, type YahooSizeChoice } from "@/components/yahoo-product-view";
 import { confirmedJanOffers } from "@/lib/pricing/malls";
+import { loadRakutenShopOffers } from "@/lib/sources/rakuten/item-search";
 import { loadRakutenJanOffers } from "@/lib/sources/rakuten/search";
 import { loadYahooJan } from "@/lib/sources/yahoo/preview";
 import type { PriceHistorySummary } from "@/lib/pricing/price-history-summary";
@@ -185,12 +186,13 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
     }
   }
 
-  const rakuten = await loadRakutenJanOffers(jan);
+  const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffers(jan), loadRakutenShopOffers(jan)]);
   const product = {
     ...result.adapted.detail,
     offers: confirmedJanOffers(jan, [
       { janCode: result.adapted.detail.janCode, offers: result.adapted.detail.offers },
       { janCode: jan, offers: rakuten.ok ? rakuten.offers : [] },
+      { janCode: jan, offers: rakutenShops.ok ? rakutenShops.offers : [] },
     ]),
   };
 
@@ -203,6 +205,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
       priceSeries={priceSeries}
       priceCheckedAt={now}
       retrievalLimited={result.retrievalLimited}
+      rakutenShopScope={rakutenShops.ok ? (rakutenShops.truncated ? "limited" : "ready") : "off"}
     />
   );
 }

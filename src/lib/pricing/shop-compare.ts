@@ -14,6 +14,7 @@ type PricedOffer = {
   packCount: number | null;
   listingTitle: string | null;
   provider: string;
+  sellerId?: string | null;
 };
 
 export function isPrimarySalesUnit(offer: { packCount: number | null; listingTitle: string | null }): boolean {
@@ -58,7 +59,7 @@ export function partitionShopComparison<T extends PricedOffer>(offers: T[]): {
   const unavailable: T[] = [];
 
   for (const offer of offers) {
-    const referenceOffer = offer.provider === "rakuten";
+    const referenceOffer = offer.provider === "rakuten" && (offer.sellerId == null || offer.sellerId === "");
     if (!isPrimarySalesUnit(offer)) {
       otherUnits.push(offer);
       continue;

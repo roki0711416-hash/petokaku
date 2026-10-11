@@ -43,8 +43,16 @@ export function groupOffersByMall<T extends { provider: string; isSample: boolea
   });
 }
 
-export function offersComparableAsNew<T extends { provider: string; itemCode: string | null }>(offers: T[]): T[] {
-  return offers.filter((offer) => offer.provider !== "rakuten" || offer.itemCode === "new");
+export function offersComparableAsNew<T extends { provider: string; itemCode: string | null; sellerId?: string | null }>(offers: T[]): T[] {
+  return offers.filter((offer) => {
+    if (offer.provider !== "rakuten") {
+      return true;
+    }
+    if (offer.sellerId != null && offer.sellerId !== "") {
+      return true;
+    }
+    return offer.itemCode === "new";
+  });
 }
 
 export function confirmedJanOffers(pageJan: string, batches: { janCode: string | null; offers: Offer[] }[]): Offer[] {

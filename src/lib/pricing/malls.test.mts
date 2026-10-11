@@ -43,11 +43,12 @@ test("掲載があるモールだけを出し、サンプルと未対応モー�
   );
 });
 
-test("中古を除けた楽天価格だけを上部の商品価格に入れる", () => {
+test("店舗別の楽天掲載と、中古を除いた商品価格ナビを上部の商品価格に入れる", () => {
   const yahoo = offer({ id: "y1", provider: "yahoo", shopName: "A店" });
-  const excluded = offer({ id: "r1", provider: "rakuten", shopName: "楽天市場", itemCode: "new" });
-  const mixed = offer({ id: "r2", provider: "rakuten", shopName: "楽天市場", itemCode: null });
-  assert.deepEqual(offersComparableAsNew([yahoo, excluded, mixed]).map((item) => item.id), ["y1", "r1"]);
+  const shop = offer({ id: "rshop", provider: "rakuten", shopName: "楽天ショップ", sellerId: "shop", itemCode: "shop:1" });
+  const naviNew = offer({ id: "r1", provider: "rakuten", shopName: "楽天市場", sellerId: null, itemCode: "new" });
+  const naviMixed = offer({ id: "r2", provider: "rakuten", shopName: "楽天市場", sellerId: null, itemCode: null });
+  assert.deepEqual(offersComparableAsNew([yahoo, shop, naviNew, naviMixed]).map((item) => item.id), ["y1", "rshop", "r1"]);
 });
 
 test("同じJANの掲載だけをまとめ、別JANとサンプルは落とす", () => {

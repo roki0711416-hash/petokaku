@@ -12,12 +12,14 @@ function offer(partial: {
   packCount?: number | null;
   packUnit?: "個" | "袋" | "本" | "パック" | null;
   listingTitle?: string | null;
+  sellerId?: string | null;
 }) {
   return {
     id: partial.id,
     price: partial.price,
     shippingFee: partial.shippingFee,
     provider: partial.provider ?? "yahoo",
+    sellerId: partial.sellerId,
     stockStatus: partial.stockStatus ?? "in_stock",
     packCount: partial.packCount ?? 1,
     packUnit: partial.packUnit ?? "個",
@@ -29,14 +31,15 @@ test("本体価格順はモールと送料の状態を混ぜ、送料未確認�
   const parts = partitionShopComparison([
     offer({ id: "yahoo-known", price: 3000, shippingFee: 0 }),
     offer({ id: "yahoo-unknown", price: 1000, shippingFee: null }),
-    offer({ id: "rakuten", price: 900, shippingFee: null, provider: "rakuten", packCount: null, listingTitle: "商品価格ナビ" }),
+    offer({ id: "rakuten", price: 900, shippingFee: null, provider: "rakuten", sellerId: null, packCount: null, listingTitle: "商品価格ナビ" }),
+    offer({ id: "rakuten-shop", price: 1200, shippingFee: null, provider: "rakuten", sellerId: "shop-a", listingTitle: "商品 1個" }),
     offer({ id: "set", price: 500, shippingFee: 0, packCount: 2, listingTitle: "商品 2個セット" }),
     offer({ id: "out", price: 100, shippingFee: 0, stockStatus: "out_of_stock" }),
   ]);
   const ranked = sortComparedOffers(parts.ranked, "item");
   assert.deepEqual(
     ranked.map((item) => item.id),
-    ["yahoo-unknown", "yahoo-known"],
+    ["yahoo-unknown", "rakuten-shop", "yahoo-known"],
   );
   assert.deepEqual(parts.reference.map((item) => item.id), ["rakuten"]);
   assert.deepEqual(parts.otherUnits.map((item) => item.id), ["set"]);

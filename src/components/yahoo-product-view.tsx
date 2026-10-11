@@ -35,6 +35,7 @@ export function YahooProductView({
   priceSeries = [],
   priceCheckedAt,
   retrievalLimited = false,
+  rakutenShopScope = "off",
 }: {
   product: ProductDetail;
   pageHref: string;
@@ -43,9 +44,10 @@ export function YahooProductView({
   priceSeries?: DailyPricePoint[];
   priceCheckedAt?: string;
   retrievalLimited?: boolean;
+  rakutenShopScope?: "off" | "ready" | "limited";
 }) {
   const quote = quoteSingleSize({
-    offers: offersComparableAsNew(product.offers).filter((offer) => offer.provider !== "rakuten"),
+    offers: offersComparableAsNew(product.offers).filter((offer) => offer.provider !== "rakuten" || (offer.sellerId != null && offer.sellerId !== "")),
     quantity: product.quantity,
     quantityUnit: product.quantityUnit,
     quantityConfidence: product.quantityConfidence,
@@ -54,7 +56,8 @@ export function YahooProductView({
   const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
-  const shopLabel = retrievalLimited
+  const acquisitionLimited = retrievalLimited || rakutenShopScope === "limited";
+  const shopLabel = acquisitionLimited
     ? `取得できた範囲で${comparisonCountLabel(product.offers)}`
     : comparisonCountLabel(product.offers);
   const crumbs: Crumb[] = [
@@ -63,7 +66,7 @@ export function YahooProductView({
     { label: visibleName, href: pageHref, current: true },
   ];
 
-  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} retrievalLimited={retrievalLimited} />;
+  const summary = <PriceSummary quote={quote} shopLabel={shopLabel} retrievalLimited={acquisitionLimited} />;
   const sizes = <SizeChoices choices={sizeChoices} />;
   const capacity = product.sizeLabel && product.sizeLabel !== unknownQuantityLabel ? product.sizeLabel : null;
   const structured = productStructuredData({
@@ -76,7 +79,7 @@ export function YahooProductView({
     offers: offersComparableAsNew(product.offers).map((offer) => ({
       shopName: offer.shopName,
       price: offer.price,
-      url: safeHttpUrl(offer.productUrl) ?? shopProductLink(offer).href,
+      url: safeHttpUrl(offer.productUrl),
       stockStatus: offer.stockStatus,
     })),
   });
@@ -119,8 +122,12 @@ export function YahooProductView({
           価格比較
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。初期表示は本体価格の安い順で5件、続きは10件ずつです。セットと在庫なしは別枠です。
+          同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。楽天市場の店舗別掲載とYahoo!ショッピングを同じ順で見られます。初期表示は本体価格の安い順で5件、続きは10件ずつです。セットと在庫なしは別枠です。
           {retrievalLimited ? " Yahoo!ショッピングは取得上限があるため、全店舗の最安値ではありません。" : ""}
+          {rakutenShopScope !== "off"
+            ? " 楽天市場の店舗別掲載は、商品検索APIがJANを返さないため、商品名か説明にこのJANコードが含まれる掲載だけです。1回の取得は30件までです。"
+            : ""}
+          {rakutenShopScope === "limited" ? " 楽天市場の検索結果はこの30件より多いため、載っていない店舗があります。" : ""}
         </p>
         {product.offers.some((offer) => shopProductLink(offer).affiliate) ? (
           <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
