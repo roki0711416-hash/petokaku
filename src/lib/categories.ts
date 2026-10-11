@@ -69,3 +69,19 @@ const categorySearchQuery: Record<CategoryId, string> = {
 export function categorySearchHref(id: CategoryId): string {
   return `/search?q=${encodeURIComponent(categorySearchQuery[id])}`;
 }
+
+const relatedCategoryPages: Record<string, { href: string; label: string }[]> = {
+  "犬 用品": [
+    { href: "/categories/dog-food", label: "ドッグフード" },
+    { href: "/categories/pet-sheets", label: "ペットシーツ" },
+  ],
+  "猫 用品": [
+    { href: "/categories/cat-food", label: "キャットフード" },
+    { href: "/categories/cat-litter", label: "猫砂" },
+    { href: "/categories/pet-sheets", label: "ペットシーツ" },
+  ],
+};
+
+export function relatedCategoryLinks(query: string): { href: string; label: string }[] {
+  return relatedCategoryPages[query.replace(/\s+/g, " ").trim()] ?? [];
+}

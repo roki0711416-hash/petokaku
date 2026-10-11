@@ -39,7 +39,7 @@ export default function AboutPage() {
         </Link>
         に書いています。
       </p>
-      <h2>運営者</h2>
+      <h2 id="operator">運営者</h2>
       <p>運営者は、ペトカク運営事務局です。</p>
       <p>
         連絡先は

@@ -3,16 +3,27 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { categories, categorySearchHref } from "@/lib/categories";
+import { categorySearchHref } from "@/lib/categories";
 
-type MenuLink = {
-  href: string;
-  label: string;
-};
+const petLinks = [
+  { href: categorySearchHref("dog"), label: "犬" },
+  { href: categorySearchHref("cat"), label: "猫" },
+  { href: categorySearchHref("small-animal"), label: "小動物" },
+  { href: categorySearchHref("bird"), label: "鳥" },
+  { href: categorySearchHref("fish"), label: "魚・アクアリウム" },
+  { href: `/search?q=${encodeURIComponent("爬虫類 用品")}`, label: "爬虫類・両生類" },
+];
+
+const infoLinks = [
+  { href: "/about", label: "サイトについて" },
+  { href: "/about#operator", label: "運営者情報" },
+  { href: "/terms", label: "利用規約" },
+  { href: "/privacy", label: "プライバシーポリシー" },
+];
 
 const closeDurationMs = 250;
 
-export function MobileMenu({ links }: { links: MenuLink[] }) {
+export function MobileMenu() {
   const titleId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -163,22 +174,23 @@ export function MobileMenu({ links }: { links: MenuLink[] }) {
                 </button>
               </div>
               <nav aria-label="スマートフォン用メニュー" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
+                <p className="px-3 pb-1 text-xs font-bold text-forest-deep">ペットの種類から探す</p>
                 <ul className="grid gap-0.5">
-                  {links.map((link) => (
-                    <li key={link.href}>
-                      <Link href={link.href} className="mobile-menu-link" onClick={closeMenu}>
+                  {petLinks.map((link) => (
+                    <li key={link.label}>
+                      <Link href={link.href} className="mobile-menu-link focus-visible:outline-2 focus-visible:outline-forest" onClick={closeMenu}>
                         {link.label}
                       </Link>
                     </li>
                   ))}
                 </ul>
                 <div className="my-3 border-t border-line" />
-                <p className="px-3 pb-1 text-xs font-bold text-forest-deep">ペットの種類から探す</p>
+                <p className="px-3 pb-1 text-xs font-bold text-forest-deep">案内</p>
                 <ul className="grid gap-0.5">
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <Link href={categorySearchHref(category.id)} className="mobile-menu-link" onClick={closeMenu}>
-                        {category.label}
+                  {infoLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="mobile-menu-link focus-visible:outline-2 focus-visible:outline-forest" onClick={closeMenu}>
+                        {link.label}
                       </Link>
                     </li>
                   ))}
@@ -195,7 +207,7 @@ export function MobileMenu({ links }: { links: MenuLink[] }) {
       <button
         ref={triggerRef}
         type="button"
-        className="grid h-10 w-10 place-items-center md:hidden"
+        className="grid h-10 w-10 place-items-center"
         aria-expanded={active}
         aria-controls={rendered ? "mobile-menu" : undefined}
         onClick={() => (active ? closeMenu() : openMenu())}
