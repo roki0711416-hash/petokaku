@@ -3,16 +3,16 @@ import { SearchBar } from "@/components/ui/search-bar";
 export function Hero() {
   return (
     <section className="px-4 pt-8 pb-12 md:pt-14 md:pb-16">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-16">
-        <div>
-          <p className="text-sm font-medium tracking-[0.14em] text-sage">PETOKAKU</p>
-          <h1 className="mt-3 max-w-xl text-[1.85rem] leading-snug font-medium tracking-tight text-ink md:text-5xl md:leading-tight">
-            ペット用品の価格比較なら、ペトカク。
+      <div className="mx-auto grid min-w-0 max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-16">
+        <div className="min-w-0">
+          <h1 className="max-w-xl text-[1.7rem] leading-snug font-medium tracking-tight text-ink min-[390px]:text-[1.85rem] md:text-5xl md:leading-tight">
+            <span className="block">ペット用品を、</span>
+            <span className="block">かしこく比較。</span>
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-7 text-muted md:text-base">
-            ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。
+            商品名やJANコードから、販売店の掲載を見比べられます。ペトカクは商品を販売しません。購入は各ショップのページで行います。
           </p>
-          <SearchBar id="home-search" showExamples />
+          <SearchBar id="home-search" />
         </div>
         <HeroScene />
       </div>
