@@ -9,14 +9,14 @@ import type { PetListingCard, PetListingGroup } from "@/lib/pets-listings";
 const pageSize = 8;
 
 const statusText: Record<Exclude<PetListingGroup["status"], "ready">, string> = {
-  empty: "この条件に合う掲載は、取得結果のなかにありませんでした。下のカテゴリから検索できます。",
-  "not-configured": "このモールの一覧はいま表示できません。カテゴリの検索は使えます。",
-  "rate-limited": "取得回数の上限に達したため、この欄はいま空です。しばらくすると再取得します。",
-  unauthorized: "認証できなかったため、この欄はいま空です。",
-  parameter: "検索条件が受け付けられなかったため、この欄はいま空です。",
-  timeout: "応答が時間内に返らなかったため、この欄はいま空です。",
+  empty: "この条件に合う商品は見つかりませんでした。下のカテゴリから探せます。",
+  "not-configured": "このモールの商品はいま表示できません。カテゴリから探せます。",
+  "rate-limited": "いま混み合っているため、この欄は空です。しばらくすると表示されます。",
+  unauthorized: "このモールの商品はいま表示できません。",
+  parameter: "この条件では商品を表示できませんでした。",
+  timeout: "応答が間に合わなかったため、この欄はいま空です。",
   unavailable: "サービスが一時的に応答しなかったため、この欄はいま空です。",
-  "request-failed": "このモールの一覧を取得できませんでした。時間をおいて、もう一度開いてください。",
+  "request-failed": "このモールの商品を表示できませんでした。時間をおいて、もう一度開いてください。",
 };
 
 function allowedImage(src: string): boolean {
@@ -56,7 +56,7 @@ function ListingCard({ card }: { card: PetListingCard }) {
           <span className="mt-1 text-xs leading-5 text-muted">{card.priceNote}</span>
           {card.reviewCount != null ? <span className="mt-1 text-xs text-muted">レビュー {card.reviewCount.toLocaleString("ja-JP")}件</span> : null}
           <span className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-3 text-sm text-white">
-            {card.compare ? "価格を比較する" : "この名前で探す"}
+            {card.compare ? "価格を比較する" : "ショップを探す"}
           </span>
         </span>
       </Link>
@@ -88,7 +88,7 @@ function ListingGroup({
     <section className="mt-10">
       <h2 className="text-lg font-medium text-ink">{title}</h2>
       <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">{note}</p>
-      <p className="mt-2 text-xs text-muted">取得 {group.cards.length}件</p>
+      <p className="mt-2 text-xs text-muted">商品 {group.cards.length}件</p>
       {group.status !== "ready" ? <p className="mt-2 text-sm leading-7 text-muted">{statusText[group.status]}</p> : null}
       {group.cards.length > 0 ? (
         <>
@@ -106,7 +106,7 @@ function ListingGroup({
           <p className="mt-3 text-xs text-muted">
             {visible.length} / {filtered.length}件
           </p>
-          {visible.length === 0 ? <p className="mt-4 text-sm leading-7 text-muted">この言葉に合う商品は、取得済みの一覧のなかにありません。</p> : null}
+          {visible.length === 0 ? <p className="mt-4 text-sm leading-7 text-muted">この言葉に合う商品は、いまの一覧のなかにありません。</p> : null}
           <ul className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
             {visible.map((card) => (
               <ListingCard key={card.id} card={card} />
@@ -131,15 +131,23 @@ export function PetListingBrowser({ yahoo, rakuten }: { yahoo: PetListingGroup; 
   return (
     <>
       <ListingGroup
-        title="Yahoo!ショッピングでレビュー件数が多い商品"
-        note="商品検索APIの並び順は、レビュー件数が多い順です。売上件数ではありません。楽天市場のレビュー件数とは合算していません。JANコードがある商品だけ、価格比較へ進めます。"
+        title="Yahoo!ショッピングの人気商品を探す"
+        note="レビュー件数を参考に、気になるペット用品を探せます。売上順ではありません。"
         group={yahoo}
       />
       <ListingGroup
-        title="楽天市場でレビュー件数が多い掲載"
-        note="商品検索APIの並び順は、レビュー件数が多い順です。売上件数ではありません。商品名か説明にJANコードがある掲載だけ、価格比較へ進めます。"
+        title="楽天市場の人気商品を探す"
+        note="レビュー件数を参考に、気になるペット用品を探せます。売上順ではありません。"
         group={rakuten}
       />
+      <details className="mt-8 rounded-2xl border border-line bg-sand/50 px-4 py-2">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">掲載情報について</summary>
+        <div className="grid gap-2 pb-2 text-xs leading-6 text-muted">
+          <p>「価格を比較する」は、商品を特定できたものだけです。それ以外は「ショップを探す」から、商品名でほかのショップを探せます。</p>
+          <p>Yahoo!ショッピングと楽天市場のレビュー件数は、別々に見ています。足した人気度ではありません。</p>
+          <p>価格は、表示できた商品のものです。すべての販売店の最安値ではありません。購入前にショップで確認してください。</p>
+        </div>
+      </details>
     </>
   );
 }

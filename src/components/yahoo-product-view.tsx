@@ -152,16 +152,16 @@ function CompareNotes({
     <details className="mt-6 rounded-2xl border border-line bg-sand/50 px-4 py-2">
       <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">比較条件について</summary>
       <div className="grid gap-2 pb-2 text-xs leading-6 text-muted">
-        <p>同じJANコードで、在庫がある同じ販売単位を一つの一覧にしています。セットや在庫なしは別の欄です。</p>
+        <p>同じ商品で、在庫がある同じ販売単位を一つの一覧にしています。セットや在庫なしは別の欄です。</p>
         <p>楽天市場とYahoo!ショッピングを、同じ順で見られます。はじめに5件、続きは10件ずつ表示します。</p>
         <p>送料が確認できない掲載は、送料を0円にしていません。送料込みの最安は、送料が分かる掲載があるときだけ出します。</p>
         {rakutenShopScope !== "off" ? (
-          <p>楽天市場は、商品名や説明にこのJANコードが含まれる店舗の掲載を集めています。1回に取得できるのは30件までです。</p>
+          <p>楽天市場は、商品名や説明にこのJANコードがある店舗を集めています。すべての店舗が並ぶとは限りません。</p>
         ) : null}
-        {rakutenShopScope === "limited" ? <p>楽天市場の該当掲載は30件より多いため、一覧にない店舗があります。</p> : null}
-        {retrievalLimited ? <p>Yahoo!ショッピングは取得できる件数に上限があるため、すべての店舗は含まれていません。</p> : null}
-        {hasAffiliate ? <p>「広告」は、報酬のあるショップリンクです。表示している価格は、その報酬では決めていません。</p> : null}
-        <p>表示は取得時点の掲載です。すべての販売店を含むとは限りません。</p>
+        {rakutenShopScope === "limited" ? <p>楽天市場には、ここに出ていない店舗があります。</p> : null}
+        {retrievalLimited ? <p>Yahoo!ショッピングにも、ここに出ていない店舗があります。</p> : null}
+        {hasAffiliate ? <p>「広告」とあるリンクは、ショップの紹介に報酬が発生します。表示している価格は、その報酬では決めていません。</p> : null}
+        <p>表示は取得時点の掲載です。価格・送料・在庫は変わることがあります。すべての販売店を含むとは限りません。</p>
       </div>
     </details>
   );

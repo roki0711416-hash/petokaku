@@ -47,7 +47,7 @@ export function ProductCard({ card }: { card: SearchCandidateCard }) {
             </Link>
           ) : (
             <div className="mt-3 text-xs leading-5 text-muted">
-              <p>JANがないため、ショップはまとめていません。</p>
+              <p>商品名からほかのショップを探せます。</p>
               {productUrl ? (
                 <a
                   href={productUrl}
