@@ -22,7 +22,23 @@ export const metadata: Metadata = {
 
 const cardGrid = "mt-6 grid min-w-0 grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 xl:grid-cols-6";
 
-const keywords = ["ロイヤルカナン", "ニュートロ", "猫砂", "ペットシーツ", "チモシー", "金魚のえさ"];
+const keywords: { label: string; href: string }[] = [
+  { label: "ドッグフード", href: "/categories/dog-food" },
+  { label: "キャットフード", href: "/categories/cat-food" },
+  { label: "猫砂", href: "/categories/cat-litter" },
+  { label: "ペットシーツ", href: "/categories/pet-sheets" },
+  { label: "ロイヤルカナン", href: `/search?q=${encodeURIComponent("ロイヤルカナン")}` },
+  { label: "ニュートロ", href: `/search?q=${encodeURIComponent("ニュートロ")}` },
+  { label: "チモシー", href: `/search?q=${encodeURIComponent("チモシー")}` },
+  { label: "金魚のえさ", href: `/search?q=${encodeURIComponent("金魚のえさ")}` },
+];
+
+const itemPages: { label: string; href: string; glyph: CatalogGlyph }[] = [
+  { label: "ドッグフード", href: "/categories/dog-food", glyph: "dog" },
+  { label: "キャットフード", href: "/categories/cat-food", glyph: "cat" },
+  { label: "猫砂", href: "/categories/cat-litter", glyph: "toilet" },
+  { label: "ペットシーツ", href: "/categories/pet-sheets", glyph: "sheet" },
+];
 
 const pets: { label: string; href: string; glyph: CatalogGlyph }[] = [
   { label: "犬", href: categorySearchHref("dog"), glyph: "dog" },
@@ -119,15 +135,15 @@ export default function HomePage() {
       <Hero />
       <section aria-labelledby="keywords-heading" className="px-4 pb-12 md:pb-16">
         <div className="mx-auto max-w-6xl">
-          <SectionHeading id="keywords-heading" title="人気検索キーワード" lead="言葉を選ぶと、その検索が開きます。" />
+          <SectionHeading id="keywords-heading" title="人気検索キーワード" lead="品目のページと、キーワード検索を開けます。" />
           <ul className="mt-6 flex min-w-0 flex-wrap gap-2" aria-label="検索キーワード">
             {keywords.map((keyword) => (
-              <li key={keyword} className="min-w-0">
+              <li key={keyword.label} className="min-w-0">
                 <Link
-                  href={`/search?q=${encodeURIComponent(keyword)}`}
+                  href={keyword.href}
                   className="inline-flex min-h-11 max-w-full items-center rounded-full border border-line bg-card px-4 text-sm text-ink hover:border-sage"
                 >
-                  {keyword}
+                  {keyword.label}
                 </Link>
               </li>
             ))}
@@ -156,6 +172,17 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
+          <div id="item-guides" className="scroll-mt-28 pt-10">
+            <h3 className="text-lg font-medium text-ink">品目ごとのページ</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">フード、猫砂、ペットシーツは、選び方と取得できた掲載を同じページで見られます。</p>
+            <ul className={cardGrid}>
+              {itemPages.map((item) => (
+                <li key={item.href} className="min-w-0">
+                  <CatalogCard href={item.href} label={item.label} glyph={item.glyph} />
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
       <section aria-labelledby="howto-heading" className="bg-card px-4 py-12 md:py-16">

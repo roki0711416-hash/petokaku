@@ -10,7 +10,7 @@ export function ProductCard({ card }: { card: SearchCandidateCard }) {
   const title = readableListingTitle(card.name);
 
   return (
-    <li className="lift flex h-full flex-col overflow-hidden rounded-[1.6rem] bg-card">
+    <li className="lift flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] bg-card">
       <div className="flex h-32 items-center justify-center bg-sand/60 px-3 md:h-40">
         {imageUrl ? (
           <img src={imageUrl} alt={card.name} className="max-h-full max-w-full object-contain" />

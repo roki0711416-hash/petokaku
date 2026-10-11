@@ -50,6 +50,10 @@ const publicSitemap = [
   "https://petokaku.com/cookies",
   "https://petokaku.com/terms",
   "https://petokaku.com/affiliate",
+  "https://petokaku.com/categories/dog-food",
+  "https://petokaku.com/categories/cat-food",
+  "https://petokaku.com/categories/cat-litter",
+  "https://petokaku.com/categories/pet-sheets",
   "https://petokaku.com/products/jan/3182550706933",
 ];
 

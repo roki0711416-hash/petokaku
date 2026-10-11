@@ -12,7 +12,8 @@ export type CatalogGlyph =
   | "toilet"
   | "toy"
   | "care"
-  | "habitat";
+  | "habitat"
+  | "sheet";
 
 const washes: Record<CatalogGlyph, string> = {
   dog: "bg-moss",
@@ -27,6 +28,7 @@ const washes: Record<CatalogGlyph, string> = {
   toy: "bg-moss",
   care: "bg-sand",
   habitat: "bg-honey",
+  sheet: "bg-moss",
 };
 
 const iconProps = {
@@ -40,7 +42,7 @@ const iconProps = {
   strokeLinejoin: "round" as const,
 };
 
-function CatalogIcon({ glyph }: { glyph: CatalogGlyph }) {
+export function CatalogIcon({ glyph }: { glyph: CatalogGlyph }) {
   switch (glyph) {
     case "dog":
       return (
@@ -136,6 +138,14 @@ function CatalogIcon({ glyph }: { glyph: CatalogGlyph }) {
         <svg {...iconProps}>
           <rect x="8" y="10" width="16" height="13" rx="2" />
           <path d="M12.5 10v13M16 10v13M19.5 10v13M8 16.2h16" />
+        </svg>
+      );
+    case "sheet":
+      return (
+        <svg {...iconProps}>
+          <path d="M8 12h11.2L24 16.6V22a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2Z" />
+          <path d="M19.2 12v4.6H24" />
+          <path d="M11.2 19.2h7.2M11.2 22h4.6" />
         </svg>
       );
   }

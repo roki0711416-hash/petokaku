@@ -1,4 +1,5 @@
 import type { Metadata, MetadataRoute } from "next";
+import { categoryGuidePaths } from "./item-guides.ts";
 
 const fallbackSiteUrl = "http://localhost:3000";
 
@@ -78,12 +79,17 @@ export function sitemapEntries(): MetadataRoute.Sitemap {
     changeFrequency: "weekly" as const,
     priority: path === "/" ? 1 : 0.6,
   }));
+  const guides = categoryGuidePaths().map((path) => ({
+    url: new URL(path, siteUrl).toString(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
   const products = selectIndexedJans(indexedJanProducts).map((product) => ({
     url: new URL(indexedJanPath(product.janCode), siteUrl).toString(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
-  return [...pages, ...products];
+  return [...pages, ...guides, ...products];
 }
 
 export function privateRobots(): Metadata["robots"] {

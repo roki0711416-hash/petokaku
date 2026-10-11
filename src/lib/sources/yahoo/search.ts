@@ -26,6 +26,7 @@ type YahooSearchParams = {
   query?: string;
   janCode?: string;
   results: number;
+  revalidate?: number;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -161,18 +162,16 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
   url.searchParams.set("results", String(params.results));
   url.searchParams.set("image_size", yahooDetailImageSize);
 
+  const init =
+    params.revalidate != null
+      ? { next: { revalidate: params.revalidate }, headers: { Accept: "application/json" } }
+      : { cache: "no-store" as const, headers: { Accept: "application/json" } };
   let response: Response;
   try {
-    response = await fetch(url, {
-      cache: "no-store",
-      headers: { Accept: "application/json" },
-    });
+    response = await fetch(url, init);
     if (response.status === 429) {
       await new Promise((resolve) => setTimeout(resolve, 1100));
-      response = await fetch(url, {
-        cache: "no-store",
-        headers: { Accept: "application/json" },
-      });
+      response = await fetch(url, init);
     }
   } catch {
     return { ok: false, reason: "request-failed" };
