@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ComparableProducts } from "@/components/comparable-products";
+import { CatalogCard, type CatalogGlyph } from "@/components/ui/catalog-card";
 import { CategoryCard } from "@/components/ui/category-card";
 import { Hero } from "@/components/ui/hero";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { categories, categorySearchHref } from "@/lib/categories";
 import { indexedJanProducts, selectIndexedJans } from "@/lib/site";
-import type { CategoryId } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +21,13 @@ export const metadata: Metadata = {
   },
 };
 
-const catalog = [
-  { label: "ドッグフード", note: "犬のごはん", query: "犬 フード", icon: "dog" as CategoryId },
-  { label: "キャットフード", note: "猫のごはん", query: "猫 フード", icon: "cat" as CategoryId },
-  { label: "猫砂", note: "猫のトイレ", query: "猫砂", icon: "cat" as CategoryId },
-  { label: "ペットシーツ", note: "トイレまわり", query: "ペットシーツ", icon: "dog" as CategoryId },
-  { label: "おやつ", note: "犬と猫のおやつ", query: "ペット おやつ", icon: "other" as CategoryId },
-  { label: "ケア用品", note: "日常のケア", query: "ペット ケア用品", icon: "other" as CategoryId },
+const catalog: { label: string; note: string; query: string; glyph: CatalogGlyph }[] = [
+  { label: "ドッグフード", note: "犬のごはん", query: "犬 フード", glyph: "dog-food" },
+  { label: "キャットフード", note: "猫のごはん", query: "猫 フード", glyph: "cat-food" },
+  { label: "猫砂", note: "猫のトイレ", query: "猫砂", glyph: "litter" },
+  { label: "ペットシーツ", note: "トイレまわり", query: "ペットシーツ", glyph: "sheet" },
+  { label: "おやつ", note: "犬と猫のおやつ", query: "ペット おやつ", glyph: "treat" },
+  { label: "ケア用品", note: "日常のケア", query: "ペット ケア用品", glyph: "care" },
 ];
 
 const steps = [
@@ -45,10 +45,10 @@ export default function HomePage() {
       <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeading id="categories-heading" title="カテゴリー" lead="選ぶと、その品目の検索が開きます。" />
-          <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          <ul className="mt-8 grid min-w-0 grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
             {catalog.map((item) => (
-              <li key={item.label}>
-                <CategoryCard href={`/search?q=${encodeURIComponent(item.query)}`} label={item.label} note={item.note} icon={item.icon} />
+              <li key={item.label} className="min-w-0">
+                <CatalogCard href={`/search?q=${encodeURIComponent(item.query)}`} label={item.label} note={item.note} glyph={item.glyph} />
               </li>
             ))}
           </ul>
