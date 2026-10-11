@@ -66,17 +66,21 @@ test("品目と関係の薄い掲載は一覧に残さない", () => {
   assert.equal(listingMatchesGuide("pet-sheets", "犬用 服", []), false);
 });
 
-test("TOPとサイトマップは実在する品目ページだけを指す", () => {
+test("サイトマップは実在する品目ページだけを指し、TOPはペットの種類から開く", () => {
   const home = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const illustrations = readFileSync(new URL("../components/ui/pet-illustrations.ts", import.meta.url), "utf8");
   const categoryPage = readFileSync(new URL("../components/category-guide-route.tsx", import.meta.url), "utf8");
   const urls = sitemapEntries().map((entry) => entry.url);
   for (const path of categoryGuidePaths()) {
-    assert.match(home, new RegExp(path.replaceAll("/", "\\/")));
     assert.equal(
       urls.some((url) => url.endsWith(path)),
       true,
     );
   }
+  assert.match(home, /PetPhotoGrid/);
+  assert.match(illustrations, /petPath\("dog"\)/);
+  assert.match(illustrations, /petPath\("reptile"\)/);
+  assert.doesNotMatch(home, /\/categories\//);
   assert.match(categoryPage, /privateRobots\(\)/);
   assert.doesNotMatch(categoryPage, /FAQPage/);
   assert.doesNotMatch(categoryPage, /searchYahooItems/);

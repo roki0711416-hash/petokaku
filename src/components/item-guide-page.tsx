@@ -29,7 +29,7 @@ export function ItemGuidePage({
         <Breadcrumbs
           items={[
             { label: "ホーム", href: "/" },
-            { label: "品目のページ", href: "/#item-guides" },
+            { label: "商品を検索", href: "/#home-search" },
             { label: guide.crumb, href: guide.path, current: true },
           ]}
         />

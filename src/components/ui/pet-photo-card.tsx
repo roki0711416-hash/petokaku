@@ -24,7 +24,7 @@ export function PetPhotoCard({ pet }: { pet: PetIllustration }) {
             src={pet.image}
             alt={pet.alt}
             fill
-            sizes="(max-width: 1023px) 45vw, 180px"
+            sizes="(max-width: 767px) 46vw, (max-width: 1023px) 30vw, 16vw"
             className="object-cover transition-transform duration-300 ease-out motion-reduce:transition-none motion-safe:group-hover:scale-105"
             onError={() => setFailed(true)}
           />
@@ -48,7 +48,7 @@ function CardArrow() {
 
 export function PetPhotoGrid() {
   return (
-    <ul className="mt-6 grid min-w-0 grid-cols-2 gap-3 md:gap-4 lg:grid-cols-6">
+    <ul className="mt-3 grid min-w-0 grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
       {petIllustrations.map((pet) => (
         <li key={pet.href} className="min-w-0">
           <PetPhotoCard pet={pet} />

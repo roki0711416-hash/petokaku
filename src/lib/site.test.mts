@@ -148,9 +148,10 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   const home = read("../app/page.tsx");
   const cards = read("../components/comparable-products.tsx");
   const site = read("./site.ts");
-  assert.doesNotMatch(home, /selectIndexedJans\(indexedJanProducts\)/);
+  assert.match(home, /selectIndexedJans\(indexedJanProducts\)/);
+  assert.match(home, /indexedJanPath\(product\.janCode\)/);
+  assert.match(home, /価格比較できる商品/);
   assert.doesNotMatch(home, /ComparableProducts/);
-  assert.doesNotMatch(home, /価格比較できる商品/);
   assert.match(cards, /価格比較できる商品/);
   assert.match(cards, /indexedJanPath\(card\.janCode\)/);
   assert.match(cards, /loadYahooJan/);
@@ -160,4 +161,5 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.doesNotMatch(site, /searchYahooItems|loadYahooJan/);
   assert.doesNotMatch(read("../app/sitemap.ts"), /searchYahooItems|loadYahooJan/);
   assert.doesNotMatch(`${home}\n${site}`, /人気商品|売れ筋/);
+  assert.doesNotMatch(home, /人気検索キーワード/);
 });
