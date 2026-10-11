@@ -69,12 +69,18 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     const janUrl = new URL(requested[1] ?? "");
     assert.equal(keywordUrl.searchParams.get("genre_category_id"), "2509");
     assert.equal(keywordUrl.searchParams.get("query"), "アイリスオーヤマ");
+    assert.equal(keywordUrl.searchParams.get("sort"), null);
     assert.equal(janUrl.searchParams.get("genre_category_id"), "2509");
     assert.equal(janUrl.searchParams.get("jan_code"), "3182550849647");
     assert.equal(janUrl.searchParams.get("query"), null);
     assert.equal(janUrl.searchParams.get("image_size"), yahooDetailImageSize);
     assert.equal(yahooDetailImageSize, "600");
     assert.equal(yahooJanSearchLimit, 50);
+    const sorted = await searchYahooItems({ query: "犬 用品", results: 20, sort: "-review_count" });
+    assert.equal(sorted.ok, true);
+    const sortedUrl = new URL(requested.at(-1) ?? "");
+    assert.equal(sortedUrl.searchParams.get("sort"), "-review_count");
+    assert.equal(requested.length, 3);
     if (keyword.ok) {
       assert.equal(keyword.totalAvailable, null);
       assert.equal(keyword.returnedCount, 2);

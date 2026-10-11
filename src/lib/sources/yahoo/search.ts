@@ -27,6 +27,7 @@ type YahooSearchParams = {
   janCode?: string;
   results: number;
   revalidate?: number;
+  sort?: "-review_count" | "+price" | "-price" | "-score";
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -133,6 +134,7 @@ export function readYahooItem(value: unknown): YahooItem | null {
       .map((parent) => text(asRecord(parent)?.name))
       .filter((parent): parent is string => parent != null),
     janCode: text(record.janCode),
+    reviewCount: integer(asRecord(record.review)?.count),
     shipping: shipping
       ? {
           code: integer(shipping.code),
@@ -161,6 +163,9 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
   url.searchParams.set("genre_category_id", String(petSupplyGenreCategoryId));
   url.searchParams.set("results", String(params.results));
   url.searchParams.set("image_size", yahooDetailImageSize);
+  if (params.sort) {
+    url.searchParams.set("sort", params.sort);
+  }
 
   const init =
     params.revalidate != null

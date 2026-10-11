@@ -25,6 +25,7 @@ export type YahooItem = {
   genreName: string | null;
   parentGenreNames: string[];
   janCode: string | null;
+  reviewCount?: number | null;
   shipping: YahooShipping | null;
   sellerId: string | null;
   sellerName: string | null;

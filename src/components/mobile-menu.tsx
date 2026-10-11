@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { categorySearchHref } from "@/lib/categories";
+import { petPath } from "@/lib/pets";
 
 const petLinks = [
-  { href: categorySearchHref("dog"), label: "犬" },
-  { href: categorySearchHref("cat"), label: "猫" },
-  { href: categorySearchHref("small-animal"), label: "小動物" },
-  { href: categorySearchHref("bird"), label: "鳥" },
-  { href: categorySearchHref("fish"), label: "魚・アクアリウム" },
-  { href: `/search?q=${encodeURIComponent("爬虫類 用品")}`, label: "爬虫類・両生類" },
+  { href: petPath("dog"), label: "犬" },
+  { href: petPath("cat"), label: "猫" },
+  { href: petPath("small-animal"), label: "小動物" },
+  { href: petPath("bird"), label: "鳥" },
+  { href: petPath("fish"), label: "魚・アクアリウム" },
+  { href: petPath("reptile"), label: "爬虫類・両生類" },
 ];
 
 const infoLinks = [

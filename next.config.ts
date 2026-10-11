@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "item-shopping.c.yimg.jp" },
+      { protocol: "https", hostname: "thumbnail.image.rakuten.co.jp" },
+    ],
+  },
   poweredByHeader: false,
   agentRules: false,
   async headers() {

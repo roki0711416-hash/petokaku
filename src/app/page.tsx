@@ -124,7 +124,7 @@ export default function HomePage() {
       </section>
       <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-2 pb-12 md:pb-16">
         <div className="mx-auto max-w-6xl">
-          <SectionHeading id="categories-heading" title="ペットの種類から探す" lead="種類を選ぶと、その用品の検索が開きます。" />
+          <SectionHeading id="categories-heading" title="ペットの種類から探す" lead="種類を選ぶと、その用品のページが開きます。" />
           <PetPhotoGrid />
         </div>
       </section>

@@ -6,7 +6,7 @@ import fish from "@/assets/pets/fish.jpg";
 import rabbit from "@/assets/pets/rabbit.jpg";
 import reptile from "@/assets/pets/reptile.jpg";
 import type { CatalogGlyph } from "@/components/ui/catalog-card";
-import { categorySearchHref } from "@/lib/categories";
+import { petPath } from "@/lib/pets";
 
 export type PetPhoto = {
   label: string;
@@ -20,7 +20,7 @@ export type PetPhoto = {
 export const petPhotos: PetPhoto[] = [
   {
     label: "犬",
-    href: categorySearchHref("dog"),
+    href: petPath("dog"),
     alt: "こちらを見上げる茶色のラブラドール",
     image: dog,
     glyph: "dog",
@@ -28,7 +28,7 @@ export const petPhotos: PetPhoto[] = [
   },
   {
     label: "猫",
-    href: categorySearchHref("cat"),
+    href: petPath("cat"),
     alt: "青い目でこちらを見る猫",
     image: cat,
     glyph: "cat",
@@ -36,7 +36,7 @@ export const petPhotos: PetPhoto[] = [
   },
   {
     label: "小動物",
-    href: categorySearchHref("small-animal"),
+    href: petPath("small-animal"),
     alt: "立ち上がった黒いロップイヤーのうさぎ",
     image: rabbit,
     glyph: "rabbit",
@@ -44,7 +44,7 @@ export const petPhotos: PetPhoto[] = [
   },
   {
     label: "鳥",
-    href: categorySearchHref("bird"),
+    href: petPath("bird"),
     alt: "枝に止まった黄色いセキセイインコ",
     image: bird,
     glyph: "bird",
@@ -52,7 +52,7 @@ export const petPhotos: PetPhoto[] = [
   },
   {
     label: "魚・アクアリウム",
-    href: categorySearchHref("fish"),
+    href: petPath("fish"),
     alt: "水槽の中でこちらを見る金魚",
     image: fish,
     glyph: "fish",
@@ -60,7 +60,7 @@ export const petPhotos: PetPhoto[] = [
   },
   {
     label: "爬虫類・両生類",
-    href: `/search?q=${encodeURIComponent("爬虫類 用品")}`,
+    href: petPath("reptile"),
     alt: "葉の上にいるフトアゴヒゲトカゲ",
     image: reptile,
     glyph: "reptile",

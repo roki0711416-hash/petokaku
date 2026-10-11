@@ -2,11 +2,11 @@ import Link from "next/link";
 import { HeaderSearch } from "@/components/header-search";
 import { Logo } from "@/components/logo";
 import { MobileMenu } from "@/components/mobile-menu";
-import { categorySearchHref } from "@/lib/categories";
+import { petPath } from "@/lib/pets";
 
 const navLinks = [
-  { href: categorySearchHref("dog"), label: "犬用品" },
-  { href: categorySearchHref("cat"), label: "猫用品" },
+  { href: petPath("dog"), label: "犬用品" },
+  { href: petPath("cat"), label: "猫用品" },
   { href: "/#categories", label: "カテゴリー" },
   { href: "/about", label: "サイトについて" },
 ];

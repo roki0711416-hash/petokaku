@@ -14,6 +14,32 @@ export type RakutenShopSearchResult =
   | { ok: true; offers: Offer[]; truncated: boolean }
   | { ok: false; reason: "not-configured" | "request-failed" | "not-found" | "rate-limited" };
 
+export function rakutenReviewSearchRequest(
+  applicationId: string,
+  accessKey: string,
+  keyword: string,
+): { url: URL; headers: Record<string, string> } {
+  const url = new URL(endpoint);
+  url.searchParams.set("applicationId", applicationId);
+  url.searchParams.set("keyword", keyword);
+  url.searchParams.set("hits", "20");
+  url.searchParams.set("page", "1");
+  url.searchParams.set("availability", "1");
+  url.searchParams.set("field", "1");
+  url.searchParams.set("sort", "-reviewCount");
+  url.searchParams.set("format", "json");
+  url.searchParams.set("formatVersion", "2");
+  return {
+    url,
+    headers: {
+      Accept: "application/json",
+      Origin: rakutenSiteOrigin,
+      Referer: `${rakutenSiteOrigin}/`,
+      ...(accessKey === "" ? {} : { accessKey }),
+    },
+  };
+}
+
 export function rakutenShopSearchRequest(
   applicationId: string,
   accessKey: string,

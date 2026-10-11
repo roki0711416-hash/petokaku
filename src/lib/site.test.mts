@@ -54,6 +54,12 @@ const publicSitemap = [
   "https://petokaku.com/categories/cat-food",
   "https://petokaku.com/categories/cat-litter",
   "https://petokaku.com/categories/pet-sheets",
+  "https://petokaku.com/pets/dog",
+  "https://petokaku.com/pets/cat",
+  "https://petokaku.com/pets/small-animal",
+  "https://petokaku.com/pets/bird",
+  "https://petokaku.com/pets/fish",
+  "https://petokaku.com/pets/reptile",
   "https://petokaku.com/products/jan/3182550706933",
 ];
 
