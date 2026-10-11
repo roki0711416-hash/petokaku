@@ -7,6 +7,14 @@ export type PetLink = {
   label: string;
 };
 
+export type PetCategory = {
+  id: string;
+  label: string;
+  query: string;
+  reject: string[];
+  require: string[];
+};
+
 export type PetPage = {
   id: PetId;
   path: string;
@@ -18,7 +26,7 @@ export type PetPage = {
   query: string;
   include: string[];
   exclude: string[];
-  categories: PetLink[];
+  categories: PetCategory[];
   related: PetLink[];
   points: { heading: string; body: string }[];
   faqs: { question: string; answer: string }[];
@@ -45,12 +53,10 @@ const pets: readonly PetPage[] = [
     include: ["犬", "ドッグ", "わん"],
     exclude: ["猫砂", "ハムスター", "セキセイ", "金魚", "水槽", "フトアゴ", "爬虫", "犬印"],
     categories: [
-      { href: "/categories/dog-food", label: "フード" },
-      { href: "/search?q=%E7%8A%AC%20%E3%81%8A%E3%82%84%E3%81%A4", label: "おやつ" },
-      { href: "/categories/pet-sheets", label: "トイレ用品" },
-      { href: "/search?q=%E7%8A%AC%20%E3%81%8A%E3%82%82%E3%81%A1%E3%82%83", label: "おもちゃ" },
-      { href: "/search?q=%E7%8A%AC%20%E3%82%B1%E3%82%A2%E7%94%A8%E5%93%81", label: "ケア用品" },
-      { href: "/search?q=%E7%8A%AC%20%E6%95%A3%E6%AD%A9", label: "散歩用品" },
+      { id: "food", label: "ドッグフード", query: "ドッグフード", require: [], reject: ["おもちゃ", "おやつ", "ジャーキー", "トイレ", "シーツ", "リード", "ハーネス", "シャンプー", "サプリ"] },
+      { id: "treat", label: "おやつ", query: "犬 おやつ", require: ["おやつ", "ジャーキー", "ガム", "ビスケット", "トリーツ", "ボーロ", "ささみ"], reject: ["トイレ", "シーツ", "おもちゃ", "リード", "ハーネス", "シャンプー"] },
+      { id: "toilet", label: "トイレ用品", query: "犬 トイレ用品", require: [], reject: ["おもちゃ", "おやつ", "ジャーキー", "リード", "ハーネス", "シャンプー", "フード"] },
+      { id: "toy", label: "おもちゃ", query: "犬 おもちゃ", require: ["おもちゃ", "オモチャ", "ボール", "ロープ", "ぬいぐるみ"], reject: ["フード", "おやつ", "ジャーキー", "トイレ", "シーツ", "シャンプー"] },
     ],
     related: [
       { href: petPath("cat"), label: "猫用品" },
@@ -80,12 +86,10 @@ const pets: readonly PetPage[] = [
     include: ["猫", "キャット", "ネコ"],
     exclude: ["ハムスター", "セキセイ", "金魚", "水槽", "フトアゴ", "爬虫", "ドッグフード"],
     categories: [
-      { href: "/categories/cat-food", label: "フード" },
-      { href: "/search?q=%E7%8C%AB%20%E3%81%8A%E3%82%84%E3%81%A4", label: "おやつ" },
-      { href: "/categories/cat-litter", label: "猫砂" },
-      { href: "/search?q=%E7%8C%AB%20%E3%83%88%E3%82%A4%E3%83%AC", label: "トイレ用品" },
-      { href: "/search?q=%E7%8C%AB%20%E3%81%8A%E3%82%82%E3%81%A1%E3%82%83", label: "おもちゃ" },
-      { href: "/search?q=%E7%8C%AB%20%E3%82%B1%E3%82%A2%E7%94%A8%E5%93%81", label: "ケア用品" },
+      { id: "food", label: "キャットフード", query: "キャットフード", require: [], reject: ["猫砂", "おもちゃ", "おやつ", "ジャーキー", "トイレ", "サプリ"] },
+      { id: "litter", label: "猫砂", query: "猫砂", require: ["猫砂", "ネコ砂", "紙砂", "サンド"], reject: ["フード", "おもちゃ", "おやつ", "ジャーキー"] },
+      { id: "treat", label: "おやつ", query: "猫 おやつ", require: ["おやつ", "ジャーキー", "ちゅーる", "チュール", "トリーツ"], reject: ["猫砂", "おもちゃ", "トイレ"] },
+      { id: "toy", label: "おもちゃ", query: "猫 おもちゃ", require: ["おもちゃ", "じゃらし", "猫じゃらし", "トンネル"], reject: ["フード", "猫砂", "おやつ", "トイレ"] },
     ],
     related: [
       { href: petPath("dog"), label: "犬用品" },
@@ -116,12 +120,10 @@ const pets: readonly PetPage[] = [
     include: ["うさぎ", "ウサギ", "ハムスター", "小動物", "モルモット", "チンチラ", "デグー"],
     exclude: ["ドッグフード", "キャットフード", "金魚", "水槽", "インコ", "フトアゴ"],
     categories: [
-      { href: "/search?q=%E5%B0%8F%E5%8B%95%E7%89%A9%20%E3%83%95%E3%83%BC%E3%83%89", label: "フード" },
-      { href: "/search?q=%E3%81%86%E3%81%95%E3%81%8E%20%E7%89%A7%E8%8D%89", label: "牧草" },
-      { href: "/search?q=%E5%B0%8F%E5%8B%95%E7%89%A9%20%E5%BA%8A%E6%9D%90", label: "床材" },
-      { href: "/search?q=%E5%B0%8F%E5%8B%95%E7%89%A9%20%E3%82%B1%E3%83%BC%E3%82%B8", label: "ケージ" },
-      { href: "/search?q=%E5%B0%8F%E5%8B%95%E7%89%A9%20%E7%B5%A6%E6%B0%B4%E5%99%A8", label: "給水器" },
-      { href: "/search?q=%E5%B0%8F%E5%8B%95%E7%89%A9%20%E3%81%8A%E3%82%82%E3%81%A1%E3%82%83", label: "おもちゃ" },
+      { id: "food", label: "フード", query: "小動物 フード", require: [], reject: ["ケージ", "床材", "おもちゃ", "おやつ", "サプリ"] },
+      { id: "cage", label: "ケージ", query: "小動物 ケージ", require: ["ケージ", "サークル"], reject: ["フード", "おやつ", "床材", "牧草"] },
+      { id: "bedding", label: "床材", query: "小動物 床材", require: ["床材", "敷材", "チップ"], reject: ["フード", "ケージ", "おやつ", "おもちゃ"] },
+      { id: "treat", label: "おやつ", query: "小動物 おやつ", require: ["おやつ", "ジャーキー", "ビスケット"], reject: ["ケージ", "床材"] },
     ],
     related: [
       { href: petPath("bird"), label: "鳥用品" },
@@ -150,11 +152,10 @@ const pets: readonly PetPage[] = [
     include: ["鳥", "インコ", "オウム", "文鳥", "ブンチョウ", "飼鳥"],
     exclude: ["ドッグフード", "キャットフード", "ハムスター", "金魚", "水槽", "フトアゴ"],
     categories: [
-      { href: "/search?q=%E9%B3%A5%20%E3%83%95%E3%83%BC%E3%83%89", label: "フード" },
-      { href: "/search?q=%E9%B3%A5%20%E3%82%B1%E3%83%BC%E3%82%B8", label: "ケージ" },
-      { href: "/search?q=%E6%AD%A2%E3%81%BE%E3%82%8A%E6%9C%A8", label: "止まり木" },
-      { href: "/search?q=%E9%B3%A5%20%E3%81%8A%E3%82%82%E3%81%A1%E3%82%83", label: "おもちゃ" },
-      { href: "/search?q=%E9%B3%A5%20%E3%82%B1%E3%82%A2%E7%94%A8%E5%93%81", label: "ケア用品" },
+      { id: "food", label: "鳥用フード", query: "鳥 フード", require: [], reject: ["ケージ", "おもちゃ", "止まり木", "サプリ"] },
+      { id: "cage", label: "ケージ", query: "鳥 ケージ", require: ["ケージ", "鳥かご", "鳥籠"], reject: ["フード", "ペレット", "おもちゃ"] },
+      { id: "toy", label: "おもちゃ", query: "鳥 おもちゃ", require: ["おもちゃ", "トイ"], reject: ["フード", "ペレット", "ケージ"] },
+      { id: "supplies", label: "飼育用品", query: "鳥 飼育用品", require: [], reject: ["おもちゃ"] },
     ],
     related: [
       { href: petPath("small-animal"), label: "小動物用品" },
@@ -182,11 +183,10 @@ const pets: readonly PetPage[] = [
     include: ["魚", "アクアリウム", "水槽", "金魚", "熱帯魚", "ろ過", "濾過"],
     exclude: ["ドッグフード", "キャットフード", "ハムスター", "インコ", "フトアゴ", "爬虫"],
     categories: [
-      { href: "/search?q=%E8%A6%B3%E8%B3%9E%E9%AD%9A%20%E3%81%88%E3%81%95", label: "フード" },
-      { href: "/search?q=%E6%B0%B4%E6%A7%BD", label: "水槽" },
-      { href: "/search?q=%E6%B0%B4%E6%A7%BD%20%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC", label: "フィルター" },
-      { href: "/search?q=%E6%B0%B4%E6%A7%BD%20%E3%83%92%E3%83%BC%E3%82%BF%E3%83%BC", label: "ヒーター" },
-      { href: "/search?q=%E6%B0%B4%E8%B3%AA%E8%AA%BF%E6%95%B4", label: "水質管理用品" },
+      { id: "food", label: "魚用フード", query: "観賞魚 えさ", require: [], reject: ["水槽", "フィルター", "濾過", "ろ過", "ヒーター", "サプリ"] },
+      { id: "tank", label: "水槽", query: "ガラス水槽", require: ["水槽"], reject: ["えさ", "エサ", "フード", "フィルター", "濾過", "ろ過", "照明", "ライト", "匹", "生体", "海水", "ボンベ", "メダカ", "掃除", "クリーナー", "スクレーパー", "コケ"] },
+      { id: "filter", label: "フィルター", query: "水槽 フィルター", require: ["フィルター", "フィルタ", "ろ過", "濾過", "ろ材"], reject: ["えさ", "エサ", "フード"] },
+      { id: "water", label: "水質管理用品", query: "水質調整", require: [], reject: ["えさ", "エサ", "フード"] },
     ],
     related: [
       { href: petPath("reptile"), label: "爬虫類・両生類用品" },
@@ -214,12 +214,10 @@ const pets: readonly PetPage[] = [
     include: ["爬虫", "両生", "トカゲ", "レオパ", "フトアゴ", "ヘビ", "カメ", "カエル", "蛙"],
     exclude: ["ドッグフード", "キャットフード", "ハムスター", "インコ", "金魚", "水槽", "ジェルネイル", "偽造防止"],
     categories: [
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E3%83%95%E3%83%BC%E3%83%89", label: "フード" },
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E9%A3%BC%E8%82%B2%E3%82%B1%E3%83%BC%E3%82%B9", label: "飼育ケース" },
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E4%BF%9D%E6%B8%A9", label: "保温器具" },
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E7%85%A7%E6%98%8E", label: "照明" },
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E5%BA%8A%E6%9D%90", label: "床材" },
-      { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E6%B8%A9%E6%B9%BF%E5%BA%A6", label: "温湿度管理用品" },
+      { id: "food", label: "フード", query: "爬虫類 フード", require: [], reject: ["ケージ", "ライト", "ヒーター", "床材", "サプリ"] },
+      { id: "cage", label: "ケージ", query: "爬虫類 ケージ", require: ["ケージ", "飼育ケース"], reject: ["フード", "ライト", "床材"] },
+      { id: "light", label: "ライト", query: "爬虫類 ライト", require: ["ライト", "照明", "紫外線"], reject: ["フード", "床材"] },
+      { id: "supplies", label: "飼育用品", query: "爬虫類 飼育用品", require: [], reject: ["フード"] },
     ],
     related: [
       { href: petPath("fish"), label: "魚・アクアリウム用品" },
@@ -249,6 +247,13 @@ export function petById(id: PetId): PetPage {
     throw new Error(`不明なペットページです: ${id}`);
   }
   return pet;
+}
+
+export function petCategory(pet: PetPage, id: string | undefined | null): PetCategory | null {
+  if (!id || id === "all") {
+    return null;
+  }
+  return pet.categories.find((item) => item.id === id) ?? null;
 }
 
 // Yahoo!ショッピングのカテゴリ2509「ペット用品、生き物」の子カテゴリ。
@@ -311,4 +316,17 @@ export function listingFitsPet(name: string, genres: string[], pet: PetPage, inO
     return true;
   }
   return nameHasPetSignal(name, pet);
+}
+
+// 検索語と公式ジャンルで集めた結果を確認する。
+// 別カテゴリの語があれば外し、必要な語を指定したカテゴリは名前かジャンル名にその語があるものだけ残す。
+export function listingFitsCategory(name: string, genres: string[], category: PetCategory): boolean {
+  const text = `${name}\n${genres.join("\n")}`;
+  if (category.reject.some((word) => text.includes(word))) {
+    return false;
+  }
+  if (category.require.length === 0) {
+    return true;
+  }
+  return category.require.some((word) => text.includes(word));
 }

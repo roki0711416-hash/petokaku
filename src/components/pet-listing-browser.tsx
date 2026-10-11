@@ -8,16 +8,23 @@ import type { PetListingCard, PetListingGroup } from "@/lib/pets-listings";
 
 const pageSize = 8;
 
-const statusText: Record<Exclude<PetListingGroup["status"], "ready">, string> = {
-  empty: "この条件に合う商品は見つかりませんでした。下のカテゴリから探せます。",
-  "not-configured": "このモールの商品はいま表示できません。カテゴリから探せます。",
-  "rate-limited": "いま混み合っているため、この欄は空です。しばらくすると表示されます。",
-  unauthorized: "このモールの商品はいま表示できません。",
-  parameter: "この条件では商品を表示できませんでした。",
-  timeout: "応答が間に合わなかったため、この欄はいま空です。",
-  unavailable: "サービスが一時的に応答しなかったため、この欄はいま空です。",
-  "request-failed": "このモールの商品を表示できませんでした。時間をおいて、もう一度開いてください。",
-};
+function statusText(status: Exclude<PetListingGroup["status"], "ready">, categoryLabel: string | null): string {
+  if (status === "empty") {
+    return categoryLabel
+      ? `「${categoryLabel}」の商品は見つかりませんでした。上のボタンから別のカテゴリを選べます。`
+      : "この条件に合う商品は見つかりませんでした。上のボタンからカテゴリを選べます。";
+  }
+  const messages: Record<Exclude<PetListingGroup["status"], "ready" | "empty">, string> = {
+    "not-configured": "このモールの商品はいま表示できません。上のボタンからカテゴリを選べます。",
+    "rate-limited": "いま混み合っているため、この欄は空です。しばらくすると表示されます。",
+    unauthorized: "このモールの商品はいま表示できません。",
+    parameter: "この条件では商品を表示できませんでした。",
+    timeout: "応答が間に合わなかったため、この欄はいま空です。",
+    unavailable: "サービスが一時的に応答しなかったため、この欄はいま空です。",
+    "request-failed": "このモールの商品を表示できませんでした。時間をおいて、もう一度開いてください。",
+  };
+  return messages[status];
+}
 
 function allowedImage(src: string): boolean {
   try {
@@ -68,10 +75,12 @@ function ListingGroup({
   title,
   note,
   group,
+  categoryLabel,
 }: {
   title: string;
   note: string;
   group: PetListingGroup;
+  categoryLabel: string | null;
 }) {
   const [query, setQuery] = useState("");
   const [shown, setShown] = useState(pageSize);
@@ -85,11 +94,11 @@ function ListingGroup({
   const visible = filtered.slice(0, shown);
 
   return (
-    <section className="mt-10">
-      <h2 className="text-lg font-medium text-ink">{title}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">{note}</p>
-      <p className="mt-2 text-xs text-muted">商品 {group.cards.length}件</p>
-      {group.status !== "ready" ? <p className="mt-2 text-sm leading-7 text-muted">{statusText[group.status]}</p> : null}
+    <section className="mt-4">
+      <h3 className="text-base font-medium text-ink">{title}</h3>
+      <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{note}</p>
+      <p className="mt-1 text-xs text-muted">商品 {group.cards.length}件</p>
+      {group.status !== "ready" ? <p className="mt-2 text-sm leading-6 text-muted">{statusText(group.status, categoryLabel)}</p> : null}
       {group.cards.length > 0 ? (
         <>
           <label className="mt-4 block max-w-md text-sm text-ink">
@@ -127,18 +136,29 @@ function ListingGroup({
   );
 }
 
-export function PetListingBrowser({ yahoo, rakuten }: { yahoo: PetListingGroup; rakuten: PetListingGroup }) {
+export function PetListingBrowser({
+  yahoo,
+  rakuten,
+  categoryLabel,
+}: {
+  yahoo: PetListingGroup;
+  rakuten: PetListingGroup;
+  categoryLabel: string | null;
+}) {
   return (
-    <>
+    <div className="mt-5">
+      <h2 className="text-lg font-medium text-ink">人気の商品一覧</h2>
       <ListingGroup
         title="Yahoo!ショッピングの人気商品を探す"
         note="レビュー件数を参考に、気になるペット用品を探せます。売上順ではありません。"
         group={yahoo}
+        categoryLabel={categoryLabel}
       />
       <ListingGroup
         title="楽天市場の人気商品を探す"
         note="レビュー件数を参考に、気になるペット用品を探せます。売上順ではありません。"
         group={rakuten}
+        categoryLabel={categoryLabel}
       />
       <details className="mt-8 rounded-2xl border border-line bg-sand/50 px-4 py-2">
         <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">掲載情報について</summary>
@@ -148,6 +168,6 @@ export function PetListingBrowser({ yahoo, rakuten }: { yahoo: PetListingGroup; 
           <p>価格は、表示できた商品のものです。すべての販売店の最安値ではありません。購入前にショップで確認してください。</p>
         </div>
       </details>
-    </>
+    </div>
   );
 }

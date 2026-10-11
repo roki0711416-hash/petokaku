@@ -3,7 +3,7 @@ import { mentionsExactJan, rakutenReviewSearchRequest } from "./sources/rakuten/
 import { buildSearchCandidates } from "./sources/yahoo/search-candidates.ts";
 import { validJanCode, type YahooItem } from "./sources/yahoo/adapter.ts";
 import { searchYahooItems } from "./sources/yahoo/search.ts";
-import { listingFitsPet, rakutenPetGenreIds, yahooPetGenreCategoryIds, type PetPage } from "./pets.ts";
+import { listingFitsCategory, listingFitsPet, rakutenPetGenreIds, yahooPetGenreCategoryIds, type PetCategory, type PetPage } from "./pets.ts";
 
 const listingLimit = 20;
 const rakutenGapMs = 1100;
@@ -60,8 +60,15 @@ function searchHref(name: string): string {
   return `/search?q=${encodeURIComponent(query === "" ? name.slice(0, 40) : query)}`;
 }
 
-function yahooCards(pet: PetPage, items: YahooItem[]): PetListingCard[] {
-  const fitting = items.filter((item) => listingFitsPet(item.name, [item.genreName ?? "", ...item.parentGenreNames], pet));
+function itemGenres(item: YahooItem): string[] {
+  return [item.genreName ?? "", ...item.parentGenreNames];
+}
+
+function yahooCards(pet: PetPage, items: YahooItem[], category: PetCategory | null): PetListingCard[] {
+  const fitting = items.filter((item) => {
+    const genres = itemGenres(item);
+    return listingFitsPet(item.name, genres, pet) && (category == null || listingFitsCategory(item.name, genres, category));
+  });
   const reviewByJan = new Map<string, number | null>();
   const reviewByName = new Map<string, number | null>();
   for (const item of fitting) {
@@ -151,7 +158,21 @@ function janInText(value: string): string | null {
   return janCode;
 }
 
-export function rakutenDiscoveryCards(payload: unknown, pet: PetPage): PetListingCard[] {
+function rakutenGenreLabels(item: Record<string, unknown>): string[] {
+  const labels: string[] = [];
+  const direct = text(item.genreName);
+  if (direct) {
+    labels.push(direct);
+  }
+  const genre = asRecord(item.genre);
+  const nested = text(genre?.name);
+  if (nested) {
+    labels.push(nested);
+  }
+  return labels;
+}
+
+export function rakutenDiscoveryCards(payload: unknown, pet: PetPage, category: PetCategory | null = null): PetListingCard[] {
   const body = asRecord(payload);
   const raw = body?.items ?? body?.Items;
   if (!Array.isArray(raw)) {
@@ -167,7 +188,8 @@ export function rakutenDiscoveryCards(payload: unknown, pet: PetPage): PetListin
     }
     const name = text(item.itemName);
     const shopName = text(item.shopName);
-    if (!name || !shopName || !listingFitsPet(name, [], pet, true)) {
+    const genres = rakutenGenreLabels(item);
+    if (!name || !shopName || !listingFitsPet(name, genres, pet, true) || (category != null && !listingFitsCategory(name, genres, category))) {
       continue;
     }
     const itemCode = text(item.itemCode) ?? `${shopName}:${name}`;
@@ -243,7 +265,7 @@ async function fetchRakuten(url: URL, headers: Record<string, string>, revalidat
   return { status: response.status, text: await response.text(), retryAfter: response.headers.get("retry-after") };
 }
 
-function cardsFromResponse(response: RakutenTransportResponse, pet: PetPage): PetListingGroup {
+function cardsFromResponse(response: RakutenTransportResponse, pet: PetPage, category: PetCategory | null): PetListingGroup {
   if (response.status === 404) {
     return { status: "empty", cards: [] };
   }
@@ -256,7 +278,7 @@ function cardsFromResponse(response: RakutenTransportResponse, pet: PetPage): Pe
   } catch {
     return { status: "request-failed", cards: [] };
   }
-  const cards = rakutenDiscoveryCards(payload, pet);
+  const cards = rakutenDiscoveryCards(payload, pet, category);
   return { status: cards.length === 0 ? "empty" : "ready", cards };
 }
 
@@ -275,9 +297,9 @@ async function shortenFailureCache(): Promise<void> {
   }
 }
 
-async function loadYahoo(pet: PetPage): Promise<PetListingGroup> {
+async function loadYahoo(pet: PetPage, category: PetCategory | null): Promise<PetListingGroup> {
   const result = await searchYahooItems({
-    query: pet.query,
+    query: category?.query ?? pet.query,
     genreCategoryId: yahooPetGenreCategoryIds[pet.id],
     results: listingLimit,
     revalidate: petPageRevalidateSeconds[pet.id],
@@ -286,22 +308,22 @@ async function loadYahoo(pet: PetPage): Promise<PetListingGroup> {
   if (!result.ok) {
     return { status: result.reason, cards: [] };
   }
-  const cards = yahooCards(pet, result.items);
+  const cards = yahooCards(pet, result.items, category);
   return { status: cards.length === 0 ? "empty" : "ready", cards };
 }
 
-async function loadRakuten(pet: PetPage, transport: RakutenTransport, pause: (ms: number) => Promise<void>): Promise<PetListingGroup> {
+async function loadRakuten(pet: PetPage, transport: RakutenTransport, pause: (ms: number) => Promise<void>, category: PetCategory | null): Promise<PetListingGroup> {
   const applicationId = process.env.RAKUTEN_APPLICATION_ID?.trim() ?? "";
   const accessKey = process.env.RAKUTEN_ACCESS_KEY?.trim() ?? "";
   if (applicationId === "" || accessKey === "") {
     return { status: "not-configured", cards: [] };
   }
-  const { url, headers } = rakutenReviewSearchRequest(applicationId, accessKey, pet.query, rakutenPetGenreIds[pet.id]);
+  const { url, headers } = rakutenReviewSearchRequest(applicationId, accessKey, category?.query ?? pet.query, rakutenPetGenreIds[pet.id]);
   const revalidate = petPageRevalidateSeconds[pet.id];
   const once = async (cacheSeconds: number | null) => {
     try {
       const response = await transport(url, headers, cacheSeconds);
-      return { group: cardsFromResponse(response, pet), retryAfter: response.retryAfter ?? null };
+      return { group: cardsFromResponse(response, pet, category), retryAfter: response.retryAfter ?? null };
     } catch (error) {
       return { group: { status: failureStatus(error), cards: [] } satisfies PetListingGroup, retryAfter: null };
     }
@@ -326,10 +348,11 @@ export async function loadPetListings(
   pet: PetPage,
   transport: RakutenTransport = fetchRakuten,
   pause: (ms: number) => Promise<void> = sleep,
+  category: PetCategory | null = null,
 ): Promise<PetListings> {
   const [yahoo, rakuten] = await Promise.all([
-    loadYahoo(pet).catch(() => ({ status: "request-failed" as const, cards: [] })),
-    loadRakuten(pet, transport, pause).catch(() => ({ status: "request-failed" as const, cards: [] })),
+    loadYahoo(pet, category).catch(() => ({ status: "request-failed" as const, cards: [] })),
+    loadRakuten(pet, transport, pause, category).catch(() => ({ status: "request-failed" as const, cards: [] })),
   ]);
   if (transport === fetchRakuten && (!keepsHourlyCache(yahoo.status) || !keepsHourlyCache(rakuten.status))) {
     await shortenFailureCache();

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { listingFitsPet, petById, petPages, rakutenPetGenreIds, yahooPetGenreCategoryIds } from "./pets.ts";
+import { listingFitsCategory, listingFitsPet, petById, petCategory, petPages, rakutenPetGenreIds, yahooPetGenreCategoryIds } from "./pets.ts";
 import { loadPetListings, petPageRevalidateSeconds, rakutenDiscoveryCards, rakutenStatus, retryAfterMs, type RakutenTransport } from "./pets-listings.ts";
 import { sitemapEntries } from "./site.ts";
 
@@ -21,7 +21,7 @@ test("ペット別ページは6件で、見出しと説明が重複しない", (
   for (const pet of pages) {
     assert.equal(pet.faqs.length >= 3, true);
     assert.equal(pet.points.length >= 3, true);
-    assert.equal(pet.categories.length >= 5, true);
+    assert.equal(pet.categories.length, 4);
     assert.equal(pet.h1.includes("売上ランキング"), false);
     assert.equal(pet.h1.includes("おすすめ"), false);
     assert.equal(pet.title.includes("おすすめ"), false);
@@ -34,9 +34,36 @@ test("ペット別ページは6件で、見出しと説明が重複しない", (
 test("犬と猫は既存の品目ページへつなぎ、別種の強い語は落とす", () => {
   const dog = petById("dog");
   const cat = petById("cat");
-  assert.equal(dog.categories.some((item) => item.href === "/categories/dog-food"), true);
-  assert.equal(cat.categories.some((item) => item.href === "/categories/cat-food"), true);
-  assert.equal(cat.categories.some((item) => item.href === "/categories/cat-litter"), true);
+  assert.deepEqual(
+    dog.categories.map((item) => item.label),
+    ["ドッグフード", "おやつ", "トイレ用品", "おもちゃ"],
+  );
+  assert.deepEqual(
+    cat.categories.map((item) => item.label),
+    ["キャットフード", "猫砂", "おやつ", "おもちゃ"],
+  );
+  assert.deepEqual(
+    petById("small-animal").categories.map((item) => item.label),
+    ["フード", "ケージ", "床材", "おやつ"],
+  );
+  assert.deepEqual(
+    petById("bird").categories.map((item) => item.label),
+    ["鳥用フード", "ケージ", "おもちゃ", "飼育用品"],
+  );
+  assert.deepEqual(
+    petById("fish").categories.map((item) => item.label),
+    ["魚用フード", "水槽", "フィルター", "水質管理用品"],
+  );
+  assert.deepEqual(
+    petById("reptile").categories.map((item) => item.label),
+    ["フード", "ケージ", "ライト", "飼育用品"],
+  );
+  assert.equal(dog.related.some((item) => item.href === "/categories/dog-food"), true);
+  assert.equal(cat.related.some((item) => item.href === "/categories/cat-food"), true);
+  assert.equal(cat.related.some((item) => item.href === "/categories/cat-litter"), true);
+  assert.equal(petCategory(dog, undefined), null);
+  assert.equal(petCategory(dog, "missing"), null);
+  assert.equal(petCategory(dog, "food")?.query, "ドッグフード");
   assert.equal(listingFitsPet("ロイヤルカナン 犬用 8kg", ["犬用品"], dog), true);
   assert.equal(listingFitsPet("金魚 餌", ["観賞魚"], dog), false);
   assert.equal(listingFitsPet("猫砂 鉱物", ["猫用品"], cat), true);
@@ -50,6 +77,80 @@ test("犬と猫は既存の品目ページへつなぎ、別種の強い語は�
   assert.equal(listingFitsPet("デジタルカメラ", ["カメラ"], petById("reptile")), false);
   assert.equal(listingFitsPet("ジェルネイル UVライト", ["爬虫類、両生類用品"], petById("reptile")), false);
   assert.equal(listingFitsPet("パネルヒーター 爬虫類", ["爬虫類、両生類用品"], petById("reptile")), true);
+});
+
+test("カテゴリは検索語とジャンルで確認し、商品名だけでは戻さない", () => {
+  const food = petCategory(petById("dog"), "food");
+  const tank = petCategory(petById("fish"), "tank");
+  const litter = petCategory(petById("cat"), "litter");
+  assert.ok(food);
+  assert.ok(tank);
+  assert.ok(litter);
+  assert.equal(listingFitsCategory("ロイヤルカナン 成犬 8kg", ["ドッグフード"], food), true);
+  assert.equal(listingFitsCategory("ロイヤルカナン 4kg", ["ドッグフード"], food), true);
+  assert.equal(listingFitsCategory("犬 ロープおもちゃ", [], food), false);
+  assert.equal(listingFitsCategory("犬 トイレシーツ", ["犬用品"], food), false);
+  assert.equal(listingFitsCategory("収納ケース", ["犬のおもちゃ"], food), false);
+  assert.equal(listingFitsCategory("おもちゃ付き", ["ドッグフード"], food), false);
+  assert.equal(listingFitsCategory("犬 サプリ 関節", ["ドッグフード"], food), false);
+  assert.equal(listingFitsCategory("猫砂 鉱物 5L", ["猫用品"], litter), true);
+  assert.equal(listingFitsCategory("キャットフード 成猫", [], litter), false);
+  assert.equal(listingFitsCategory("ガラス水槽 60cm", ["熱帯魚、アクアリウム用品"], tank), true);
+  assert.equal(listingFitsCategory("上部フィルター", ["フィルター"], tank), false);
+  assert.equal(listingFitsCategory("メダカ 20匹セット", ["熱帯魚、アクアリウム用品"], tank), false);
+  const treat = petCategory(petById("dog"), "treat");
+  assert.ok(treat);
+  assert.equal(listingFitsCategory("犬 歯磨き 歯磨き粉", ["犬用品"], treat), false);
+  assert.equal(listingFitsCategory("犬 ささみジャーキー", ["犬用品"], treat), true);
+  const cards = rakutenDiscoveryCards(
+    {
+      items: [
+        { itemName: "ロイヤルカナン 成犬 8kg", itemPrice: 1000, shopName: "A店", itemCode: "a:1", reviewCount: 2, genreName: "ドッグフード" },
+        { itemName: "犬 ロープおもちゃ", itemPrice: 800, shopName: "B店", itemCode: "b:2", reviewCount: 1 },
+        { itemName: "収納ケース", itemPrice: 500, shopName: "C店", itemCode: "c:3", reviewCount: 1, genreName: "犬のおもちゃ" },
+      ],
+    },
+    petById("dog"),
+    food,
+  );
+  assert.deepEqual(cards.map((card) => card.name), ["ロイヤルカナン 成犬 8kg"]);
+});
+
+test("選択したカテゴリは公式ジャンルを保ったまま検索語だけ変える", async () => {
+  const previous = {
+    app: process.env.RAKUTEN_APPLICATION_ID,
+    key: process.env.RAKUTEN_ACCESS_KEY,
+    yahoo: process.env.YAHOO_CLIENT_ID,
+  };
+  process.env.RAKUTEN_APPLICATION_ID = "app-id";
+  process.env.RAKUTEN_ACCESS_KEY = "access-key";
+  delete process.env.YAHOO_CLIENT_ID;
+  const calls: string[] = [];
+  const transport: RakutenTransport = async (url) => {
+    calls.push(`${url.searchParams.get("genreId")}:${url.searchParams.get("keyword")}`);
+    return {
+      status: 200,
+      text: JSON.stringify({
+        items: [
+          { itemName: "犬 ロープおもちゃ", itemPrice: 800, shopName: "B店", itemCode: "b:2", reviewCount: 1 },
+        ],
+      }),
+    };
+  };
+  try {
+    const food = petCategory(petById("dog"), "food");
+    const listings = await loadPetListings(petById("dog"), transport, async () => undefined, food);
+    assert.deepEqual(calls, ["507513:ドッグフード"]);
+    assert.equal(listings.rakuten.status, "empty");
+    assert.equal(listings.yahoo.status, "not-configured");
+  } finally {
+    if (previous.app == null) delete process.env.RAKUTEN_APPLICATION_ID;
+    else process.env.RAKUTEN_APPLICATION_ID = previous.app;
+    if (previous.key == null) delete process.env.RAKUTEN_ACCESS_KEY;
+    else process.env.RAKUTEN_ACCESS_KEY = previous.key;
+    if (previous.yahoo == null) delete process.env.YAHOO_CLIENT_ID;
+    else process.env.YAHOO_CLIENT_ID = previous.yahoo;
+  }
 });
 
 test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビュー件数は合算しない", () => {

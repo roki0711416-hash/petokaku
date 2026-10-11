@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PetKindPage } from "@/components/pet-kind-page";
 import { loadPetListings } from "@/lib/pets-listings";
-import { petById, type PetId } from "@/lib/pets";
+import { petById, petCategory, type PetId } from "@/lib/pets";
 import { robotsMetadata } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -21,8 +21,9 @@ export function petPageMetadata(id: PetId): Metadata {
   };
 }
 
-export async function PetKindRoute({ id }: { id: PetId }) {
+export async function PetKindRoute({ id, category }: { id: PetId; category?: string }) {
   const pet = petById(id);
-  const listings = await loadPetListings(pet);
-  return <PetKindPage pet={pet} listings={listings} />;
+  const selected = petCategory(pet, category);
+  const listings = await loadPetListings(pet, undefined, undefined, selected);
+  return <PetKindPage pet={pet} listings={listings} categoryId={selected?.id ?? null} />;
 }
