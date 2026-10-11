@@ -28,6 +28,7 @@ type YahooSearchParams = {
   results: number;
   revalidate?: number;
   sort?: "-review_count" | "+price" | "-price" | "-score";
+  genreCategoryId?: number;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -160,7 +161,7 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
   if (params.janCode) {
     url.searchParams.set("jan_code", params.janCode);
   }
-  url.searchParams.set("genre_category_id", String(petSupplyGenreCategoryId));
+  url.searchParams.set("genre_category_id", String(params.genreCategoryId ?? petSupplyGenreCategoryId));
   url.searchParams.set("results", String(params.results));
   url.searchParams.set("image_size", yahooDetailImageSize);
   if (params.sort) {

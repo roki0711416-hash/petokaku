@@ -18,10 +18,14 @@ export function rakutenReviewSearchRequest(
   applicationId: string,
   accessKey: string,
   keyword: string,
+  genreId?: number,
 ): { url: URL; headers: Record<string, string> } {
   const url = new URL(endpoint);
   url.searchParams.set("applicationId", applicationId);
   url.searchParams.set("keyword", keyword);
+  if (genreId != null) {
+    url.searchParams.set("genreId", String(genreId));
+  }
   url.searchParams.set("hits", "20");
   url.searchParams.set("page", "1");
   url.searchParams.set("availability", "1");

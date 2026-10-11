@@ -12,6 +12,7 @@ test("店舗検索はJANをキーワードにし、アクセスキーをURLに�
   assert.equal(url.searchParams.get("availability"), "0");
   assert.equal(url.searchParams.get("sort"), "+itemPrice");
   assert.equal(url.searchParams.get("affiliateId"), "affiliate-id");
+  assert.equal(url.searchParams.get("genreId"), null);
   assert.equal(url.searchParams.get("accessKey"), null);
   assert.equal(headers.accessKey, "access-key");
   const plain = rakutenShopSearchRequest("app-id", "access-key", jan);
@@ -21,12 +22,17 @@ test("店舗検索はJANをキーワードにし、アクセスキーをURLに�
 test("レビュー件数の多い掲載はアフィリエイトIDを付けず、在庫ありだけを取る", () => {
   const { url, headers } = rakutenReviewSearchRequest("app-id", "access-key", "犬 用品");
   assert.equal(url.searchParams.get("keyword"), "犬 用品");
+  assert.equal(url.searchParams.get("genreId"), null);
   assert.equal(url.searchParams.get("hits"), "20");
   assert.equal(url.searchParams.get("availability"), "1");
   assert.equal(url.searchParams.get("sort"), "-reviewCount");
   assert.equal(url.searchParams.get("affiliateId"), null);
   assert.equal(url.searchParams.get("accessKey"), null);
   assert.equal(headers.accessKey, "access-key");
+  const dogGenre = rakutenReviewSearchRequest("app-id", "access-key", "犬 用品", 507513);
+  assert.equal(dogGenre.url.searchParams.get("genreId"), "507513");
+  assert.equal(dogGenre.url.searchParams.get("keyword"), "犬 用品");
+  assert.equal(dogGenre.url.searchParams.get("affiliateId"), null);
 });
 
 test("JANは前後が数字でないときだけ一致する", () => {

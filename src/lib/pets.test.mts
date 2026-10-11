@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { listingFitsPet, petById, petPages } from "./pets.ts";
+import { listingFitsPet, petById, petPages, rakutenPetGenreIds, yahooPetGenreCategoryIds } from "./pets.ts";
 import { loadPetListings, petPageRevalidateSeconds, rakutenDiscoveryCards, rakutenStatus, retryAfterMs, type RakutenTransport } from "./pets-listings.ts";
 import { sitemapEntries } from "./site.ts";
 
@@ -41,6 +41,15 @@ test("犬と猫は既存の品目ページへつなぎ、別種の強い語は�
   assert.equal(listingFitsPet("金魚 餌", ["観賞魚"], dog), false);
   assert.equal(listingFitsPet("猫砂 鉱物", ["猫用品"], cat), true);
   assert.equal(listingFitsPet("ドッグフード 成犬", ["犬用品"], cat), false);
+  assert.equal(listingFitsPet("犬印 マタニティショーツ", [], dog), false);
+  assert.equal(listingFitsPet("犬印本舗 産褥ショーツ", ["犬用品"], dog), false);
+  assert.equal(listingFitsPet("アーテミス アガリクスI/S 小粒", ["ドッグフード", "犬用品"], dog), true);
+  assert.equal(listingFitsPet("アーテミス アガリクスI/S 小粒", [], dog), false);
+  assert.equal(listingFitsPet("自動給水器 猫 犬 ステンレス", ["犬用品"], cat), true);
+  assert.equal(listingFitsPet("ペットシーツ レギュラー", ["犬用品"], cat), false);
+  assert.equal(listingFitsPet("デジタルカメラ", ["カメラ"], petById("reptile")), false);
+  assert.equal(listingFitsPet("ジェルネイル UVライト", ["爬虫類、両生類用品"], petById("reptile")), false);
+  assert.equal(listingFitsPet("パネルヒーター 爬虫類", ["爬虫類、両生類用品"], petById("reptile")), true);
 });
 
 test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビュー件数は合算しない", () => {
@@ -70,6 +79,20 @@ test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビ�
           itemCode: "c:3",
           reviewCount: 99,
         },
+        {
+          itemName: "犬印 マタニティショーツ",
+          itemPrice: 2480,
+          shopName: "D店",
+          itemCode: "d:4",
+          reviewCount: 80,
+        },
+        {
+          itemName: "アーテミス アガリクス 小粒 3kg",
+          itemPrice: 4980,
+          shopName: "E店",
+          itemCode: "e:5",
+          reviewCount: 30,
+        },
       ],
     },
     petById("dog"),
@@ -79,8 +102,11 @@ test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビ�
     [
       [true, true, 12],
       [false, false, 4],
+      [false, false, 30],
     ],
   );
+  assert.equal(cards.some((card) => card.name.includes("犬印")), false);
+  assert.equal(cards.some((card) => card.name.includes("金魚")), false);
   assert.equal(cards[1]?.href.startsWith("/search?q="), true);
   assert.equal(cards.some((card) => card.reviewCount === 12 + 4), false);
 });
@@ -140,7 +166,7 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
   process.env.RAKUTEN_ACCESS_KEY = "access-key";
   delete process.env.YAHOO_CLIENT_ID;
   const pauses: number[] = [];
-  const calls: Array<{ revalidate: number | null; accessKeyInUrl: boolean; header: string | undefined }> = [];
+  const calls: Array<{ revalidate: number | null; accessKeyInUrl: boolean; header: string | undefined; genreId: string | null; keyword: string | null; sort: string | null }> = [];
   const scripted = [
     { status: 429, text: "", retryAfter: "1" },
     {
@@ -155,6 +181,9 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
       revalidate,
       accessKeyInUrl: url.search.includes("access-key") || url.search.includes("accessKey"),
       header: headers.accessKey,
+      genreId: url.searchParams.get("genreId"),
+      keyword: url.searchParams.get("keyword"),
+      sort: url.searchParams.get("sort"),
     });
     const next = scripted.shift();
     if (!next) {
@@ -169,6 +198,7 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
     assert.deepEqual(pauses, [1100]);
     assert.equal(calls.length, 2);
     assert.equal(calls.every((call) => call.revalidate === 3600 && call.accessKeyInUrl === false && call.header === "access-key"), true);
+    assert.equal(calls.every((call) => call.genreId === "507513" && call.keyword === "犬 用品" && call.sort === "-reviewCount"), true);
     assert.equal(listings.rakuten.status, "ready");
     assert.equal(listings.rakuten.cards.length, 1);
     assert.equal(listings.yahoo.status, "not-configured");
@@ -212,6 +242,25 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
     if (previous.yahoo == null) delete process.env.YAHOO_CLIENT_ID;
     else process.env.YAHOO_CLIENT_ID = previous.yahoo;
   }
+});
+
+test("ペット別の公式ジャンルIDは6種類とも確認済みの値だけ", () => {
+  assert.deepEqual(yahooPetGenreCategoryIds, {
+    dog: 4772,
+    cat: 4820,
+    "small-animal": 32938,
+    bird: 4816,
+    fish: 4798,
+    reptile: 33966,
+  });
+  assert.deepEqual(rakutenPetGenreIds, {
+    dog: 507513,
+    cat: 507524,
+    "small-animal": 565699,
+    bird: 204183,
+    fish: 203107,
+    reptile: 560198,
+  });
 });
 
 test("ペット別ページの再取得間隔は5分ずつずれている", () => {

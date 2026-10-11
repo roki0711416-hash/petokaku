@@ -43,7 +43,7 @@ const pets: readonly PetPage[] = [
     lead: "犬のご飯や散歩、トイレ、ケアに使う用品を、商品名を思い出さなくても探せます。一覧の並びは売上順位ではありません。",
     query: "犬 用品",
     include: ["犬", "ドッグ", "わん"],
-    exclude: ["猫砂", "ハムスター", "セキセイ", "金魚", "水槽", "フトアゴ", "爬虫"],
+    exclude: ["猫砂", "ハムスター", "セキセイ", "金魚", "水槽", "フトアゴ", "爬虫", "犬印"],
     categories: [
       { href: "/categories/dog-food", label: "フード" },
       { href: "/search?q=%E7%8A%AC%20%E3%81%8A%E3%82%84%E3%81%A4", label: "おやつ" },
@@ -212,7 +212,7 @@ const pets: readonly PetPage[] = [
     lead: "トカゲ、ヘビ、カメ、カエルなどの飼育用品を探せます。適温と湿度は種で違うため、器具の対応範囲を販売店のページで確認してください。",
     query: "爬虫類 用品",
     include: ["爬虫", "両生", "トカゲ", "レオパ", "フトアゴ", "ヘビ", "カメ", "カエル", "蛙"],
-    exclude: ["ドッグフード", "キャットフード", "ハムスター", "インコ", "金魚", "水槽"],
+    exclude: ["ドッグフード", "キャットフード", "ハムスター", "インコ", "金魚", "水槽", "ジェルネイル", "偽造防止"],
     categories: [
       { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E3%83%95%E3%83%BC%E3%83%89", label: "フード" },
       { href: "/search?q=%E7%88%AC%E8%99%AB%E9%A1%9E%20%E9%A3%BC%E8%82%B2%E3%82%B1%E3%83%BC%E3%82%B9", label: "飼育ケース" },
@@ -230,7 +230,7 @@ const pets: readonly PetPage[] = [
       { heading: "フードは肉食と植物食を分ける", body: "人工飼料、昆虫、サプリは別の商品です。対象種が商品名にあるかを確認してください。" },
     ],
     faqs: [
-      { question: "両生類の用品も入りますか？", answer: "検索語は「爬虫類 用品」です。カエルなど両生類の用品が常に含まれるとは限りません。足りない場合はカテゴリの検索を使ってください。" },
+      { question: "両生類の用品も入りますか？", answer: "爬虫類・両生類のジャンルから、レビュー件数が多い順に並べています。カエル向けの用品も入ります。種ごとの適温は、販売店のページで確認してください。" },
       { question: "人気順位はありますか？", answer: "売上の人気順位はありません。レビュー件数が多い順に並べています。レビュー件数が分からない商品に、順位は付けません。" },
       { question: "温度が合うかは分かりますか？", answer: "価格とレビュー件数から、適温は判断できません。対応ワット数と対象は販売店のページで確認してください。" },
     ],
@@ -251,10 +251,64 @@ export function petById(id: PetId): PetPage {
   return pet;
 }
 
-export function listingFitsPet(name: string, genres: string[], pet: PetPage): boolean {
+// Yahoo!ショッピングのカテゴリ2509「ペット用品、生き物」の子カテゴリ。
+// 公式カテゴリページのリンクと、itemSearchのparentGenreCategoriesに出たidと名称が一致したものだけ。
+export const yahooPetGenreCategoryIds: Record<PetId, number> = {
+  dog: 4772,
+  cat: 4820,
+  "small-animal": 32938,
+  bird: 4816,
+  fish: 4798,
+  reptile: 33966,
+};
+
+// 楽天市場の公式カテゴリページのタイトルと一致したジャンルID。
+// お手入れ用品や食器など、複数のペットに共通するジャンルは割り当てない。
+export const rakutenPetGenreIds: Record<PetId, number> = {
+  dog: 507513,
+  cat: 507524,
+  "small-animal": 565699,
+  bird: 204183,
+  fish: 203107,
+  reptile: 560198,
+};
+
+const officialGenreLabels: Record<PetId, readonly string[]> = {
+  dog: ["犬用品"],
+  cat: ["猫用品"],
+  "small-animal": ["小動物用品"],
+  bird: ["鳥用品"],
+  fish: ["熱帯魚、アクアリウム用品", "熱帯魚・アクアリウム"],
+  reptile: ["爬虫類、両生類用品", "爬虫類・両生類"],
+};
+
+function hasOfficialGenre(genres: string[], pet: PetPage): boolean {
+  return genres.some((genre) => officialGenreLabels[pet.id].some((label) => genre.includes(label)));
+}
+
+function nameHasPetSignal(name: string, pet: PetPage): boolean {
+  if (pet.id === "dog") {
+    return /ドッグ|わん|犬\s*用|犬の|犬服|子犬|成犬|老犬|愛犬|小型犬|中型犬|大型犬|超小型犬/.test(name);
+  }
+  if (pet.id === "bird") {
+    return /インコ|オウム|文鳥|ブンチョウ|飼鳥|鳥用|鳥かご|鳥籠|小鳥|セキセイ|バード/.test(name);
+  }
+  if (pet.id === "fish") {
+    return /アクアリウム|水槽|金魚|熱帯魚|観賞魚|ろ過|濾過|めだか|メダカ|水草/.test(name);
+  }
+  if (pet.id === "reptile") {
+    return /爬虫|両生|トカゲ|レオパ|フトアゴ|ヘビ|カエル|蛙|リクガメ|カメ(?!ラ)/.test(name);
+  }
+  return pet.include.some((word) => name.includes(word));
+}
+
+export function listingFitsPet(name: string, genres: string[], pet: PetPage, inOfficialGenre = false): boolean {
   const text = `${name}\n${genres.join("\n")}`;
   if (pet.exclude.some((word) => text.includes(word))) {
     return false;
   }
-  return pet.include.some((word) => text.includes(word));
+  if (inOfficialGenre || hasOfficialGenre(genres, pet)) {
+    return true;
+  }
+  return nameHasPetSignal(name, pet);
 }

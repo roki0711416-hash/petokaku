@@ -3,7 +3,7 @@ import { mentionsExactJan, rakutenReviewSearchRequest } from "./sources/rakuten/
 import { buildSearchCandidates } from "./sources/yahoo/search-candidates.ts";
 import { validJanCode, type YahooItem } from "./sources/yahoo/adapter.ts";
 import { searchYahooItems } from "./sources/yahoo/search.ts";
-import { listingFitsPet, type PetPage } from "./pets.ts";
+import { listingFitsPet, rakutenPetGenreIds, yahooPetGenreCategoryIds, type PetPage } from "./pets.ts";
 
 const listingLimit = 20;
 const rakutenGapMs = 1100;
@@ -167,7 +167,7 @@ export function rakutenDiscoveryCards(payload: unknown, pet: PetPage): PetListin
     }
     const name = text(item.itemName);
     const shopName = text(item.shopName);
-    if (!name || !shopName || !listingFitsPet(name, [], pet)) {
+    if (!name || !shopName || !listingFitsPet(name, [], pet, true)) {
       continue;
     }
     const itemCode = text(item.itemCode) ?? `${shopName}:${name}`;
@@ -278,6 +278,7 @@ async function shortenFailureCache(): Promise<void> {
 async function loadYahoo(pet: PetPage): Promise<PetListingGroup> {
   const result = await searchYahooItems({
     query: pet.query,
+    genreCategoryId: yahooPetGenreCategoryIds[pet.id],
     results: listingLimit,
     revalidate: petPageRevalidateSeconds[pet.id],
     sort: "-review_count",
@@ -295,7 +296,7 @@ async function loadRakuten(pet: PetPage, transport: RakutenTransport, pause: (ms
   if (applicationId === "" || accessKey === "") {
     return { status: "not-configured", cards: [] };
   }
-  const { url, headers } = rakutenReviewSearchRequest(applicationId, accessKey, pet.query);
+  const { url, headers } = rakutenReviewSearchRequest(applicationId, accessKey, pet.query, rakutenPetGenreIds[pet.id]);
   const revalidate = petPageRevalidateSeconds[pet.id];
   const once = async (cacheSeconds: number | null) => {
     try {
