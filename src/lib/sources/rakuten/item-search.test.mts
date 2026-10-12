@@ -9,7 +9,8 @@ test("店舗検索はJANをキーワードにし、アクセスキーをURLに�
   assert.equal(url.origin + url.pathname, "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701");
   assert.equal(url.searchParams.get("keyword"), jan);
   assert.equal(url.searchParams.get("hits"), "30");
-  assert.equal(url.searchParams.get("availability"), "0");
+  assert.equal(url.searchParams.get("availability"), "1");
+  assert.equal(url.searchParams.get("field"), "0");
   assert.equal(url.searchParams.get("sort"), "+itemPrice");
   assert.equal(url.searchParams.get("affiliateId"), "affiliate-id");
   assert.equal(url.searchParams.get("genreId"), null);
@@ -116,6 +117,16 @@ test("商品名にJANがある店舗だけを残し、送料別と税別と重�
             taxFlag: 0,
           },
           {
+            itemName: `送料フラグなし ${jan}`,
+            itemPrice: 6100,
+            itemUrl: "https://item.rakuten.co.jp/shop-f/600/",
+            shopName: "F店",
+            shopCode: "shop-f",
+            itemCode: "shop-f:600",
+            availability: 1,
+            taxFlag: 0,
+          },
+          {
             itemName: `重複 ${jan}`,
             itemPrice: 7000,
             itemUrl: "https://item.rakuten.co.jp/shop-a/100/",
@@ -138,6 +149,7 @@ test("商品名にJANがある店舗だけを残し、送料別と税別と重�
         ["shop-a", 5980, "free", 0, true, true, "https://item.rakuten.co.jp/shop-a/100/"],
         ["shop-b", 11000, "unknown", null, true, true, null],
         ["shop-e", 4500, "free", 0, false, false, "https://item.rakuten.co.jp/shop-e/500/"],
+        ["shop-f", 6100, "unknown", null, true, false, "https://item.rakuten.co.jp/shop-f/600/"],
       ],
     );
   } finally {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cheapestPrices, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, collapseSameShopOffers, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
 function offer(partial: {
@@ -13,6 +13,7 @@ function offer(partial: {
   packUnit?: "個" | "袋" | "本" | "パック" | null;
   listingTitle?: string | null;
   sellerId?: string | null;
+  shopName?: string;
 }) {
   return {
     id: partial.id,
@@ -20,12 +21,48 @@ function offer(partial: {
     shippingFee: partial.shippingFee,
     provider: partial.provider ?? "yahoo",
     sellerId: partial.sellerId,
+    shopName: partial.shopName,
     stockStatus: partial.stockStatus ?? "in_stock",
     packCount: partial.packCount ?? 1,
     packUnit: partial.packUnit ?? "個",
     listingTitle: partial.listingTitle ?? "商品 1個",
   };
 }
+
+test("楽天の実店舗はYahooと同じ本体価格順に入り、商品価格ナビは別枠のまま", () => {
+  const parts = partitionShopComparison([
+    offer({ id: "yahoo", price: 3000, shippingFee: 0, shopName: "Yahoo店", provider: "yahoo", sellerId: "yahoo-a" }),
+    offer({ id: "rakuten-shop", price: 900, shippingFee: null, shopName: "楽天実店舗", provider: "rakuten", sellerId: "shop-a" }),
+    offer({ id: "rakuten-named", price: 800, shippingFee: null, shopName: "店舗コードなし", provider: "rakuten", sellerId: null }),
+    offer({ id: "navi", price: 100, shippingFee: null, shopName: "楽天市場", provider: "rakuten", sellerId: null, listingTitle: "商品価格ナビ" }),
+  ]);
+  assert.deepEqual(sortComparedOffers(parts.ranked, "item").map((item) => item.id), ["rakuten-named", "rakuten-shop", "yahoo"]);
+  assert.deepEqual(parts.reference.map((item) => item.id), ["navi"]);
+});
+
+test("同じ価格ではモールではなくショップ名で並べる", () => {
+  const ranked = sortComparedOffers(
+    [
+      offer({ id: "yahoo", price: 1000, shippingFee: null, shopName: "ん店", provider: "yahoo", sellerId: "y" }),
+      offer({ id: "rakuten", price: 1000, shippingFee: null, shopName: "あ店", provider: "rakuten", sellerId: "r" }),
+    ],
+    "item",
+  );
+  assert.deepEqual(ranked.map((item) => item.id), ["rakuten", "yahoo"]);
+});
+
+test("同じショップの重複は販売単位ごとに安い掲載だけを残す", () => {
+  const parts = partitionShopComparison([
+    offer({ id: "dear", price: 2000, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a" }),
+    offer({ id: "cheap", price: 1200, shippingFee: null, shopName: "A店", provider: "rakuten", sellerId: "shop-a" }),
+    offer({ id: "set", price: 900, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a", packCount: 2, listingTitle: "2個セット" }),
+    offer({ id: "yahoo-same", price: 1500, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y" }),
+    offer({ id: "yahoo-dup", price: 1800, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y" }),
+  ]);
+  assert.deepEqual(sortComparedOffers(parts.ranked, "item").map((item) => item.id), ["cheap", "yahoo-same"]);
+  assert.deepEqual(parts.otherUnits.map((item) => item.id), ["set"]);
+  assert.equal(collapseSameShopOffers(parts.ranked).length, parts.ranked.length);
+});
 
 test("本体価格順はモールと送料の状態を混ぜ、送料未確認も一覧に残す", () => {
   const parts = partitionShopComparison([

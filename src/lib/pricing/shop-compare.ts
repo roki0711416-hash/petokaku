@@ -8,6 +8,8 @@ export const comparePageStep = 10;
 export type CompareSort = "item" | "total";
 
 type PricedOffer = {
+  id?: string;
+  shopName?: string | null;
   price: number | null;
   shippingFee: number | null;
   stockStatus: "in_stock" | "out_of_stock" | "unknown";
@@ -16,6 +18,17 @@ type PricedOffer = {
   provider: string;
   sellerId?: string | null;
 };
+
+export function isRakutenReferencePrice(offer: { provider: string; sellerId?: string | null; shopName?: string | null }): boolean {
+  if (offer.provider !== "rakuten") {
+    return false;
+  }
+  if ((offer.sellerId ?? "").trim() !== "") {
+    return false;
+  }
+  const shop = (offer.shopName ?? "").trim();
+  return shop === "" || shop === "楽天市場";
+}
 
 export function isPrimarySalesUnit(offer: { packCount: number | null; listingTitle: string | null }): boolean {
   return (offer.packCount == null || offer.packCount === 1) && !hasUnresolvedPackNotation(offer.listingTitle ?? "");
@@ -28,14 +41,55 @@ export function compareWindow(total: number, shown: number): { shown: number; ne
   return { shown: visible, next, remaining };
 }
 
-function byPayableTotal<T extends { price: number | null; shippingFee: number | null }>(offers: T[]): T[] {
-  return [...offers].sort(
-    (left, right) => (payableTotal(left) ?? Number.POSITIVE_INFINITY) - (payableTotal(right) ?? Number.POSITIVE_INFINITY),
-  );
+function tieBreak(left: { shopName?: string | null; id?: string }, right: { shopName?: string | null; id?: string }): number {
+  const byShop = (left.shopName ?? "").localeCompare(right.shopName ?? "", "ja");
+  if (byShop !== 0) {
+    return byShop;
+  }
+  return (left.id ?? "").localeCompare(right.id ?? "");
 }
 
-function byItemPrice<T extends { price: number | null }>(offers: T[]): T[] {
-  return [...offers].sort((left, right) => (left.price ?? Number.POSITIVE_INFINITY) - (right.price ?? Number.POSITIVE_INFINITY));
+function byPayableTotal<T extends { price: number | null; shippingFee: number | null; shopName?: string | null; id?: string }>(offers: T[]): T[] {
+  return [...offers].sort((left, right) => {
+    const byTotal = (payableTotal(left) ?? Number.POSITIVE_INFINITY) - (payableTotal(right) ?? Number.POSITIVE_INFINITY);
+    return byTotal === 0 ? tieBreak(left, right) : byTotal;
+  });
+}
+
+function byItemPrice<T extends { price: number | null; shopName?: string | null; id?: string }>(offers: T[]): T[] {
+  return [...offers].sort((left, right) => {
+    const byPrice = (left.price ?? Number.POSITIVE_INFINITY) - (right.price ?? Number.POSITIVE_INFINITY);
+    return byPrice === 0 ? tieBreak(left, right) : byPrice;
+  });
+}
+
+function sameShopKey(offer: PricedOffer): string | null {
+  if (isRakutenReferencePrice(offer)) {
+    return null;
+  }
+  const shop = (offer.sellerId ?? "").trim() || (offer.shopName ?? "").trim();
+  if (shop === "") {
+    return null;
+  }
+  const unit = isPrimarySalesUnit(offer) ? "primary" : `pack:${offer.packCount ?? "unknown"}`;
+  return `${offer.provider}:${shop}:${unit}:${offer.stockStatus}`;
+}
+
+export function collapseSameShopOffers<T extends PricedOffer>(offers: readonly T[]): T[] {
+  const kept = new Map<string, T>();
+  const passthrough: T[] = [];
+  for (const offer of offers) {
+    const key = sameShopKey(offer);
+    if (key == null) {
+      passthrough.push(offer);
+      continue;
+    }
+    const current = kept.get(key);
+    if (!current || (offer.price ?? Number.POSITIVE_INFINITY) < (current.price ?? Number.POSITIVE_INFINITY)) {
+      kept.set(key, offer);
+    }
+  }
+  return [...kept.values(), ...passthrough];
 }
 
 export function cheapestPrices<T extends { price: number | null; shippingFee: number | null }>(offers: T[]): {
@@ -76,18 +130,17 @@ export function partitionShopComparison<T extends PricedOffer>(offers: T[]): {
   const otherUnits: T[] = [];
   const unavailable: T[] = [];
 
-  for (const offer of offers) {
-    const referenceOffer = offer.provider === "rakuten" && (offer.sellerId == null || offer.sellerId === "");
+  for (const offer of collapseSameShopOffers(offers)) {
+    if (isRakutenReferencePrice(offer)) {
+      reference.push(offer);
+      continue;
+    }
     if (!isPrimarySalesUnit(offer)) {
       otherUnits.push(offer);
       continue;
     }
     if (offer.stockStatus !== "in_stock") {
       unavailable.push(offer);
-      continue;
-    }
-    if (referenceOffer) {
-      reference.push(offer);
       continue;
     }
     ranked.push(offer);

@@ -10,6 +10,7 @@ import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
 import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
 import { shopProductLink } from "@/lib/pricing/shop-link";
 import { offersComparableAsNew } from "@/lib/pricing/malls";
+import { isRakutenReferencePrice } from "@/lib/pricing/shop-compare";
 import { comparisonCountLabel } from "@/lib/pricing/visible-offers";
 import { productStructuredData } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
@@ -47,7 +48,7 @@ export function YahooProductView({
   rakutenShopScope?: "off" | "ready" | "limited";
 }) {
   const quote = quoteSingleSize({
-    offers: offersComparableAsNew(product.offers).filter((offer) => offer.provider !== "rakuten" || (offer.sellerId != null && offer.sellerId !== "")),
+    offers: offersComparableAsNew(product.offers).filter((offer) => !isRakutenReferencePrice(offer)),
     quantity: product.quantity,
     quantityUnit: product.quantityUnit,
     quantityConfidence: product.quantityConfidence,
@@ -75,7 +76,7 @@ export function YahooProductView({
     pageUrl: new URL(pageHref, getSiteUrl()).toString(),
     sizeLabel: capacity,
     offers: offersComparableAsNew(product.offers).flatMap((offer) => {
-      if (offer.isSample) {
+      if (offer.isSample || isRakutenReferencePrice(offer)) {
         return [];
       }
       return [
