@@ -70,18 +70,21 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} />
       <section id="home-search" aria-labelledby="home-search-heading" className="scroll-mt-28 bg-card px-4 pt-6 pb-8 md:pt-10">
         <div className="mx-auto max-w-3xl">
-          <h1 id="home-search-heading" className="text-lg leading-snug font-medium text-ink md:text-3xl">
-            商品名・ブランド名・JANコードで検索
+          <h1 id="home-search-heading" className="text-[1.65rem] leading-snug font-medium tracking-tight text-ink min-[390px]:text-[1.8rem] md:text-4xl md:leading-tight">
+            ペット用品を、<br className="sm:hidden" />
+            もっとお得に。
           </h1>
+          <p className="mt-2 text-sm leading-6 text-muted md:text-base">いつものフードや日用品をかんたん価格比較</p>
           <div className="mt-4">
             <SearchForm
               id="home-search-input"
               prominent
               action="/search"
-              label="商品名・ブランド名・JANコードで検索"
+              label="商品名・ブランド名で検索"
               buttonLabel="検索"
-              placeholder="商品名・ブランド名・JANコードで検索"
+              placeholder="商品名・ブランド名で検索"
             />
+            <p className="mt-2 text-xs leading-5 text-muted">JANコードでの検索にも対応</p>
           </div>
         </div>
       </section>
