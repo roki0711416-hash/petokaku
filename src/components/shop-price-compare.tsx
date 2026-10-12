@@ -6,11 +6,12 @@ import { formatYen } from "@/lib/format";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { comparisonMallOf, mallVisitLabel, type ComparisonMall } from "@/lib/pricing/malls";
 import {
-  cheapestPrices,
   compareWindow,
+  competitionRanks,
   type CompareSort,
   groupOtherSalesUnits,
   initialCompareCount,
+  listingShopCounts,
   partitionShopComparison,
   sortComparedOffers,
 } from "@/lib/pricing/shop-compare";
@@ -47,10 +48,20 @@ export function ShopPriceCompare({
   const reference = sortComparedOffers(parts.reference, "item");
   const otherUnits = groupOtherSalesUnits(parts.otherUnits, sort);
   const unavailable = sortComparedOffers(parts.unavailable, sort);
-  const overallLowest = cheapestPrices(partitionShopComparison(offers.filter((offer) => comparisonMallOf(offer))).ranked).itemPrice;
+  const counts = listingShopCounts(ranked);
 
   return (
     <div className="grid min-w-0 gap-3">
+      <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
+          すべてのショップで価格を比較
+        </h2>
+        <p className="text-sm text-ink">
+          <span className="price-num text-lg">{counts.listingCount}</span>
+          件 / <span className="price-num text-lg">{counts.shopCount}</span>
+          店舗
+        </p>
+      </div>
       {present.length > 1 ? (
         <div className="flex min-w-0 flex-wrap gap-2" role="group" aria-label="モールで絞り込み">
           <FilterChip selected={mall === "all"} onClick={() => setMall("all")}>
@@ -71,17 +82,18 @@ export function ShopPriceCompare({
           送料込み合計が安い順
         </FilterChip>
       </div>
-      <section aria-label="価格比較" className="min-w-0">
+      <section aria-label="すべてのショップで価格を比較" className="min-w-0">
         <PagedOffers
           resetKey={`${mall}:${sort}:ranked`}
           offers={ranked}
-          lowestItemPrice={overallLowest}
+          sort={sort}
+          showRank
           emptyLabel="この条件で順位に入れられる掲載はありません。"
         />
         {reference.length > 0 ? <ReferencePrices offers={reference} /> : null}
       </section>
       {otherUnits.length > 0 ? (
-        <SideFrame title="セット・販売単位が違う掲載" note="個数やセットが違うため、単品の順位には入れていません。">
+        <SideFrame title="セット・販売単位が違う掲載">
           <div className="grid min-w-0 gap-5">
             {otherUnits.map((group) => (
               <div key={group.key} className="min-w-0">
@@ -90,8 +102,7 @@ export function ShopPriceCompare({
                 <PagedOffers
                   resetKey={`${mall}:${sort}:unit:${group.key}`}
                   offers={group.offers}
-                  lowestItemPrice={null}
-                  showGap={false}
+                  sort={sort}
                   emptyLabel="この販売単位の掲載はありません。"
                 />
               </div>
@@ -104,8 +115,7 @@ export function ShopPriceCompare({
           <PagedOffers
             resetKey={`${mall}:${sort}:stock`}
             offers={unavailable}
-            lowestItemPrice={null}
-            showGap={false}
+            sort={sort}
             emptyLabel="在庫が確認できない掲載はありません。"
           />
         </SideFrame>
@@ -131,11 +141,11 @@ function FilterChip({ selected, onClick, children }: { selected: boolean; onClic
   );
 }
 
-function SideFrame({ title, note, children }: { title: string; note: string; children: ReactNode }) {
+function SideFrame({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
     <section aria-label={title} className="min-w-0 rounded-[1.5rem] border border-line bg-sand/50 p-3 sm:p-4">
       <h3 className="text-base font-medium text-ink">{title}</h3>
-      <p className="mt-1 text-xs leading-5 text-muted">{note}</p>
+      {note ? <p className="mt-1 text-xs leading-5 text-muted">{note}</p> : null}
       {children}
     </section>
   );
@@ -145,7 +155,6 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
   return (
     <aside className="mt-4 rounded-xl border border-line bg-sand/70 px-4 py-3">
       <h3 className="text-sm font-medium text-ink">楽天の参考価格</h3>
-      <p className="mt-1 text-xs leading-5 text-muted">商品価格ナビの参考です。店舗・送料・在庫は未確認のため、上の比較には入れていません。</p>
       <ul className="mt-3 grid gap-3">
         {offers.map((offer) => {
           const link = shopProductLink(offer);
@@ -176,14 +185,14 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
 
 function PagedOffers({
   offers,
-  lowestItemPrice,
-  showGap = true,
+  sort,
+  showRank = false,
   emptyLabel,
   resetKey,
 }: {
   offers: Offer[];
-  lowestItemPrice: number | null;
-  showGap?: boolean;
+  sort: CompareSort;
+  showRank?: boolean;
   emptyLabel: string;
   resetKey: string;
 }) {
@@ -195,6 +204,7 @@ function PagedOffers({
   }
   const window = compareWindow(offers.length, visible);
   const shown = offers.slice(0, window.shown);
+  const ranks = showRank ? competitionRanks(offers, sort).slice(0, window.shown) : null;
 
   if (offers.length === 0) {
     return <p className="mt-3 text-sm leading-7 text-muted">{emptyLabel}</p>;
@@ -202,10 +212,7 @@ function PagedOffers({
 
   return (
     <div className="mt-3 min-w-0">
-      <p className="mb-2 text-xs text-muted">
-        {shown.length} / {offers.length}件
-      </p>
-      <ShopCompareList offers={shown} lowestItemPrice={lowestItemPrice} showGap={showGap} />
+      <ShopCompareList offers={shown} ranks={ranks} />
       {window.remaining > 0 ? (
         <button
           type="button"

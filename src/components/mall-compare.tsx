@@ -17,7 +17,16 @@ export function MallCompare({
 }) {
   const malls = groupOffersByMall(offers);
   if (malls.length === 0) {
-    return <OfferList offers={offers} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} />;
+    return (
+      <div>
+        <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
+          すべてのショップで価格を比較
+        </h2>
+        <div className="mt-3">
+          <OfferList offers={offers} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} />
+        </div>
+      </div>
+    );
   }
 
   return (

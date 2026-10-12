@@ -106,10 +106,7 @@ export function YahooProductView({
       <PriceSummary lowestPrice={confirmed.lowestPrice} shopCount={confirmed.shopCount} />
       {product.offers.length > 0 ? (
         <section id="compare" aria-labelledby="compare-heading" className="mt-5 scroll-mt-24">
-          <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
-            価格比較
-          </h2>
-          <p className="mt-1 text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
+          <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
           <div className="mt-3">
             <MallCompare
               offers={product.offers}

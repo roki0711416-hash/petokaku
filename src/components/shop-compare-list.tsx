@@ -1,8 +1,6 @@
 import { formatYen, stockLabel } from "@/lib/format";
 import { mallVisitLabel } from "@/lib/pricing/malls";
-import { itemPriceGap } from "@/lib/pricing/shop-compare";
 import { shopProductLink } from "@/lib/pricing/shop-link";
-import { payableTotal } from "@/lib/pricing/visible-offers";
 import { shippingCell } from "@/components/ui/shop-card";
 import type { Offer } from "@/lib/types";
 
@@ -11,38 +9,29 @@ const mallLabel: Record<string, string> = {
   rakuten: "楽天市場",
 };
 
-export function ShopCompareList({
-  offers,
-  lowestItemPrice,
-  showGap = true,
-}: {
-  offers: Offer[];
-  lowestItemPrice: number | null;
-  showGap?: boolean;
-}) {
+export function ShopCompareList({ offers, ranks }: { offers: Offer[]; ranks: (number | null)[] | null }) {
   return (
     <>
       <ol className="grid gap-2 lg:hidden">
-        {offers.map((offer) => (
-          <MobileShop key={offer.id} offer={offer} lowestItemPrice={lowestItemPrice} showGap={showGap} />
+        {offers.map((offer, index) => (
+          <MobileShop key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} />
         ))}
       </ol>
       <div className="hidden overflow-hidden rounded-xl border border-line bg-card lg:block">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
+        <table className="w-full table-fixed border-collapse text-left">
           <thead>
             <tr className="border-b border-line bg-sand/70 text-xs text-muted">
-              <th className="w-[14%] px-3 py-2 font-medium">商品価格</th>
-              {showGap ? <th className="w-[12%] px-3 py-2 font-medium">差額</th> : null}
-              <th className="w-[12%] px-3 py-2 font-medium">送料</th>
-              <th className="w-[14%] px-3 py-2 font-medium">合計価格</th>
-              <th className="px-3 py-2 font-medium">ショップ名</th>
-              <th className="w-[12%] px-3 py-2 font-medium">在庫状況</th>
-              <th className="w-[16%] px-3 py-2 font-medium">購入リンク</th>
+              {ranks != null ? <th className="w-[8%] px-3 py-2 font-medium">順位</th> : null}
+              <th className="w-[16%] px-3 py-2 font-medium">商品価格</th>
+              <th className="w-[14%] px-3 py-2 font-medium">送料</th>
+              <th className="w-[12%] px-3 py-2 font-medium">在庫</th>
+              <th className="px-3 py-2 font-medium">ショップ情報</th>
+              <th className="w-[18%] px-3 py-2 font-medium">購入ボタン</th>
             </tr>
           </thead>
           <tbody>
-            {offers.map((offer) => (
-              <DesktopRow key={offer.id} offer={offer} lowestItemPrice={lowestItemPrice} showGap={showGap} />
+            {offers.map((offer, index) => (
+              <DesktopRow key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} />
             ))}
           </tbody>
         </table>
@@ -51,36 +40,23 @@ export function ShopCompareList({
   );
 }
 
-function MobileShop({ offer, lowestItemPrice, showGap }: { offer: Offer; lowestItemPrice: number | null; showGap: boolean }) {
-  const gap = showGap ? itemPriceGap(offer.price, lowestItemPrice) : null;
-  const cheapest = gap === 0;
-  const total = payableTotal(offer);
+function MobileShop({ offer, rank, showRank }: { offer: Offer; rank: number | null; showRank: boolean }) {
+  const first = rank === 1;
   return (
-    <li className={cheapest ? "rounded-xl border border-forest bg-moss/70 p-3" : "rounded-xl border border-line bg-card p-3"}>
+    <li className={first ? "rounded-xl border border-forest bg-moss/70 p-3" : "rounded-xl border border-line bg-card p-3"}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
-          <h3 className="text-sm font-medium leading-5 text-ink">{offer.shopName}</h3>
+          {showRank ? <RankLabel rank={rank} /> : null}
+          <p className="mt-1 text-xs font-medium text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
+          <h3 className="text-base font-medium leading-6 text-ink">{offer.shopName}</h3>
         </div>
-        <div className="shrink-0 text-right">
-          {showGap ? <Gap gap={gap} /> : null}
-          <p className="price-num text-2xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
-        </div>
+        <p className="price-num shrink-0 text-3xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
       </div>
-      <dl className="mt-2 grid grid-cols-3 gap-2 text-sm text-ink">
-        <div>
-          <dt className="text-xs text-muted">送料</dt>
-          <dd className="mt-0.5">{shippingCell(offer)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted">合計</dt>
-          <dd className="price-num mt-0.5">{total == null ? "不明" : formatYen(total)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted">在庫</dt>
-          <dd className="mt-0.5">{stockLabel(offer.stockStatus, offer.isSample)}</dd>
-        </div>
-      </dl>
+      <p className="mt-2 text-sm text-ink">
+        送料 {shippingCell(offer)}
+        <span className="px-1.5 text-line">/</span>
+        {stockLabel(offer.stockStatus, offer.isSample)}
+      </p>
       <div className="mt-3">
         <VisitLink offer={offer} />
       </div>
@@ -88,29 +64,24 @@ function MobileShop({ offer, lowestItemPrice, showGap }: { offer: Offer; lowestI
   );
 }
 
-function DesktopRow({ offer, lowestItemPrice, showGap }: { offer: Offer; lowestItemPrice: number | null; showGap: boolean }) {
-  const gap = showGap ? itemPriceGap(offer.price, lowestItemPrice) : null;
-  const cheapest = gap === 0;
-  const total = payableTotal(offer);
+function DesktopRow({ offer, rank, showRank }: { offer: Offer; rank: number | null; showRank: boolean }) {
+  const first = rank === 1;
   return (
-    <tr className={cheapest ? "border-b border-line bg-moss/80" : "border-b border-line"}>
-      <td className="px-3 py-3 align-middle">
-        <span className="price-num text-xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</span>
-      </td>
-      {showGap ? (
+    <tr className={first ? "border-b border-line bg-moss/80" : "border-b border-line"}>
+      {showRank ? (
         <td className="px-3 py-3 align-middle">
-          <Gap gap={gap} />
+          <RankLabel rank={rank} />
         </td>
       ) : null}
-      <td className="px-3 py-3 align-middle text-sm text-ink">{shippingCell(offer)}</td>
       <td className="px-3 py-3 align-middle">
-        <span className="price-num text-base text-ink">{total == null ? "不明" : formatYen(total)}</span>
+        <span className="price-num text-2xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</span>
       </td>
+      <td className="px-3 py-3 align-middle text-sm text-ink">{shippingCell(offer)}</td>
+      <td className="px-3 py-3 align-middle text-sm text-ink">{stockLabel(offer.stockStatus, offer.isSample)}</td>
       <td className="px-3 py-3 align-middle">
         <p className="text-xs text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
-        <p className="break-words text-sm font-medium leading-5 text-ink">{offer.shopName}</p>
+        <p className="break-words text-base font-medium leading-6 text-ink">{offer.shopName}</p>
       </td>
-      <td className="px-3 py-3 align-middle text-sm text-ink">{stockLabel(offer.stockStatus, offer.isSample)}</td>
       <td className="px-3 py-3 align-middle">
         <VisitLink offer={offer} />
       </td>
@@ -118,21 +89,18 @@ function DesktopRow({ offer, lowestItemPrice, showGap }: { offer: Offer; lowestI
   );
 }
 
-function Gap({ gap }: { gap: number | null }) {
-  if (gap == null) {
+function RankLabel({ rank }: { rank: number | null }) {
+  if (rank == null) {
     return <span className="text-sm text-muted">—</span>;
   }
-  if (gap === 0) {
-    return <span className="inline-flex rounded-full bg-forest px-2 py-0.5 text-xs font-medium text-white">最安値</span>;
-  }
-  return <span className="text-sm text-muted">+{formatYen(gap)}</span>;
+  return <span className={rank === 1 ? "text-base font-medium text-forest" : "text-base font-medium text-ink"}>{rank}位</span>;
 }
 
 function VisitLink({ offer }: { offer: Offer }) {
   const link = shopProductLink(offer);
   const label = mallVisitLabel(offer.provider);
   const className =
-    "inline-flex min-h-10 w-full items-center justify-center rounded-full bg-forest px-3 text-sm font-medium text-white hover:bg-forest-deep";
+    "inline-flex min-h-11 w-full items-center justify-center rounded-full bg-forest px-3 text-sm font-medium text-white hover:bg-forest-deep";
   if (!link.href) {
     return (
       <button type="button" className={`${className} cursor-not-allowed opacity-70`} disabled>

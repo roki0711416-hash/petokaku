@@ -34,6 +34,42 @@ export function isPrimarySalesUnit(offer: { packCount: number | null; listingTit
   return (offer.packCount == null || offer.packCount === 1) && !hasUnresolvedPackNotation(offer.listingTitle ?? "");
 }
 
+export function competitionRanks(
+  offers: readonly { price: number | null; shippingFee: number | null }[],
+  sort: CompareSort,
+): (number | null)[] {
+  const values = offers.map((offer) => (sort === "item" ? positivePrice(offer.price) : payableTotal(offer)));
+  const rankOf = new Map<number, number>();
+  let placed = 0;
+  for (const value of [...values].filter((value): value is number => value != null).sort((left, right) => left - right)) {
+    if (!rankOf.has(value)) {
+      rankOf.set(value, placed + 1);
+    }
+    placed += 1;
+  }
+  return values.map((value) => (value == null ? null : (rankOf.get(value) ?? null)));
+}
+
+export function listingShopCounts<T extends { provider: string; sellerId?: string | null; shopName?: string | null }>(
+  offers: readonly T[],
+): { listingCount: number; shopCount: number } {
+  const shops = new Set<string>();
+  for (const offer of offers) {
+    const shop = (offer.sellerId ?? "").trim() || (offer.shopName ?? "").trim();
+    if (shop !== "") {
+      shops.add(`${offer.provider}:${shop}`);
+    }
+  }
+  return { listingCount: offers.length, shopCount: shops.size };
+}
+
+function positivePrice(price: number | null): number | null {
+  if (price == null || !Number.isInteger(price) || price <= 0) {
+    return null;
+  }
+  return price;
+}
+
 export function itemPriceGap(price: number | null, lowest: number | null): number | null {
   if (price == null || lowest == null || !Number.isInteger(price) || !Number.isInteger(lowest) || price < 0 || lowest < 0) {
     return null;

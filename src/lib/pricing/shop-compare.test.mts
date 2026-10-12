@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cheapestPrices, compareWindow, confirmedPriceSummary, groupOtherSalesUnits, initialCompareCount, itemPriceGap, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, compareWindow, competitionRanks, confirmedPriceSummary, groupOtherSalesUnits, initialCompareCount, itemPriceGap, listingShopCounts, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
 import { payableTotal } from "./visible-offers.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
@@ -160,6 +160,45 @@ test("確認できた最安とショップ数は在庫ありの実店舗だけ�
   assert.equal(itemPriceGap(634, summary.lowestPrice), 0);
   assert.equal(itemPriceGap(null, summary.lowestPrice), null);
   assert.equal(payableTotal(offers[0]!), null);
+});
+
+test("同額は同じ順位にし、次の順位は飛ばす", () => {
+  assert.deepEqual(
+    competitionRanks(
+      [
+        { price: 100, shippingFee: 0 },
+        { price: 100, shippingFee: 0 },
+        { price: 120, shippingFee: 0 },
+      ],
+      "item",
+    ),
+    [1, 1, 3],
+  );
+});
+
+test("送料込み順は合計が分かる掲載だけ順位を付け、送料不明は0円にしない", () => {
+  assert.deepEqual(
+    competitionRanks(
+      [
+        { price: 500, shippingFee: 100 },
+        { price: 100, shippingFee: null },
+        { price: 700, shippingFee: 0 },
+      ],
+      "total",
+    ),
+    [1, null, 2],
+  );
+});
+
+test("件数は出品ごと、店舗数は同じ店舗を1件に数える", () => {
+  assert.deepEqual(
+    listingShopCounts([
+      offer({ id: "a", price: 100, shippingFee: 0, sellerId: "same", shopName: "A店" }),
+      offer({ id: "b", price: 200, shippingFee: 0, sellerId: "same", shopName: "A店", listingTitle: "別掲載" }),
+      offer({ id: "c", price: 150, shippingFee: 0, provider: "rakuten", sellerId: "other", shopName: "B店" }),
+    ]),
+    { listingCount: 3, shopCount: 2 },
+  );
 });
 
 test("Yahooの取得件数が総ヒットより少ないときは全店舗の最安としない", () => {
