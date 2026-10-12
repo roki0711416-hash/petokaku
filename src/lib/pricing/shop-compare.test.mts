@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cheapestPrices, collapseSameShopOffers, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
 function offer(partial: {
@@ -51,17 +51,17 @@ test("同じ価格ではモールではなくショップ名で並べる", () =>
   assert.deepEqual(ranked.map((item) => item.id), ["rakuten", "yahoo"]);
 });
 
-test("同じショップの重複は販売単位ごとに安い掲載だけを残す", () => {
+test("同じショップの同じ商品だけを安値にまとめ、別商品は残す", () => {
   const parts = partitionShopComparison([
-    offer({ id: "dear", price: 2000, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a" }),
-    offer({ id: "cheap", price: 1200, shippingFee: null, shopName: "A店", provider: "rakuten", sellerId: "shop-a" }),
-    offer({ id: "set", price: 900, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a", packCount: 2, listingTitle: "2個セット" }),
-    offer({ id: "yahoo-same", price: 1500, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y" }),
-    offer({ id: "yahoo-dup", price: 1800, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y" }),
+    offer({ id: "dear", price: 2000, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a", listingTitle: "【送料無料】湿度計" }),
+    offer({ id: "cheap", price: 1200, shippingFee: null, shopName: "A店", provider: "rakuten", sellerId: "shop-a", listingTitle: "湿度計 送料無料" }),
+    offer({ id: "other", price: 900, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a", listingTitle: "温度計" }),
+    offer({ id: "set", price: 800, shippingFee: 0, shopName: "A店", provider: "rakuten", sellerId: "shop-a", packCount: 2, listingTitle: "湿度計 2個セット" }),
+    offer({ id: "yahoo-same", price: 1500, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y", listingTitle: "湿度計" }),
+    offer({ id: "yahoo-dup", price: 1800, shippingFee: 0, shopName: "Y店", provider: "yahoo", sellerId: "y", listingTitle: "湿度計" }),
   ]);
-  assert.deepEqual(sortComparedOffers(parts.ranked, "item").map((item) => item.id), ["cheap", "yahoo-same"]);
+  assert.deepEqual(sortComparedOffers(parts.ranked, "item").map((item) => item.id), ["other", "cheap", "yahoo-same"]);
   assert.deepEqual(parts.otherUnits.map((item) => item.id), ["set"]);
-  assert.equal(collapseSameShopOffers(parts.ranked).length, parts.ranked.length);
 });
 
 test("本体価格順はモールと送料の状態を混ぜ、送料未確認も一覧に残す", () => {

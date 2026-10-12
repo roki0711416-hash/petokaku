@@ -59,9 +59,9 @@ export function rakutenShopSearchRequest(
   url.searchParams.set("keyword", janCode);
   url.searchParams.set("hits", String(rakutenShopSearchHits));
   url.searchParams.set("page", "1");
-  // 在庫切れを安い順の30件が埋めると、購入できる店舗が欠ける。広い検索で説明文のJANも拾う。
+  // 在庫切れが安い順の30件を埋めると、購入できる店舗が欠ける。検索範囲は商品名を優先し、説明文だけの別商品を混ぜない。
   url.searchParams.set("availability", "1");
-  url.searchParams.set("field", "0");
+  url.searchParams.set("field", "1");
   url.searchParams.set("sort", "+itemPrice");
   url.searchParams.set("format", "json");
   url.searchParams.set("formatVersion", "2");

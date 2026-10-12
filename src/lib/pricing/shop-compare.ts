@@ -63,6 +63,15 @@ function byItemPrice<T extends { price: number | null; shopName?: string | null;
   });
 }
 
+function listingIdentity(title: string | null): string {
+  return (title ?? "")
+    .normalize("NFKC")
+    .replace(/【[^】]*】/g, "")
+    .replace(/送料無料|送料込/g, "")
+    .replace(/\s+/g, "")
+    .slice(0, 80);
+}
+
 function sameShopKey(offer: PricedOffer): string | null {
   if (isRakutenReferencePrice(offer)) {
     return null;
@@ -72,7 +81,7 @@ function sameShopKey(offer: PricedOffer): string | null {
     return null;
   }
   const unit = isPrimarySalesUnit(offer) ? "primary" : `pack:${offer.packCount ?? "unknown"}`;
-  return `${offer.provider}:${shop}:${unit}:${offer.stockStatus}`;
+  return `${offer.provider}:${shop}:${unit}:${offer.stockStatus}:${listingIdentity(offer.listingTitle)}`;
 }
 
 export function collapseSameShopOffers<T extends PricedOffer>(offers: readonly T[]): T[] {

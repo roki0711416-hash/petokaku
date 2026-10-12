@@ -10,7 +10,7 @@ test("店舗検索はJANをキーワードにし、アクセスキーをURLに�
   assert.equal(url.searchParams.get("keyword"), jan);
   assert.equal(url.searchParams.get("hits"), "30");
   assert.equal(url.searchParams.get("availability"), "1");
-  assert.equal(url.searchParams.get("field"), "0");
+  assert.equal(url.searchParams.get("field"), "1");
   assert.equal(url.searchParams.get("sort"), "+itemPrice");
   assert.equal(url.searchParams.get("affiliateId"), "affiliate-id");
   assert.equal(url.searchParams.get("genreId"), null);
