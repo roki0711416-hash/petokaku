@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ShopCard } from "@/components/ui/shop-card";
+import { ShopCompareList } from "@/components/shop-compare-list";
+import { formatYen } from "@/lib/format";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
-import { comparisonMallOf, type ComparisonMall } from "@/lib/pricing/malls";
+import { comparisonMallOf, mallVisitLabel, type ComparisonMall } from "@/lib/pricing/malls";
 import {
   cheapestPrices,
   compareWindow,
@@ -13,7 +14,7 @@ import {
   partitionShopComparison,
   sortComparedOffers,
 } from "@/lib/pricing/shop-compare";
-import { payableTotal } from "@/lib/pricing/visible-offers";
+import { shopProductLink } from "@/lib/pricing/shop-link";
 import type { Offer } from "@/lib/types";
 
 const mallLabels: Record<ComparisonMall, string> = {
@@ -23,16 +24,8 @@ const mallLabels: Record<ComparisonMall, string> = {
 
 type MallFilter = "all" | ComparisonMall;
 
-function mallName(offer: Offer): string | null {
-  const mall = comparisonMallOf(offer);
-  return mall ? mallLabels[mall] : null;
-}
-
 export function ShopPriceCompare({
   offers,
-  quantity,
-  quantityUnit,
-  unitPriceType,
 }: {
   offers: Offer[];
   quantity: number | null;
@@ -54,11 +47,10 @@ export function ShopPriceCompare({
   const reference = sortComparedOffers(parts.reference, "item");
   const otherUnits = groupOtherSalesUnits(parts.otherUnits, sort);
   const unavailable = sortComparedOffers(parts.unavailable, sort);
-  const cheapest = cheapestPrices(ranked);
-  const listProps = { quantity, quantityUnit, unitPriceType, cheapest };
+  const overallLowest = cheapestPrices(partitionShopComparison(offers.filter((offer) => comparisonMallOf(offer))).ranked).itemPrice;
 
   return (
-    <div className="grid min-w-0 gap-6">
+    <div className="grid min-w-0 gap-3">
       {present.length > 1 ? (
         <div className="flex min-w-0 flex-wrap gap-2" role="group" aria-label="モールで絞り込み">
           <FilterChip selected={mall === "all"} onClick={() => setMall("all")}>
@@ -83,22 +75,10 @@ export function ShopPriceCompare({
         <PagedOffers
           resetKey={`${mall}:${sort}:ranked`}
           offers={ranked}
+          lowestItemPrice={overallLowest}
           emptyLabel="この条件で順位に入れられる掲載はありません。"
-          {...listProps}
         />
-        {reference.length > 0 ? (
-          <div className="mt-4 min-w-0">
-            <h4 className="text-sm font-medium text-ink">参考価格</h4>
-            <p className="mt-1 text-xs leading-5 text-muted">
-              楽天市場の商品価格ナビです。店舗ごとの個数と送料は未確認のため、単品の順位には入れていません。
-            </p>
-            <ol className="mt-3 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
-              {reference.map((offer) => (
-                <ShopCard key={offer.id} offer={offer} rank={0} mallLabel={mallName(offer)} reference />
-              ))}
-            </ol>
-          </div>
-        ) : null}
+        {reference.length > 0 ? <ReferencePrices offers={reference} /> : null}
       </section>
       {otherUnits.length > 0 ? (
         <SideFrame title="セット・販売単位が違う掲載" note="個数やセットが違うため、単品の順位には入れていません。">
@@ -110,9 +90,9 @@ export function ShopPriceCompare({
                 <PagedOffers
                   resetKey={`${mall}:${sort}:unit:${group.key}`}
                   offers={group.offers}
+                  lowestItemPrice={null}
+                  showGap={false}
                   emptyLabel="この販売単位の掲載はありません。"
-                  {...listProps}
-                  cheapest={{ itemPrice: null, shippingTotal: null }}
                 />
               </div>
             ))}
@@ -124,9 +104,9 @@ export function ShopPriceCompare({
           <PagedOffers
             resetKey={`${mall}:${sort}:stock`}
             offers={unavailable}
+            lowestItemPrice={null}
+            showGap={false}
             emptyLabel="在庫が確認できない掲載はありません。"
-            {...listProps}
-            cheapest={{ itemPrice: null, shippingTotal: null }}
           />
         </SideFrame>
       ) : null}
@@ -161,20 +141,49 @@ function SideFrame({ title, note, children }: { title: string; note: string; chi
   );
 }
 
+function ReferencePrices({ offers }: { offers: Offer[] }) {
+  return (
+    <aside className="mt-4 rounded-xl border border-line bg-sand/70 px-4 py-3">
+      <h3 className="text-sm font-medium text-ink">楽天の参考価格</h3>
+      <p className="mt-1 text-xs leading-5 text-muted">商品価格ナビの参考です。店舗・送料・在庫は未確認のため、上の比較には入れていません。</p>
+      <ul className="mt-3 grid gap-3">
+        {offers.map((offer) => {
+          const link = shopProductLink(offer);
+          const label = mallVisitLabel(offer.provider);
+          return (
+            <li key={offer.id} className="flex flex-wrap items-center justify-between gap-3">
+              <p className="price-num text-2xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+              {link.href ? (
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel={link.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
+                  className="inline-flex min-h-10 items-center justify-center rounded-full border border-line bg-card px-4 text-sm text-ink"
+                >
+                  {link.affiliate ? "広告 · " : ""}
+                  {label}
+                </a>
+              ) : (
+                <span className="text-sm text-muted">リンクなし</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </aside>
+  );
+}
+
 function PagedOffers({
   offers,
-  cheapest,
-  quantity,
-  quantityUnit,
-  unitPriceType,
+  lowestItemPrice,
+  showGap = true,
   emptyLabel,
   resetKey,
 }: {
   offers: Offer[];
-  cheapest: { itemPrice: number | null; shippingTotal: number | null };
-  quantity: number | null;
-  quantityUnit: QuantityUnit | null;
-  unitPriceType: UnitPriceType;
+  lowestItemPrice: number | null;
+  showGap?: boolean;
   emptyLabel: string;
   resetKey: string;
 }) {
@@ -196,24 +205,7 @@ function PagedOffers({
       <p className="mb-2 text-xs text-muted">
         {shown.length} / {offers.length}件
       </p>
-      <ol className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
-        {shown.map((offer, index) => {
-          const total = payableTotal(offer);
-          return (
-            <ShopCard
-              key={offer.id}
-              offer={offer}
-              rank={index + 1}
-              mallLabel={mallName(offer)}
-              itemCheapest={cheapest.itemPrice != null && offer.price === cheapest.itemPrice}
-              totalCheapest={cheapest.shippingTotal != null && total != null && total === cheapest.shippingTotal}
-              quantity={quantity}
-              quantityUnit={quantityUnit}
-              unitPriceType={unitPriceType}
-            />
-          );
-        })}
-      </ol>
+      <ShopCompareList offers={shown} lowestItemPrice={lowestItemPrice} showGap={showGap} />
       {window.remaining > 0 ? (
         <button
           type="button"

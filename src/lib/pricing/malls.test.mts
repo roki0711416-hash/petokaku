@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { confirmedJanOffers, groupOffersByMall, offersComparableAsNew } from "./malls.ts";
+import { confirmedJanOffers, groupOffersByMall, mallVisitLabel, offersComparableAsNew } from "./malls.ts";
 import type { Offer } from "../types.ts";
 
 function offer(patch: Partial<Offer> & Pick<Offer, "id" | "provider" | "shopName">): Offer {
@@ -26,6 +26,12 @@ function offer(patch: Partial<Offer> & Pick<Offer, "id" | "provider" | "shopName
     ...patch,
   };
 }
+
+test("購入リンクはモール名で案内する", () => {
+  assert.equal(mallVisitLabel("rakuten"), "楽天で見る");
+  assert.equal(mallVisitLabel("yahoo"), "Yahoo!で見る");
+  assert.equal(mallVisitLabel("sample"), "ショップで見る");
+});
 
 test("掲載があるモールだけを出し、サンプルと未対応モールは出さない", () => {
   const groups = groupOffersByMall([

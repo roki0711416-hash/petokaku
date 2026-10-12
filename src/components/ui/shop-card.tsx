@@ -1,6 +1,7 @@
 import { formatUnitAmount, formatYen, stockLabel } from "@/lib/format";
 import { calculateUnitPrices, type QuantityUnit, type UnitPriceType } from "@/lib/pricing/calculate";
 import { unitPriceQuantity } from "@/lib/pricing/quantity-parse";
+import { mallVisitLabel } from "@/lib/pricing/malls";
 import { shopProductLink } from "@/lib/pricing/shop-link";
 import { payableTotal } from "@/lib/pricing/visible-offers";
 import type { Offer } from "@/lib/types";
@@ -25,7 +26,7 @@ export function shippingLine(offer: Offer): string {
     case "free":
       return "送料無料";
     case "unknown":
-      return "送料はショップで確認";
+      return "送料不明";
     case "amount":
       return `送料 ${formatYen(offer.shippingFee ?? 0)}`;
   }
@@ -36,9 +37,9 @@ export function shippingCell(offer: Offer): string {
     case "conditional":
       return "条件付き";
     case "free":
-      return "無料";
+      return "送料無料";
     case "unknown":
-      return "未確認";
+      return "送料不明";
     case "amount":
       return formatYen(offer.shippingFee ?? 0);
   }
@@ -76,7 +77,7 @@ function ShopVisit({ offer, wide }: { offer: Offer; wide?: boolean }) {
   const link = shopProductLink(offer);
   const href = link.href;
   const isAdvertisement = link.affiliate;
-  const label = wide ? "ショップで商品を見る" : "商品を見る";
+  const label = mallVisitLabel(offer.provider);
   const className = wide
     ? "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-forest px-4 text-sm font-medium text-white hover:bg-forest-deep"
     : "inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-forest px-4 text-sm whitespace-nowrap text-white hover:bg-forest-deep";

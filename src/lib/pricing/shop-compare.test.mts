@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cheapestPrices, compareWindow, groupOtherSalesUnits, initialCompareCount, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, compareWindow, confirmedPriceSummary, groupOtherSalesUnits, initialCompareCount, itemPriceGap, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { payableTotal } from "./visible-offers.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
 function offer(partial: {
@@ -142,6 +143,23 @@ test("セットは個数ごとに分け、指定した順で並べる", () => {
     ["2", "4"],
   );
   assert.deepEqual(groups[0]?.offers.map((item) => item.id), ["two-cheap", "two-dear"]);
+});
+
+test("確認できた最安とショップ数は在庫ありの実店舗だけで、参考価格と送料不明の合計は入れない", () => {
+  const offers = [
+    offer({ id: "low", price: 634, shippingFee: null, shopName: "カウモール", sellerId: "cow" }),
+    offer({ id: "same-shop", price: 700, shippingFee: 0, shopName: "カウモール", sellerId: "cow", listingTitle: "別掲載" }),
+    offer({ id: "high", price: 800, shippingFee: 0, shopName: "別店", sellerId: "other" }),
+    offer({ id: "navi", price: 508, shippingFee: null, shopName: "楽天市場", provider: "rakuten", sellerId: null }),
+    offer({ id: "set", price: 100, shippingFee: 0, shopName: "セット店", sellerId: "set", packCount: 2, listingTitle: "2個セット" }),
+  ];
+  const summary = confirmedPriceSummary(offers);
+  assert.equal(summary.lowestPrice, 634);
+  assert.equal(summary.shopCount, 2);
+  assert.equal(itemPriceGap(800, summary.lowestPrice), 166);
+  assert.equal(itemPriceGap(634, summary.lowestPrice), 0);
+  assert.equal(itemPriceGap(null, summary.lowestPrice), null);
+  assert.equal(payableTotal(offers[0]!), null);
 });
 
 test("Yahooの取得件数が総ヒットより少ないときは全店舗の最安としない", () => {

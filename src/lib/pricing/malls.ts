@@ -9,6 +9,16 @@ const mallLabels: Record<ComparisonMall, string> = {
   rakuten: "楽天市場",
 };
 
+export function mallVisitLabel(provider: string): string {
+  if (provider === "rakuten") {
+    return "楽天で見る";
+  }
+  if (provider === "yahoo") {
+    return "Yahoo!で見る";
+  }
+  return "ショップで見る";
+}
+
 export function comparisonMallOf(offer: { provider: string; isSample: boolean }): ComparisonMall | null {
   if (offer.isSample) {
     return null;

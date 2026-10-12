@@ -34,6 +34,31 @@ export function isPrimarySalesUnit(offer: { packCount: number | null; listingTit
   return (offer.packCount == null || offer.packCount === 1) && !hasUnresolvedPackNotation(offer.listingTitle ?? "");
 }
 
+export function itemPriceGap(price: number | null, lowest: number | null): number | null {
+  if (price == null || lowest == null || !Number.isInteger(price) || !Number.isInteger(lowest) || price < 0 || lowest < 0) {
+    return null;
+  }
+  return price - lowest;
+}
+
+export function confirmedPriceSummary<T extends PricedOffer>(offers: readonly T[]): { lowestPrice: number | null; shopCount: number } {
+  const shops = new Set<string>();
+  let lowestPrice: number | null = null;
+  for (const offer of partitionShopComparison([...offers]).ranked) {
+    if (offer.price == null || !Number.isInteger(offer.price) || offer.price <= 0) {
+      continue;
+    }
+    if (lowestPrice == null || offer.price < lowestPrice) {
+      lowestPrice = offer.price;
+    }
+    const shop = (offer.sellerId ?? "").trim() || (offer.shopName ?? "").trim();
+    if (shop !== "") {
+      shops.add(`${offer.provider}:${shop}`);
+    }
+  }
+  return { lowestPrice, shopCount: shops.size };
+}
+
 export function compareWindow(total: number, shown: number): { shown: number; next: number; remaining: number } {
   const visible = Math.min(Math.max(shown, 0), total);
   const remaining = total - visible;
