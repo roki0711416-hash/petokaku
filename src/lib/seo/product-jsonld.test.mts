@@ -14,6 +14,7 @@ test("商品の構造化データは実在する価格と在庫だけを入れ�
       { shopName: "ショップA", price: 5990, url: "https://shop.example/a", stockStatus: "in_stock" },
       { shopName: "ショップB", price: null, url: "https://shop.example/b", stockStatus: "in_stock" },
       { shopName: "ショップC", price: 6200, url: "https://shop.example/c", stockStatus: "unknown" },
+      { shopName: "価格なし", price: 0, url: "https://shop.example/zero", stockStatus: "in_stock" },
     ],
   });
   assert.equal(data?.["@type"], "Product");

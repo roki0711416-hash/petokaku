@@ -55,7 +55,7 @@ export function productStructuredData(input: ProductJsonInput): Record<string, u
   }
 
   const offers = input.offers.flatMap((offer) => {
-    if (offer.price == null || !Number.isInteger(offer.price) || offer.price < 0 || !offer.url) {
+    if (offer.price == null || !Number.isInteger(offer.price) || offer.price <= 0 || !offer.url) {
       return [];
     }
     const entry: Record<string, unknown> = {

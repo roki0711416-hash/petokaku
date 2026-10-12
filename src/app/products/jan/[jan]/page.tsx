@@ -15,7 +15,8 @@ import { saveDisplayedJanPrices } from "@/lib/supabase/save-price-history";
 import { validJanCode } from "@/lib/sources/yahoo/adapter";
 import { classifyPetKind } from "@/lib/sources/yahoo/pet-kind";
 import { bestItemUnitIds, groupSizeFamilies, quoteSingleSize, sizeFamilyHref, type SizeFamilyMember } from "@/lib/sources/yahoo/size-family";
-import { getSiteUrl, janPageRobots } from "@/lib/site";
+import { janProductMetadata } from "@/lib/seo/jan-metadata";
+import { janPageRobots } from "@/lib/site";
 import { safeHttpUrl } from "@/lib/urls";
 import type { ProductDetail } from "@/lib/types";
 
@@ -124,36 +125,23 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
     if (result.reason === "no-jan") {
       const fallback = await loadRakutenOnlyComparison(jan);
       if (fallback && fallback !== "temporary") {
-        const name = fallback.product.name.trim() || "商品の価格比較";
-        return { title: name, robots: janPageRobots(true), alternates: { canonical: `/products/jan/${jan}` } };
+        return janProductMetadata({
+          jan,
+          name: fallback.product.name,
+          brand: fallback.product.brand,
+          imageUrl: safeHttpUrl(fallback.product.imageUrl),
+        });
       }
     }
     return { title: "商品を表示できません", robots: janPageRobots(false) };
   }
   const detail = result.adapted.detail;
-  const name = detail.name.trim();
-  const title = name || "商品の価格比較";
-  const brand = detail.brand.trim();
-  const brandPrefix = brand && !title.includes(brand) ? `${brand}の` : "";
-  const janLabel = detail.janCode ? `（JAN ${detail.janCode}）` : "";
-  const description = `${brandPrefix}${title}${janLabel}の販売価格と送料を、ショップごとに見比べられます。購入前にショップで確認してください。`;
-  const imageUrl = safeHttpUrl(result.adapted.detail.imageUrl);
-  const canonical = `/products/jan/${jan}`;
-  return {
-    title,
-    description,
-    alternates: { canonical },
-    robots: janPageRobots(true),
-    openGraph: {
-      title,
-      description,
-      url: new URL(canonical, getSiteUrl()).toString(),
-      siteName: "ペトカク",
-      locale: "ja_JP",
-      type: "website",
-      images: imageUrl?.startsWith("https://") ? [{ url: imageUrl, alt: title }] : undefined,
-    },
-  };
+  return janProductMetadata({
+    jan,
+    name: detail.name,
+    brand: detail.brand,
+    imageUrl: safeHttpUrl(detail.imageUrl),
+  });
 }
 
 export default async function YahooJanPage({ params, searchParams }: JanPageProps) {

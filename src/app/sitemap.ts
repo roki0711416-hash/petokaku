@@ -1,6 +1,20 @@
 import type { MetadataRoute } from "next";
-import { sitemapEntries } from "@/lib/site";
+import { publishedProductPaths } from "@/lib/sitemap-products";
+import { getSiteUrl, sitemapEntries } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return sitemapEntries();
+export const revalidate = 3600;
+export const maxDuration = 60;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = getSiteUrl();
+  const staticEntries = sitemapEntries().filter((entry) => !entry.url.includes("/products/jan/"));
+  const seen = new Set(staticEntries.map((entry) => entry.url));
+  const products = (await publishedProductPaths())
+    .map((path) => ({
+      url: new URL(path, siteUrl).toString(),
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    }))
+    .filter((entry) => !seen.has(entry.url));
+  return [...staticEntries, ...products];
 }

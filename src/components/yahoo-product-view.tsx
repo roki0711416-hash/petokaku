@@ -74,12 +74,19 @@ export function YahooProductView({
     imageUrl,
     pageUrl: new URL(pageHref, getSiteUrl()).toString(),
     sizeLabel: capacity,
-    offers: offersComparableAsNew(product.offers).map((offer) => ({
-      shopName: offer.shopName,
-      price: offer.price,
-      url: safeHttpUrl(offer.productUrl),
-      stockStatus: offer.stockStatus,
-    })),
+    offers: offersComparableAsNew(product.offers).flatMap((offer) => {
+      if (offer.isSample) {
+        return [];
+      }
+      return [
+        {
+          shopName: offer.shopName,
+          price: offer.price,
+          url: safeHttpUrl(offer.productUrl),
+          stockStatus: offer.stockStatus,
+        },
+      ];
+    }),
   });
 
   return (

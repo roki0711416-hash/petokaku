@@ -60,7 +60,6 @@ const publicSitemap = [
   "https://petokaku.com/pets/bird",
   "https://petokaku.com/pets/fish",
   "https://petokaku.com/pets/reptile",
-  "https://petokaku.com/products/jan/3182550706933",
 ];
 
 test("ALLOW_INDEXING=true かつ PRICE_SOURCE=sample でも公開ページを許可する", () => {
@@ -87,7 +86,7 @@ test("ALLOW_INDEXING が true でないときはサイト全体を拒否する",
   });
 });
 
-test("サイトマップは公開固定ページと確認済みJANだけをサイトURLのオリジンで出す", () => {
+test("サイトマップの固定ページは公開ページだけで、商品詳細は含めない", () => {
   withEnv({ NEXT_PUBLIC_SITE_URL: "https://petokaku.com/unused" }, () => {
     const entries = sitemapEntries();
     assert.deepEqual(
@@ -95,10 +94,9 @@ test("サイトマップは公開固定ページと確認済みJANだけをサ�
       publicSitemap,
     );
     assert.equal(
-      entries.some((entry) => entry.url.includes("/search") || entry.url.includes("/products/yahoo-preview")),
+      entries.some((entry) => entry.url.includes("/search") || entry.url.includes("/products/yahoo-preview") || entry.url.includes("/products/jan/")),
       false,
     );
-    assert.equal(entries.filter((entry) => entry.url.includes("/products/jan/")).length, 1);
     assert.equal(entries[0]?.priority, 1);
     assert.ok(entries.slice(1).every((entry) => entry.priority === 0.6 && entry.changeFrequency === "weekly"));
   });
@@ -143,8 +141,13 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
     assert.doesNotMatch(source, /robotsMetadata\(\)/);
   }
   const jan = read("../app/products/jan/[jan]/page.tsx");
-  assert.match(jan, /janPageRobots\(true\)/);
+  const janMetadata = read("./seo/jan-metadata.ts");
+  assert.match(jan, /janProductMetadata/);
   assert.match(jan, /janPageRobots\(false\)/);
+  assert.match(jan, /export async function generateMetadata\(\{ params \}/);
+  assert.match(janMetadata, /janPageRobots\(true\)/);
+  assert.match(janMetadata, /alternates: \{ canonical \}/);
+  assert.doesNotMatch(janMetadata, /searchParams/);
   const home = read("../app/page.tsx");
   const cards = read("../components/comparable-products.tsx");
   const site = read("./site.ts");
@@ -166,7 +169,13 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.match(catalog, /確定した金額としては扱っていません/);
   assert.doesNotMatch(catalog, /売れ筋/);
   assert.doesNotMatch(site, /searchYahooItems|loadYahooJan/);
-  assert.doesNotMatch(read("../app/sitemap.ts"), /searchYahooItems|loadYahooJan/);
+  const sitemap = read("../app/sitemap.ts");
+  assert.doesNotMatch(sitemap, /searchYahooItems|loadYahooJan/);
+  assert.match(sitemap, /publishedProductPaths/);
+  assert.match(sitemap, /revalidate = 3600/);
+  assert.doesNotMatch(sitemap, /3182550706933/);
+  const robots = robotsPolicy.toString();
+  assert.equal(robots.includes("/products/jan"), false);
   assert.doesNotMatch(`${home}\n${site}`, /人気商品|売れ筋/);
   assert.doesNotMatch(home, /人気検索キーワード/);
 });

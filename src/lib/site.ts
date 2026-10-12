@@ -90,12 +90,7 @@ export function sitemapEntries(): MetadataRoute.Sitemap {
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
-  const products = selectIndexedJans(indexedJanProducts).map((product) => ({
-    url: new URL(indexedJanPath(product.janCode), siteUrl).toString(),
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
-  return [...pages, ...guides, ...petEntries, ...products];
+  return [...pages, ...guides, ...petEntries];
 }
 
 export function privateRobots(): Metadata["robots"] {
