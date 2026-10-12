@@ -167,20 +167,91 @@ async function fetchKeywordPages(query: string, starts: readonly number[]): Prom
   return { ok: true, items: ready.flatMap((page) => page.items) };
 }
 
-export const loadYahooKeywordSearch = cache(async (query: string): Promise<YahooKeywordSearchResult> => {
-  const first = await fetchKeywordPages(query, [1, 51]);
-  if (!first.ok) {
-    return first;
+const keywordSecondPageWaitMs = 250;
+
+async function settleWithin<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const result = await Promise.race([
+    promise.then((value) => value),
+    new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), ms);
+    }),
+  ]);
+  if (timer) {
+    clearTimeout(timer);
   }
-  let items = matchingKeywordItems(query, dedupeYahooKeywordItems(first.items));
+  return result;
+}
+
+export const loadYahooKeywordSearch = cache(async (query: string): Promise<YahooKeywordSearchResult> => {
+  const janSearch = validJanCode(query) != null;
+  const started = Date.now();
+  const firstPromise = fetchKeywordPages(query, [1]);
+  const secondPromise = janSearch ? null : fetchKeywordPages(query, [51]);
+  const first = await firstPromise;
+  const firstMs = Date.now() - started;
+  let followMs = 0;
+  let shapeMs = 0;
+  let usedSecond = false;
+  let sourceItems: YahooItem[] = [];
+  if (!first.ok) {
+    if (!secondPromise) {
+      console.info("[petokaku] キーワード検索の所要時間", { firstMs, followMs: 0, shapeMs: 0, cards: 0 });
+      return first;
+    }
+    const waitStarted = Date.now();
+    const second = await secondPromise;
+    followMs += Date.now() - waitStarted;
+    if (!second.ok) {
+      console.info("[petokaku] キーワード検索の所要時間", { firstMs, followMs, shapeMs: 0, cards: 0 });
+      return first;
+    }
+    sourceItems = second.items;
+    usedSecond = true;
+  } else {
+    sourceItems = first.items;
+  }
+  let shapeStarted = Date.now();
+  let items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
   let cards = keywordCards(items);
-  if (!validJanCode(query) && cards.length < keywordSearchFillTarget) {
-    const more = await fetchKeywordPages(query, keywordSearchMoreStarts);
-    if (more.ok) {
-      items = matchingKeywordItems(query, dedupeYahooKeywordItems([...first.items, ...more.items]));
+  shapeMs += Date.now() - shapeStarted;
+  if (secondPromise && !usedSecond && cards.length < keywordSearchFillTarget) {
+    const waitStarted = Date.now();
+    const second = await secondPromise;
+    followMs += Date.now() - waitStarted;
+    if (second.ok) {
+      sourceItems = [...sourceItems, ...second.items];
+      shapeStarted = Date.now();
+      items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
       cards = keywordCards(items);
+      shapeMs += Date.now() - shapeStarted;
+    }
+  } else if (secondPromise && !usedSecond) {
+    const waitStarted = Date.now();
+    const second = await settleWithin(secondPromise, keywordSecondPageWaitMs);
+    followMs += Date.now() - waitStarted;
+    if (second?.ok) {
+      sourceItems = [...sourceItems, ...second.items];
+      shapeStarted = Date.now();
+      items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
+      cards = keywordCards(items);
+      shapeMs += Date.now() - shapeStarted;
+    } else {
+      void secondPromise.then(() => undefined, () => undefined);
     }
   }
+  if (!janSearch && cards.length < keywordSearchFillTarget) {
+    const waitStarted = Date.now();
+    const more = await fetchKeywordPages(query, keywordSearchMoreStarts);
+    followMs += Date.now() - waitStarted;
+    if (more.ok) {
+      shapeStarted = Date.now();
+      items = matchingKeywordItems(query, dedupeYahooKeywordItems([...sourceItems, ...more.items]));
+      cards = keywordCards(items);
+      shapeMs += Date.now() - shapeStarted;
+    }
+  }
+  console.info("[petokaku] キーワード検索の所要時間", { firstMs, followMs, shapeMs, cards: cards.length });
   if (cards.length === 0) {
     const candidates = buildSearchCandidates(items, new Date().toISOString(), Math.max(items.length, 1)).map((card) => ({
       ...card,
