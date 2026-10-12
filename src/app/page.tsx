@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HomeCatalogSections } from "@/components/home-catalog-sections";
+import { HomeTopics } from "@/components/home-topics";
 import { SearchForm } from "@/components/search-form";
-import { Hero } from "@/components/ui/hero";
 import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
 import { loadHomeCatalog } from "@/lib/home-catalog";
 import { getSiteUrl, indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 };
 
 const steps = [
-  { title: "探す", body: "ペットの種類か、商品名で探します。" },
-  { title: "比べる", body: "ショップごとの価格を見ます。" },
+  { title: "探す", body: "商品名か、ペットの種類から探します。" },
+  { title: "比較する", body: "ショップごとの価格と送料を見ます。" },
   { title: "ショップで確認", body: "購入は各ショップのページで行います。" },
 ];
 
@@ -68,8 +68,24 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} />
-      <Hero />
-      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-4 pb-2">
+      <section id="home-search" aria-labelledby="home-search-heading" className="scroll-mt-28 bg-card px-4 pt-6 pb-8 md:pt-10">
+        <div className="mx-auto max-w-3xl">
+          <h1 id="home-search-heading" className="text-lg leading-snug font-medium text-ink md:text-3xl">
+            商品名・ブランド名・JANコードで検索
+          </h1>
+          <div className="mt-4">
+            <SearchForm
+              id="home-search-input"
+              prominent
+              action="/search"
+              label="商品名・ブランド名・JANコードで検索"
+              buttonLabel="検索"
+              placeholder="商品名・ブランド名・JANコードで検索"
+            />
+          </div>
+        </div>
+      </section>
+      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-8">
         <div className="mx-auto max-w-6xl">
           <h2 id="categories-heading" className="text-base font-medium text-ink md:text-lg">
             ペットの種類から探す
@@ -77,21 +93,30 @@ export default async function HomePage() {
           <PetPhotoGrid />
         </div>
       </section>
-      <section id="home-search" aria-labelledby="home-search-heading" className="scroll-mt-28 px-4 pt-4 pb-8">
+      <HomeTopics />
+      <section aria-labelledby="howto-heading" className="px-4 py-8 md:py-10">
         <div className="mx-auto max-w-6xl">
-          <h2 id="home-search-heading" className="text-sm font-medium text-ink">
-            商品名から探す
+          <h2 id="howto-heading" className="text-base font-medium text-ink md:text-lg">
+            サイトの使い方
           </h2>
-          <div className="mt-2 max-w-xl">
-            <SearchForm
-              id="home-search-input"
-              compact
-              action="/search"
-              label="商品名・ブランド・JANコード"
-              buttonLabel="検索"
-              placeholder="商品名・ブランド・JANコード"
-            />
-          </div>
+          <ol className="mt-3 grid gap-2 md:grid-cols-3 md:gap-3">
+            {steps.map((step, index) => (
+              <li key={step.title} className="flex min-w-0 items-start gap-3 rounded-2xl bg-card px-3 py-3">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-forest text-sm text-white">{index + 1}</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-ink">{step.title}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-muted">{step.body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            詳しくは
+            <Link href="/guide" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+              サイトの使い方
+            </Link>
+            にまとめています。
+          </p>
         </div>
       </section>
       <HomeCatalogSections catalog={catalog} />
@@ -115,29 +140,6 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
-      <section aria-labelledby="howto-heading" className="bg-card px-4 py-8 md:py-10">
-        <div className="mx-auto max-w-6xl">
-          <h2 id="howto-heading" className="text-lg font-medium text-ink">
-            使い方
-          </h2>
-          <ol className="mt-4 grid gap-3 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <li key={step.title} className="min-w-0 rounded-2xl bg-paper px-4 py-4">
-                <p className="text-sm text-sage">0{index + 1}</p>
-                <h3 className="mt-1 text-base font-medium text-ink">{step.title}</h3>
-                <p className="mt-1 text-sm leading-6 text-muted">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            詳しくは
-            <Link href="/guide" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
-              サイトの使い方
-            </Link>
-            にまとめています。
-          </p>
-        </div>
-      </section>
     </>
   );
 }

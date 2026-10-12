@@ -18,28 +18,28 @@ export type PetIllustration = {
 
 export const petIllustrations: PetIllustration[] = [
   {
-    label: "犬",
+    label: "犬用品",
     href: petPath("dog"),
     alt: "ゴールデンレトリバーのイラスト",
     image: dog,
     glyph: "dog",
   },
   {
-    label: "猫",
+    label: "猫用品",
     href: petPath("cat"),
     alt: "キジトラ猫のイラスト",
     image: cat,
     glyph: "cat",
   },
   {
-    label: "小動物",
+    label: "小動物用品",
     href: petPath("small-animal"),
     alt: "垂れ耳ウサギのイラスト",
     image: rabbit,
     glyph: "rabbit",
   },
   {
-    label: "鳥",
+    label: "鳥用品",
     href: petPath("bird"),
     alt: "オカメインコのイラスト",
     image: bird,
