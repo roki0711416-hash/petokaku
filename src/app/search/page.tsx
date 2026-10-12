@@ -32,13 +32,26 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       />
       <RelatedCategoryLinks query={query} />
       {query ? (
-        <Suspense fallback={<p className="mt-8 text-muted">商品を探しています</p>}>
+        <Suspense fallback={<SearchResultsPending />}>
           <YahooSearchResults query={query} />
         </Suspense>
       ) : (
         <p className="mt-8 text-muted">商品名を入力して検索してください。</p>
       )}
     </article>
+  );
+}
+
+function SearchResultsPending() {
+  return (
+    <div className="mt-8" aria-busy="true" aria-live="polite">
+      <p className="text-sm text-muted">商品を探しています</p>
+      <ul className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+        {["a", "b", "c", "d"].map((item) => (
+          <li key={item} className="h-64 rounded-2xl border border-line bg-card" />
+        ))}
+      </ul>
+    </div>
   );
 }
 

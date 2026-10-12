@@ -23,7 +23,8 @@ export async function YahooSearchResults({ query }: { query: string }) {
   if (result.cards.length === 0) {
     return (
       <div className="mt-8 rounded-[1.75rem] bg-card px-5 py-6">
-        <h2 className="text-xl font-bold">ペット用品では商品が見つかりませんでした</h2>
+        <h2 className="text-xl font-bold">価格を比較できる商品は見つかりませんでした</h2>
+        <p className="mt-3 text-sm leading-7 text-muted">同じJANコードで、容量とセット数が一致する商品を2店舗以上から確認できたものだけを表示しています。</p>
         <ul className="mt-3 grid list-disc gap-2 pl-5 text-sm leading-7 text-muted">
           <li>商品名を短くして検索してみてください。</li>
           <li>ブランド名だけで検索してみてください。</li>
