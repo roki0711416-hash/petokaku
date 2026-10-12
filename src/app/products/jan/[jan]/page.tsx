@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { YahooProductView, type YahooSizeChoice } from "@/components/yahoo-product-view";
 import { confirmedJanOffers } from "@/lib/pricing/malls";
+import { rakutenComparisonDetail } from "@/lib/sources/rakuten/compare-detail";
 import { loadRakutenShopOffers } from "@/lib/sources/rakuten/item-search";
 import { loadRakutenJanOffers } from "@/lib/sources/rakuten/search";
 import { loadYahooJan } from "@/lib/sources/yahoo/preview";
@@ -16,6 +18,21 @@ import { bestItemUnitIds, groupSizeFamilies, quoteSingleSize, sizeFamilyHref, ty
 import { getSiteUrl, janPageRobots } from "@/lib/site";
 import { safeHttpUrl } from "@/lib/urls";
 import type { ProductDetail } from "@/lib/types";
+
+const loadRakutenOnlyComparison = cache(async (jan: string): Promise<{ product: ProductDetail; truncated: boolean } | "temporary" | null> => {
+  const shops = await loadRakutenShopOffers(jan);
+  if (!shops.ok) {
+    if (shops.reason === "rate-limited" || shops.reason === "request-failed") {
+      return "temporary";
+    }
+    return null;
+  }
+  const product = rakutenComparisonDetail(jan, shops.offers, new Date().toISOString());
+  if (!product) {
+    return null;
+  }
+  return { product, truncated: shops.truncated };
+});
 
 export const dynamic = "force-dynamic";
 
@@ -104,6 +121,13 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
   }
   const result = await loadYahooJan(jan);
   if (!result.ok) {
+    if (result.reason === "no-jan") {
+      const fallback = await loadRakutenOnlyComparison(jan);
+      if (fallback && fallback !== "temporary") {
+        const name = fallback.product.name.trim() || "商品の価格比較";
+        return { title: name, robots: janPageRobots(true), alternates: { canonical: `/products/jan/${jan}` } };
+      }
+    }
     return { title: "商品を表示できません", robots: janPageRobots(false) };
   }
   const detail = result.adapted.detail;
@@ -140,11 +164,24 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
   }
   const result = await loadYahooJan(jan);
   if (!result.ok) {
+    const fallback = result.reason === "no-jan" ? await loadRakutenOnlyComparison(jan) : null;
+    if (fallback && fallback !== "temporary") {
+      return (
+        <YahooProductView
+          product={fallback.product}
+          pageHref={`/products/jan/${jan}`}
+          priceCheckedAt={new Date().toISOString()}
+          retrievalLimited={fallback.truncated}
+          rakutenShopScope={fallback.truncated ? "limited" : "ready"}
+        />
+      );
+    }
+    const temporary = result.reason !== "no-jan" || fallback === "temporary";
     return (
       <article className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-3xl font-bold">商品を表示できません</h1>
         <p className="mt-4 leading-8 text-muted">
-          {result.reason === "no-jan" ? "この商品の販売情報は見つかりませんでした。" : fetchError}
+          {temporary ? fetchError : "この商品の販売情報は見つかりませんでした。"}
         </p>
         <p className="mt-6">
           <Link href="/search" className="font-bold text-forest-deep underline-offset-4 hover:underline">

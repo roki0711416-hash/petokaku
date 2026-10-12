@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HomeCatalogSections } from "@/components/home-catalog-sections";
 import { SearchForm } from "@/components/search-form";
 import { Hero } from "@/components/ui/hero";
 import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
+import { loadHomeCatalog } from "@/lib/home-catalog";
 import { getSiteUrl, indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
+
+export const revalidate = 3600;
 
 const title = "ペット用品を、かしこく比較 | ペトカク";
 const description = "ペット用品の本体価格と送料を、販売店の掲載から見比べるサイトです。商品名やJANコードで探し、購入は各ショップで行います。";
@@ -56,9 +60,10 @@ function homeStructuredData() {
   };
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const structured = homeStructuredData();
   const comparable = selectIndexedJans(indexedJanProducts);
+  const catalog = await loadHomeCatalog();
 
   return (
     <>
@@ -89,6 +94,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <HomeCatalogSections catalog={catalog} />
       {comparable.length > 0 ? (
         <section aria-labelledby="comparable-heading" className="px-4 pb-8">
           <div className="mx-auto max-w-6xl">

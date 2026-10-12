@@ -1,3 +1,4 @@
+import { collectShopKeys, salesUnitKeyOf } from "../../listing-eligibility.ts";
 import { adaptYahooGroup, validJanCode, type YahooItem } from "./adapter.ts";
 import { readableListingTitle } from "./listing-title.ts";
 import { classifyPetKind, type PetKind, type PetKindSource } from "./pet-kind.ts";
@@ -19,6 +20,10 @@ export type SearchCandidateCard = {
   imageUrl: string | null;
   sizeLabel: string | null;
   shopCount: number;
+  comparableShopCount: number;
+  shopKeys: string[];
+  salesUnitKey: string | null;
+  salesUnitConfirmed: boolean;
   shopLabel: string | null;
   sellingPrice: number | null;
   priceFrom: boolean;
@@ -105,6 +110,7 @@ function candidateFromJan(items: YahooItem[], observedAt: string): SearchCandida
   const chosen = chooseRepresentative(detail.offers);
   const priced = chosen.offer ? inStockPriced(chosen.group) : [];
   const quote = chosen.offer ? referenceUnit(chosen.offer, detail.quantity, detail.quantityUnit, detail.unitPriceType) : null;
+  const shopKeys = collectShopKeys("yahoo", detail.offers);
   const shops = shopCountOf(detail.offers);
   const setLabel =
     chosen.offer && chosen.offer.packCount != null && chosen.offer.packCount > 1
@@ -122,6 +128,10 @@ function candidateFromJan(items: YahooItem[], observedAt: string): SearchCandida
     imageUrl: detail.imageUrl,
     sizeLabel: detail.quantity != null ? detail.sizeLabel : null,
     shopCount: shops,
+    comparableShopCount: shopKeys.length,
+    shopKeys,
+    salesUnitKey: null,
+    salesUnitConfirmed: false,
     shopLabel: shops <= 1 ? "この検索では1ショップ" : `${shops}ショップを比較`,
     sellingPrice: chosen.offer?.price ?? null,
     priceFrom: priced.length > 1,
@@ -133,6 +143,15 @@ function candidateFromJan(items: YahooItem[], observedAt: string): SearchCandida
     animalSource: kind.source,
     sizeChoices: null,
   };
+}
+
+export function preferComparableCards<T extends { janCode: string | null; shopCount: number; comparableShopCount?: number }>(cards: T[]): T[] {
+  const shops = (card: T) => card.comparableShopCount ?? card.shopCount;
+  const rank = (card: T) => (card.janCode != null && shops(card) > 1 ? 0 : card.janCode != null ? 1 : 2);
+  return cards
+    .map((card, index) => ({ card, index }))
+    .sort((left, right) => rank(left.card) - rank(right.card) || left.index - right.index)
+    .map((entry) => entry.card);
 }
 
 function listingIdentity(item: YahooItem, index: number): string {
@@ -158,6 +177,10 @@ function candidateWithoutJan(item: YahooItem, index: number): SearchCandidateCar
     imageUrl: item.imageUrl,
     sizeLabel: null,
     shopCount: 1,
+    comparableShopCount: inStock ? 1 : 0,
+    shopKeys: inStock && item.sellerId ? [`yahoo:${item.sellerId}`] : [],
+    salesUnitKey: null,
+    salesUnitConfirmed: false,
     shopLabel: null,
     sellingPrice: inStock ? item.price : null,
     priceFrom: false,
@@ -171,23 +194,38 @@ function candidateWithoutJan(item: YahooItem, index: number): SearchCandidateCar
   };
 }
 
-export function buildSearchCandidates(items: YahooItem[], observedAt: string): SearchCandidateCard[] {
-  const byJan = new Map<string, YahooItem[]>();
+export function buildSearchCandidates(items: YahooItem[], observedAt: string, limit = searchCandidateLimit): SearchCandidateCard[] {
+  const capped = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 250) : 0;
+  const byUnit = new Map<string, YahooItem[]>();
   const withoutJan: Array<{ item: YahooItem; index: number }> = [];
   const seenListing = new Set<string>();
   const order: string[] = [];
   items.forEach((item, index) => {
     const janCode = validJanCode(item.janCode);
-    if (janCode) {
-      const grouped = byJan.get(janCode) ?? [];
+    const unit = janCode ? salesUnitKeyOf(item.name) : null;
+    if (janCode && unit) {
+      const key = `jan:${janCode}:unit:${unit}`;
+      const grouped = byUnit.get(key) ?? [];
       if (grouped.length === 0) {
-        order.push(`jan:${janCode}`);
+        order.push(key);
       }
       grouped.push(item);
-      byJan.set(janCode, grouped);
+      byUnit.set(key, grouped);
       return;
     }
     const identity = listingIdentity(item, index);
+    if (janCode) {
+      if (item.sellerId && item.code && seenListing.has(identity)) {
+        return;
+      }
+      if (item.sellerId && item.code) {
+        seenListing.add(identity);
+      }
+      const key = `jan:${janCode}:open:${identity}`;
+      byUnit.set(key, [item]);
+      order.push(key);
+      return;
+    }
     if (item.sellerId && item.code) {
       if (seenListing.has(identity)) {
         return;
@@ -200,10 +238,20 @@ export function buildSearchCandidates(items: YahooItem[], observedAt: string): S
 
   const cards = new Map<string, SearchCandidateCard>();
   const familyMembers: SizeFamilyMember[] = [];
-  for (const [janCode, grouped] of byJan) {
+  const seenFamilyJan = new Set<string>();
+  for (const [key, grouped] of byUnit) {
     const candidate = candidateFromJan(grouped, observedAt);
     if (candidate) {
-      cards.set(`jan:${janCode}`, candidate);
+      candidate.id = key;
+      const unitKey = key.includes(":unit:") ? (key.split(":unit:")[1] ?? null) : null;
+      candidate.salesUnitKey = unitKey;
+      candidate.salesUnitConfirmed = unitKey != null;
+      cards.set(key, candidate);
+      const janCode = candidate.janCode;
+      if (!janCode || seenFamilyJan.has(janCode)) {
+        continue;
+      }
+      seenFamilyJan.add(janCode);
       const brands = [...new Set(grouped.map((item) => item.brandName).filter((brand): brand is string => brand != null && brand !== ""))];
       const genres = [...new Set(grouped.map((item) => item.genreName).filter((genre): genre is string => genre != null && genre !== ""))];
       familyMembers.push({
@@ -235,5 +283,5 @@ export function buildSearchCandidates(items: YahooItem[], observedAt: string): S
   return order.flatMap((id) => {
     const card = cards.get(id);
     return card ? [card] : [];
-  }).slice(0, searchCandidateLimit);
+  }).slice(0, capped);
 }

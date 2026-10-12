@@ -83,9 +83,14 @@ test("通常販売があるとき、セット価格を代表価格にしない",
     ],
     observedAt,
   );
-  assert.equal(cards.length, 1);
-  assert.equal(cards[0]?.sellingPrice, 9990);
-  assert.equal(cards[0]?.salesUnitLabel, null);
+  assert.equal(cards.length, 2);
+  const single = cards.find((card) => card.salesUnitLabel == null);
+  const set = cards.find((card) => card.salesUnitLabel === "2袋セット");
+  assert.equal(single?.sellingPrice, 9990);
+  assert.equal(set?.sellingPrice, 8000);
+  assert.equal(single?.href, "/products/jan/3182550849654");
+  assert.equal(set?.href, "/products/jan/3182550849654");
+  assert.notEqual(single?.id, set?.id);
 });
 
 test("在庫切れの安い価格は代表価格にしない", () => {
@@ -170,10 +175,47 @@ test("個数が矛盾するセット価格を通常販売の代表にしない",
     ],
     observedAt,
   );
+  assert.equal(cards.length, 2);
+  const set = cards.find((card) => card.salesUnitLabel === "4個セット");
+  const other = cards.find((card) => card.salesUnitLabel !== "4個セット");
+  assert.equal(set?.sellingPrice, 3190);
+  assert.match(set?.name ?? "", /5L×4個/);
+  assert.equal(set?.href, "/products/jan/4903351011250");
+  assert.equal(other?.janCode, "4903351011250");
+  assert.notEqual(other?.id, set?.id);
+  assert.equal(other?.shopCount, 1);
+});
+
+test("同じショップの複数掲載は1ショップとして数える", () => {
+  const cards = buildSearchCandidates(
+    [
+      item(),
+      item({
+        code: "chanet_2",
+        price: 9800,
+        url: "https://store.shopping.yahoo.co.jp/example/other.html",
+      }),
+    ],
+    observedAt,
+  );
   assert.equal(cards.length, 1);
-  assert.equal(cards[0]?.sellingPrice, 3190);
-  assert.equal(cards[0]?.salesUnitLabel, "4個セット");
-  assert.match(cards[0]?.name ?? "", /5L×4個/);
-  assert.equal(cards[0]?.unitYen, 160);
-  assert.equal(cards[0]?.unitLabel, "L");
+  assert.equal(cards[0]?.comparableShopCount, 1);
+});
+
+test("容量が違う同じJANは別カードにする", () => {
+  const cards = buildSearchCandidates(
+    [
+      item({ name: "ロイヤルカナン 4kg", price: 4000 }),
+      item({
+        sellerId: "shopb",
+        code: "shopb_1",
+        name: "ロイヤルカナン 8kg",
+        price: 8000,
+      }),
+    ],
+    observedAt,
+  );
+  assert.equal(cards.length, 2);
+  assert.equal(cards.every((card) => card.comparableShopCount === 1), true);
+  assert.notEqual(cards[0]?.salesUnitKey, cards[1]?.salesUnitKey);
 });

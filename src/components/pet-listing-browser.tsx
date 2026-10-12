@@ -63,7 +63,7 @@ function ListingCard({ card }: { card: PetListingCard }) {
           <span className="mt-1 text-xs leading-5 text-muted">{card.priceNote}</span>
           {card.reviewCount != null ? <span className="mt-1 text-xs text-muted">レビュー {card.reviewCount.toLocaleString("ja-JP")}件</span> : null}
           <span className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-3 text-sm text-white">
-            {card.compare ? "価格を比較する" : "ショップを探す"}
+            価格を比較する
           </span>
         </span>
       </Link>
@@ -140,14 +140,27 @@ export function PetListingBrowser({
   yahoo,
   rakuten,
   categoryLabel,
+  observedLabel,
+  page,
+  previousHref,
+  nextHref,
 }: {
   yahoo: PetListingGroup;
   rakuten: PetListingGroup;
   categoryLabel: string | null;
+  observedLabel: string;
+  page: number;
+  previousHref: string | null;
+  nextHref: string | null;
 }) {
+  const observed =
+    observedLabel === "未確認"
+      ? "価格・送料・在庫は、取得できた時点の掲載です。ショップで変わっていることがあるため、確定した金額としては扱っていません。"
+      : `価格・送料・在庫は${observedLabel}時点の掲載です。ショップで変わっていることがあるため、確定した金額としては扱っていません。`;
   return (
     <div className="mt-5">
       <h2 className="text-lg font-medium text-ink">人気の商品一覧</h2>
+      <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{observed}</p>
       <ListingGroup
         title="Yahoo!ショッピングの人気商品を探す"
         note="レビュー件数を参考に、気になるペット用品を探せます。売上順ではありません。"
@@ -160,10 +173,25 @@ export function PetListingBrowser({
         group={rakuten}
         categoryLabel={categoryLabel}
       />
+      {previousHref || nextHref ? (
+        <nav aria-label="商品一覧のページ" className="mt-4 flex flex-wrap items-center gap-2">
+          {previousHref ? (
+            <Link href={previousHref} scroll={false} className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-4 text-sm text-ink hover:border-sage">
+              前のページ
+            </Link>
+          ) : null}
+          <span className="text-sm text-muted">{page}ページ目</span>
+          {nextHref ? (
+            <Link href={nextHref} scroll={false} className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-4 text-sm text-ink hover:border-sage">
+              次のページ
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
       <details className="mt-8 rounded-2xl border border-line bg-sand/50 px-4 py-2">
         <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">掲載情報について</summary>
         <div className="grid gap-2 pb-2 text-xs leading-6 text-muted">
-          <p>「価格を比較する」は、商品を特定できたものだけです。それ以外は「ショップを探す」から、商品名でほかのショップを探せます。</p>
+          <p>一覧に出しているのは、同じ商品・同じ容量・同じ販売単位で、別々の2ショップ以上の価格を比べられる商品だけです。</p>
           <p>Yahoo!ショッピングと楽天市場のレビュー件数は、別々に見ています。足した人気度ではありません。</p>
           <p>価格は、表示できた商品のものです。すべての販売店の最安値ではありません。購入前にショップで確認してください。</p>
         </div>

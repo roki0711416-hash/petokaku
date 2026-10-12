@@ -19,6 +19,8 @@ export function rakutenReviewSearchRequest(
   accessKey: string,
   keyword: string,
   genreId?: number,
+  page = 1,
+  hits = 20,
 ): { url: URL; headers: Record<string, string> } {
   const url = new URL(endpoint);
   url.searchParams.set("applicationId", applicationId);
@@ -26,8 +28,10 @@ export function rakutenReviewSearchRequest(
   if (genreId != null) {
     url.searchParams.set("genreId", String(genreId));
   }
-  url.searchParams.set("hits", "20");
-  url.searchParams.set("page", "1");
+  const safeHits = Number.isInteger(hits) ? Math.min(rakutenShopSearchHits, Math.max(1, hits)) : 20;
+  const safePage = Number.isInteger(page) ? Math.min(100, Math.max(1, page)) : 1;
+  url.searchParams.set("hits", String(safeHits));
+  url.searchParams.set("page", String(safePage));
   url.searchParams.set("availability", "1");
   url.searchParams.set("field", "1");
   url.searchParams.set("sort", "-reviewCount");

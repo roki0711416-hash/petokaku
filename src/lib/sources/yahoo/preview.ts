@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { adaptYahooGroup, validJanCode, type AdaptedYahooProduct } from "@/lib/sources/yahoo/adapter";
 import { searchYahooItems, yahooJanSearchLimit, yahooRetrievalLimited } from "@/lib/sources/yahoo/search";
+import { prepareComparableCards } from "@/lib/listing-eligibility";
 import { buildSearchCandidates, type SearchCandidateCard } from "@/lib/sources/yahoo/search-candidates";
 
 export type YahooPreviewResult =
@@ -103,5 +104,12 @@ export async function loadYahooKeywordSearch(query: string): Promise<YahooKeywor
   if (!matched.ok) {
     return matched;
   }
-  return { ok: true, cards: buildSearchCandidates(matched.items, new Date().toISOString()) };
+  const cards = prepareComparableCards(
+    buildSearchCandidates(matched.items, new Date().toISOString()).map((card) => ({
+      ...card,
+      price: card.sellingPrice,
+      shopCount: card.comparableShopCount,
+    })),
+  );
+  return { ok: true, cards };
 }

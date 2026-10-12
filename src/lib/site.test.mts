@@ -158,6 +158,13 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.doesNotMatch(cards, /searchYahooItems|loadYahooKeywordSearch/);
   assert.match(site, /3182550706933/);
   assert.doesNotMatch(home, /searchYahooItems|loadYahooJan|loadYahooKeywordSearch/);
+  const catalog = read("../components/home-catalog-sections.tsx");
+  assert.match(home, /loadHomeCatalog/);
+  assert.match(home, /HomeCatalogSections/);
+  assert.match(catalog, /人気のペット用品/);
+  assert.match(catalog, /カテゴリ別の商品/);
+  assert.match(catalog, /確定した金額としては扱っていません/);
+  assert.doesNotMatch(catalog, /売れ筋/);
   assert.doesNotMatch(site, /searchYahooItems|loadYahooJan/);
   assert.doesNotMatch(read("../app/sitemap.ts"), /searchYahooItems|loadYahooJan/);
   assert.doesNotMatch(`${home}\n${site}`, /人気商品|売れ筋/);

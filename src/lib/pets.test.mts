@@ -2,7 +2,20 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { listingFitsCategory, listingFitsPet, petById, petCategory, petPages, rakutenPetGenreIds, yahooPetGenreCategoryIds } from "./pets.ts";
-import { loadPetListings, petPageRevalidateSeconds, rakutenDiscoveryCards, rakutenStatus, retryAfterMs, type RakutenTransport } from "./pets-listings.ts";
+import {
+  listingDiscoveryRequests,
+  listingPageHref,
+  listingPageNumber,
+  loadPetListings,
+  petDiscoveryRequests,
+  petPageRevalidateSeconds,
+  rakutenDiscoveryCards,
+  rakutenListingHits,
+  rakutenStatus,
+  retryAfterMs,
+  yahooListingResults,
+  type RakutenTransport,
+} from "./pets-listings.ts";
 import { sitemapEntries } from "./site.ts";
 
 test("ペット別ページは6件で、見出しと説明が重複しない", () => {
@@ -105,7 +118,8 @@ test("カテゴリは検索語とジャンルで確認し、商品名だけで�
   const cards = rakutenDiscoveryCards(
     {
       items: [
-        { itemName: "ロイヤルカナン 成犬 8kg", itemPrice: 1000, shopName: "A店", itemCode: "a:1", reviewCount: 2, genreName: "ドッグフード" },
+        { itemName: "ロイヤルカナン 成犬 8kg", catchcopy: "3182550706933", itemPrice: 1000, shopName: "A店", shopCode: "shop-a", itemCode: "a:1", reviewCount: 2, genreName: "ドッグフード" },
+        { itemName: "ロイヤルカナン 成犬 8kg", catchcopy: "3182550706933", itemPrice: 1200, shopName: "B店", shopCode: "shop-b", itemCode: "b:9", reviewCount: 1, genreName: "ドッグフード" },
         { itemName: "犬 ロープおもちゃ", itemPrice: 800, shopName: "B店", itemCode: "b:2", reviewCount: 1 },
         { itemName: "収納ケース", itemPrice: 500, shopName: "C店", itemCode: "c:3", reviewCount: 1, genreName: "犬のおもちゃ" },
       ],
@@ -161,8 +175,18 @@ test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビ�
           itemName: "犬用フード 3182550706933",
           itemPrice: 5980,
           shopName: "A店",
+          shopCode: "shop-a",
           itemCode: "a:1",
           reviewCount: 12,
+          availability: 1,
+        },
+        {
+          itemName: "犬用フード 3182550706933",
+          itemPrice: 6200,
+          shopName: "F店",
+          shopCode: "shop-f",
+          itemCode: "f:1",
+          reviewCount: 1,
           availability: 1,
         },
         {
@@ -199,16 +223,12 @@ test("楽天の掲載はJANがあるときだけ価格比較へ進み、レビ�
     petById("dog"),
   );
   assert.deepEqual(
-    cards.map((card) => [card.compare, card.href.startsWith("/products/jan/"), card.reviewCount]),
-    [
-      [true, true, 12],
-      [false, false, 4],
-      [false, false, 30],
-    ],
+    cards.map((card) => [card.compare, card.href, card.reviewCount]),
+    [[true, "/products/jan/3182550706933", 12]],
   );
   assert.equal(cards.some((card) => card.name.includes("犬印")), false);
   assert.equal(cards.some((card) => card.name.includes("金魚")), false);
-  assert.equal(cards[1]?.href.startsWith("/search?q="), true);
+  assert.equal(cards.some((card) => card.href.startsWith("/search")), false);
   assert.equal(cards.some((card) => card.reviewCount === 12 + 4), false);
 });
 
@@ -238,7 +258,7 @@ test("楽天の失敗種別はステータスで分かれ、再試行の待ち�
   assert.equal(retryAfterMs(null), 1100);
 });
 
-test("JANがない楽天掲載は商品名検索のまま、名前が似ていてもまとめない", () => {
+test("JANがない楽天掲載は一覧に出さない", () => {
   const cards = rakutenDiscoveryCards(
     {
       items: [
@@ -248,13 +268,7 @@ test("JANがない楽天掲載は商品名検索のまま、名前が似てい�
     },
     petById("dog"),
   );
-  assert.equal(cards.length, 2);
-  assert.deepEqual(
-    cards.map((card) => card.compare),
-    [false, false],
-  );
-  assert.equal(cards[0]?.href === cards[1]?.href, false);
-  assert.equal(cards.every((card) => card.href.startsWith("/search?q=")), true);
+  assert.equal(cards.length, 0);
 });
 
 test("429のあと1回だけ再取得し、認証エラーと検索条件エラーは再試行しない", async () => {
@@ -267,7 +281,7 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
   process.env.RAKUTEN_ACCESS_KEY = "access-key";
   delete process.env.YAHOO_CLIENT_ID;
   const pauses: number[] = [];
-  const calls: Array<{ revalidate: number | null; accessKeyInUrl: boolean; header: string | undefined; genreId: string | null; keyword: string | null; sort: string | null }> = [];
+  const calls: Array<{ revalidate: number | null; accessKeyInUrl: boolean; header: string | undefined; genreId: string | null; keyword: string | null; sort: string | null; hits: string | null; page: string | null }> = [];
   const scripted = [
     { status: 429, text: "", retryAfter: "1" },
     {
@@ -285,6 +299,8 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
       genreId: url.searchParams.get("genreId"),
       keyword: url.searchParams.get("keyword"),
       sort: url.searchParams.get("sort"),
+      hits: url.searchParams.get("hits"),
+      page: url.searchParams.get("page"),
     });
     const next = scripted.shift();
     if (!next) {
@@ -300,8 +316,11 @@ test("429のあと1回だけ再取得し、認証エラーと検索条件エラ�
     assert.equal(calls.length, 2);
     assert.equal(calls.every((call) => call.revalidate === 3600 && call.accessKeyInUrl === false && call.header === "access-key"), true);
     assert.equal(calls.every((call) => call.genreId === "507513" && call.keyword === "犬 用品" && call.sort === "-reviewCount"), true);
-    assert.equal(listings.rakuten.status, "ready");
-    assert.equal(listings.rakuten.cards.length, 1);
+    assert.equal(calls.every((call) => call.hits === String(rakutenListingHits) && call.page === "1"), true);
+    assert.equal(yahooListingResults, 50);
+    assert.equal(rakutenListingHits, 30);
+    assert.equal(listings.rakuten.status, "empty");
+    assert.equal(listings.rakuten.cards.length, 0);
     assert.equal(listings.yahoo.status, "not-configured");
 
     const blocked: number[] = [];
@@ -362,6 +381,49 @@ test("ペット別の公式ジャンルIDは6種類とも確認済みの値だ�
     fish: 203107,
     reptile: 560198,
   });
+});
+
+test("商品一覧は4ページまでで、カテゴリを保って送る", () => {
+  assert.equal(listingPageNumber(undefined), 1);
+  assert.equal(listingPageNumber("2"), 2);
+  assert.equal(listingPageNumber("4"), 4);
+  assert.equal(listingPageNumber("0"), 1);
+  assert.equal(listingPageNumber("9"), 1);
+  assert.equal(listingPageHref("/pets/cat", null, 1), "/pets/cat");
+  assert.equal(listingPageHref("/pets/cat", "litter", 2), "/pets/cat?category=litter&page=2");
+});
+
+test("価格比較できる楽天商品を一覧の前に出す", () => {
+  const cards = rakutenDiscoveryCards(
+    {
+      items: [
+        { itemName: "犬用おもちゃ", itemPrice: 500, shopName: "A店", itemCode: "a:1", reviewCount: 10 },
+        { itemName: "犬用フード 3182550706933", itemPrice: 1000, shopName: "B店", shopCode: "shop-b", itemCode: "b:1", reviewCount: 1 },
+        { itemName: "犬用フード 3182550706933", itemPrice: 1100, shopName: "C店", shopCode: "shop-c", itemCode: "c:1", reviewCount: 2 },
+      ],
+    },
+    petById("dog"),
+  );
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0]?.compare, true);
+  assert.equal(cards[0]?.href, "/products/jan/3182550706933");
+});
+
+test("6種類のペットは公式ジャンルの中で複数の検索語から候補を集める", () => {
+  for (const pet of petPages()) {
+    const requests = petDiscoveryRequests[pet.id];
+    assert.ok(requests.length >= 3);
+    assert.ok(requests.length <= 5);
+    assert.equal(requests.every((request) => request.query.trim() !== ""), true);
+    assert.equal(requests.every((request) => request.start == null || request.start === 51), true);
+    assert.deepEqual(listingDiscoveryRequests(pet, null, 1), [...requests]);
+    const category = pet.categories[0];
+    assert.ok(category);
+    assert.deepEqual(listingDiscoveryRequests(pet, category, 1), [{ query: category.query }]);
+    assert.deepEqual(listingDiscoveryRequests(pet, null, 2), [{ query: pet.query, start: 51 }]);
+  }
+  assert.equal(petDiscoveryRequests.fish.some((request) => request.query === "テトラ フレーク"), true);
+  assert.equal(petDiscoveryRequests["small-animal"].some((request) => request.query === "チモシー"), true);
 });
 
 test("ペット別ページの再取得間隔は5分ずつずれている", () => {

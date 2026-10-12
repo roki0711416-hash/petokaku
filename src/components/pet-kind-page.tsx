@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PetListingBrowser } from "@/components/pet-listing-browser";
-import type { PetListings } from "@/lib/pets-listings";
+import { formatCheckedAt } from "@/lib/format";
+import { listingPageHref, type PetListings } from "@/lib/pets-listings";
 import type { PetPage } from "@/lib/pets";
 
 export function PetKindPage({ pet, listings, categoryId }: { pet: PetPage; listings: PetListings; categoryId: string | null }) {
@@ -50,7 +51,17 @@ export function PetKindPage({ pet, listings, categoryId }: { pet: PetPage; listi
           </ul>
         </section>
 
-        <PetListingBrowser yahoo={listings.yahoo} rakuten={listings.rakuten} categoryLabel={selected?.label ?? null} />
+        <PetListingBrowser
+          yahoo={listings.yahoo}
+          rakuten={listings.rakuten}
+          categoryLabel={selected?.label ?? null}
+          observedLabel={formatCheckedAt(listings.observedAt)}
+          page={listings.page}
+          previousHref={listings.page > 1 ? listingPageHref(pet.path, selected?.id ?? null, listings.page - 1) : null}
+          nextHref={
+            listings.yahoo.hasNext || listings.rakuten.hasNext ? listingPageHref(pet.path, selected?.id ?? null, listings.page + 1) : null
+          }
+        />
 
         <section className="mt-8" aria-labelledby="pet-points-heading">
           <h2 id="pet-points-heading" className="text-lg font-medium text-ink">

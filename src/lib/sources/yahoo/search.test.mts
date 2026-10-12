@@ -86,7 +86,13 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     const dogGenreUrl = new URL(requested.at(-1) ?? "");
     assert.equal(dogGenreUrl.searchParams.get("genre_category_id"), "4772");
     assert.equal(dogGenreUrl.searchParams.get("query"), "犬 用品");
-    assert.equal(requested.length, 4);
+    assert.equal(dogGenreUrl.searchParams.get("start"), null);
+    const offset = await searchYahooItems({ query: "犬 用品", results: 50, start: 51, sort: "-review_count", genreCategoryId: 4772 });
+    assert.equal(offset.ok, true);
+    const offsetUrl = new URL(requested.at(-1) ?? "");
+    assert.equal(offsetUrl.searchParams.get("start"), "51");
+    assert.equal(offsetUrl.searchParams.get("results"), "50");
+    assert.equal(requested.length, 5);
     if (keyword.ok) {
       assert.equal(keyword.totalAvailable, null);
       assert.equal(keyword.returnedCount, 2);

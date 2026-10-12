@@ -33,6 +33,13 @@ test("レビュー件数の多い掲載はアフィリエイトIDを付けず、
   assert.equal(dogGenre.url.searchParams.get("genreId"), "507513");
   assert.equal(dogGenre.url.searchParams.get("keyword"), "犬 用品");
   assert.equal(dogGenre.url.searchParams.get("affiliateId"), null);
+  const nextPage = rakutenReviewSearchRequest("app-id", "access-key", "猫 用品", 507524, 2, 30);
+  assert.equal(nextPage.url.searchParams.get("page"), "2");
+  assert.equal(nextPage.url.searchParams.get("hits"), "30");
+  assert.equal(nextPage.url.searchParams.get("affiliateId"), null);
+  const capped = rakutenReviewSearchRequest("app-id", "access-key", "猫 用品", 507524, 200, 100);
+  assert.equal(capped.url.searchParams.get("page"), "100");
+  assert.equal(capped.url.searchParams.get("hits"), "30");
 });
 
 test("JANは前後が数字でないときだけ一致する", () => {

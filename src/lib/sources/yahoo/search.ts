@@ -26,6 +26,7 @@ type YahooSearchParams = {
   query?: string;
   janCode?: string;
   results: number;
+  start?: number;
   revalidate?: number;
   sort?: "-review_count" | "+price" | "-price" | "-score";
   genreCategoryId?: number;
@@ -163,6 +164,9 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
   }
   url.searchParams.set("genre_category_id", String(params.genreCategoryId ?? petSupplyGenreCategoryId));
   url.searchParams.set("results", String(params.results));
+  if (params.start != null && params.start > 1) {
+    url.searchParams.set("start", String(params.start));
+  }
   url.searchParams.set("image_size", yahooDetailImageSize);
   if (params.sort) {
     url.searchParams.set("sort", params.sort);

@@ -1,4 +1,5 @@
 import { guideListingQuery, listingMatchesGuide, type ItemGuide } from "@/lib/item-guides";
+import { prepareComparableCards } from "@/lib/listing-eligibility";
 import { buildSearchCandidates, type SearchCandidateCard } from "@/lib/sources/yahoo/search-candidates";
 import { searchYahooItems } from "@/lib/sources/yahoo/search";
 
@@ -23,7 +24,13 @@ export async function loadGuideListings(guide: ItemGuide, userQuery: string): Pr
   const matched = result.items.filter((item) =>
     listingMatchesGuide(guide.slug, item.name, [item.genreName ?? "", ...item.parentGenreNames]),
   );
-  const cards = buildSearchCandidates(matched, new Date().toISOString()).slice(0, guideListingLimit);
+  const cards = prepareComparableCards(
+    buildSearchCandidates(matched, new Date().toISOString()).map((card) => ({
+      ...card,
+      price: card.sellingPrice,
+      shopCount: card.comparableShopCount,
+    })),
+  ).slice(0, guideListingLimit);
   if (cards.length === 0) {
     return { status: "empty", query, cards: [] };
   }
