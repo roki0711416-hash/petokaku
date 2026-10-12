@@ -253,21 +253,25 @@ export async function loadRakutenShopOffers(
     status = response.status;
     text = response.text;
   } catch {
+    console.error("[petokaku] 楽天の店舗検索に失敗しました", { status: null, kind: "network" });
     return { ok: false, reason: "request-failed" };
   }
   if (status === 429) {
+    console.error("[petokaku] 楽天の店舗検索に失敗しました", { status, kind: "rate-limited" });
     return { ok: false, reason: "rate-limited" };
   }
   if (status === 404) {
     return { ok: true, offers: [], truncated: false };
   }
   if (status < 200 || status >= 300) {
+    console.error("[petokaku] 楽天の店舗検索に失敗しました", { status, kind: "http" });
     return { ok: false, reason: "request-failed" };
   }
   let payload: unknown = null;
   try {
     payload = JSON.parse(text);
   } catch {
+    console.error("[petokaku] 楽天の店舗検索に失敗しました", { status, kind: "invalid-body" });
     return { ok: false, reason: "request-failed" };
   }
   const parsed = rakutenShopItemsFromPayload(payload, janCode, affiliateId);

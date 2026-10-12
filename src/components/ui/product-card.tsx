@@ -41,6 +41,7 @@ export function ProductCard({ card }: { card: SearchCandidateCard }) {
           {card.href ? (
             <Link
               href={card.href}
+              prefetch={false}
               className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-accent px-3 text-sm text-white hover:bg-forest-deep"
             >
               価格を見る

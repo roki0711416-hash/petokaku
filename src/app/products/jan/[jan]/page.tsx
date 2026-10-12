@@ -12,7 +12,9 @@ import type { PriceHistorySummary } from "@/lib/pricing/price-history-summary";
 import { loadJanPriceView } from "@/lib/supabase/price-history-summary";
 import { recordDisplayedJanView } from "@/lib/supabase/record-jan-view";
 import { saveDisplayedJanPrices } from "@/lib/supabase/save-price-history";
+import { janDetailOutcome, type RakutenDetailState } from "@/lib/jan-detail-outcome";
 import { validJanCode } from "@/lib/sources/yahoo/adapter";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { classifyPetKind } from "@/lib/sources/yahoo/pet-kind";
 import { bestItemUnitIds, groupSizeFamilies, quoteSingleSize, sizeFamilyHref, type SizeFamilyMember } from "@/lib/sources/yahoo/size-family";
 import { janProductMetadata } from "@/lib/seo/jan-metadata";
@@ -115,6 +117,16 @@ function sizeChoicesFor(current: ProductDetail, companions: ProductDetail[]): Ya
   return choices.map((choice) => ({ ...choice, isBestItemUnit: best.has(choice.janCode) }));
 }
 
+function rakutenDetailState(value: Awaited<ReturnType<typeof loadRakutenOnlyComparison>>): RakutenDetailState {
+  if (value === "temporary") {
+    return "temporary";
+  }
+  if (value) {
+    return "ready";
+  }
+  return "none";
+}
+
 export async function generateMetadata({ params }: JanPageProps): Promise<Metadata> {
   const { jan } = await params;
   if (!validJanCode(jan)) {
@@ -122,18 +134,17 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
   }
   const result = await loadYahooJan(jan);
   if (!result.ok) {
-    if (result.reason === "no-jan") {
-      const fallback = await loadRakutenOnlyComparison(jan);
-      if (fallback && fallback !== "temporary") {
-        return janProductMetadata({
-          jan,
-          name: fallback.product.name,
-          brand: fallback.product.brand,
-          imageUrl: safeHttpUrl(fallback.product.imageUrl),
-        });
-      }
+    const fallback = await loadRakutenOnlyComparison(jan);
+    const outcome = janDetailOutcome(result.reason, rakutenDetailState(fallback));
+    if (outcome === "rakuten" && fallback && fallback !== "temporary") {
+      return janProductMetadata({
+        jan,
+        name: fallback.product.name,
+        brand: fallback.product.brand,
+        imageUrl: safeHttpUrl(fallback.product.imageUrl),
+      });
     }
-    return { title: "商品を表示できません", robots: janPageRobots(false) };
+    return { title: outcome === "missing" ? "商品が見つかりません" : "商品を表示できません", robots: janPageRobots(false) };
   }
   const detail = result.adapted.detail;
   return janProductMetadata({
@@ -152,8 +163,11 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
   }
   const result = await loadYahooJan(jan);
   if (!result.ok) {
-    const fallback = result.reason === "no-jan" ? await loadRakutenOnlyComparison(jan) : null;
-    if (fallback && fallback !== "temporary") {
+    const fallback = await loadRakutenOnlyComparison(jan);
+    const rakuten = rakutenDetailState(fallback);
+    const outcome = janDetailOutcome(result.reason, rakuten);
+    if (outcome === "rakuten" && fallback && fallback !== "temporary") {
+      console.error("[petokaku] Yahooの商品取得に失敗したため楽天の比較を表示します", { jan, yahoo: result.reason });
       return (
         <YahooProductView
           product={fallback.product}
@@ -164,12 +178,12 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
         />
       );
     }
-    const temporary = result.reason !== "no-jan" || fallback === "temporary";
+    console.error("[petokaku] 商品詳細を表示できません", { jan, yahoo: result.reason, rakuten, outcome });
     return (
       <article className="mx-auto max-w-3xl px-4 py-16">
-        <h1 className="text-3xl font-bold">商品を表示できません</h1>
+        <h1 className="text-3xl font-bold">{outcome === "missing" ? "商品が見つかりません" : "商品を表示できません"}</h1>
         <p className="mt-4 leading-8 text-muted">
-          {temporary ? fetchError : "この商品の販売情報は見つかりませんでした。"}
+          {outcome === "missing" ? "この商品の販売情報は見つかりませんでした。" : fetchError}
         </p>
         <p className="mt-6">
           <Link href="/search" className="font-bold text-forest-deep underline-offset-4 hover:underline">
@@ -180,36 +194,35 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
     );
   }
 
-  try {
-    await saveDisplayedJanPrices(jan, result.adapted);
-  } catch {
-    // 価格履歴が保存できなくても、取得済みの価格比較は表示する。
-  }
+  if (isSupabaseConfigured()) {
+    try {
+      await saveDisplayedJanPrices(jan, result.adapted);
+    } catch {
+      // 価格履歴が保存できなくても、取得済みの価格比較は表示する。
+    }
 
-  try {
-    await recordDisplayedJanView(jan);
-  } catch {
-    // 閲覧記録が残せなくても、商品詳細は表示する。
+    try {
+      await recordDisplayedJanView(jan);
+    } catch {
+      // 閲覧記録が残せなくても、商品詳細は表示する。
+    }
   }
 
   const now = new Date().toISOString();
   let priceSummary: PriceHistorySummary | null = null;
   let priceSeries: Awaited<ReturnType<typeof loadJanPriceView>>["series"] = [];
-  try {
-    const priceView = await loadJanPriceView(jan, now);
-    priceSummary = priceView.summary;
-    priceSeries = priceView.series;
-  } catch {
-    priceSummary = null;
-  }
-
-  const companions: ProductDetail[] = [];
-  for (const related of relatedJans(withJans, jan)) {
-    const loaded = await loadYahooJan(related);
-    if (loaded.ok) {
-      companions.push(loaded.adapted.detail);
+  if (isSupabaseConfigured()) {
+    try {
+      const priceView = await loadJanPriceView(jan, now);
+      priceSummary = priceView.summary;
+      priceSeries = priceView.series;
+    } catch {
+      priceSummary = null;
     }
   }
+
+  const related = await Promise.all(relatedJans(withJans, jan).map((relatedJan) => loadYahooJan(relatedJan)));
+  const companions = related.flatMap((loaded) => (loaded.ok ? [loaded.adapted.detail] : []));
 
   const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffers(jan), loadRakutenShopOffers(jan)]);
   const product = {

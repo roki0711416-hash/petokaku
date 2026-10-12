@@ -6,6 +6,7 @@ const endpoint = "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch
 export const petSupplyGenreCategoryId = 2509;
 
 export const yahooJanSearchLimit = 50;
+const yahooSearchTimeoutMs = 8000;
 
 export type YahooSearchResult =
   | { ok: true; items: YahooItem[]; totalAvailable: number | null; returnedCount: number }
@@ -174,8 +175,8 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
 
   const init =
     params.revalidate != null
-      ? { next: { revalidate: params.revalidate }, headers: { Accept: "application/json" } }
-      : { cache: "no-store" as const, headers: { Accept: "application/json" } };
+      ? { next: { revalidate: params.revalidate }, headers: { Accept: "application/json" }, signal: AbortSignal.timeout(yahooSearchTimeoutMs) }
+      : { cache: "no-store" as const, headers: { Accept: "application/json" }, signal: AbortSignal.timeout(yahooSearchTimeoutMs) };
   let response: Response;
   try {
     response = await fetch(url, init);
@@ -183,11 +184,17 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
       await new Promise((resolve) => setTimeout(resolve, 1100));
       response = await fetch(url, init);
     }
-  } catch {
+  } catch (error) {
+    const timedOut = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+    console.error("[petokaku] Yahoo商品検索に失敗しました", { status: null, kind: timedOut ? "timeout" : "network" });
     return { ok: false, reason: "request-failed" };
   }
 
   if (!response.ok) {
+    console.error("[petokaku] Yahoo商品検索に失敗しました", {
+      status: response.status,
+      kind: response.status === 429 ? "rate-limited" : "http",
+    });
     return { ok: false, reason: "request-failed" };
   }
 
@@ -196,6 +203,7 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
     const record = asRecord(payload);
     const hits = record?.hits;
     if (!Array.isArray(hits)) {
+      console.error("[petokaku] Yahoo商品検索に失敗しました", { status: response.status, kind: "invalid-body" });
       return { ok: false, reason: "request-failed" };
     }
     return {
@@ -205,6 +213,7 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
       returnedCount: hits.length,
     };
   } catch {
+    console.error("[petokaku] Yahoo商品検索に失敗しました", { status: response.status, kind: "invalid-body" });
     return { ok: false, reason: "request-failed" };
   }
 }

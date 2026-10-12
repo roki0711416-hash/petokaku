@@ -72,12 +72,14 @@ export const loadYahooPreviewCase = cache(async (previewCase: YahooPreviewCase):
   };
 });
 
+const janSearchRevalidateSeconds = 60;
+
 export const loadYahooJan = cache(async (janCode: string): Promise<YahooPreviewResult> => {
   if (!validJanCode(janCode)) {
     return { ok: false, reason: "no-jan" };
   }
   const observedAt = new Date().toISOString();
-  const matched = await searchYahooItems({ janCode, results: yahooJanSearchLimit });
+  const matched = await searchYahooItems({ janCode, results: yahooJanSearchLimit, revalidate: janSearchRevalidateSeconds });
   if (!matched.ok) {
     return matched;
   }

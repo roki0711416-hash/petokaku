@@ -31,11 +31,13 @@ export async function loadRakutenJanOffers(
   try {
     const response = await transport(url, headers);
     if (response.status < 200 || response.status >= 300) {
+      console.error("[petokaku] 楽天の製品検索に失敗しました", { status: response.status, kind: "http" });
       return { ok: true, offers: [] };
     }
     const offer = rakutenProductOfferFromPayload(JSON.parse(response.text) as unknown, janCode, new Date().toISOString(), affiliateId);
     return { ok: true, offers: offer ? [offer] : [] };
   } catch {
+    console.error("[petokaku] 楽天の製品検索に失敗しました", { status: null, kind: "network" });
     return { ok: true, offers: [] };
   }
 }

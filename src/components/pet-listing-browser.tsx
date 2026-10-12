@@ -41,6 +41,7 @@ function ListingCard({ card }: { card: PetListingCard }) {
     <li className="min-w-0">
       <Link
         href={card.href}
+        prefetch={false}
         className="lift flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-card shadow-[0_8px_20px_rgba(32,77,56,0.06)] hover:border-sage"
       >
         <span className="relative block aspect-square bg-sand">
