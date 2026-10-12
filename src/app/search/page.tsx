@@ -7,9 +7,6 @@ import { relatedCategoryLinks } from "@/lib/categories";
 import { privateRobots } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-// Next.js 16 では非推奨だが、検索のサーバー処理だけ東京へ寄せるために残す。
-// 商品詳細や人気カテゴリのページには付けない。
-export const preferredRegion = "hnd1";
 
 export const metadata: Metadata = {
   title: "商品を探す",

@@ -167,22 +167,6 @@ async function fetchKeywordPages(query: string, starts: readonly number[]): Prom
   return { ok: true, items: ready.flatMap((page) => page.items) };
 }
 
-const keywordSecondPageWaitMs = 250;
-
-async function settleWithin<T>(promise: Promise<T>, ms: number): Promise<T | null> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const result = await Promise.race([
-    promise.then((value) => value),
-    new Promise<null>((resolve) => {
-      timer = setTimeout(() => resolve(null), ms);
-    }),
-  ]);
-  if (timer) {
-    clearTimeout(timer);
-  }
-  return result;
-}
-
 export const loadYahooKeywordSearch = cache(async (query: string): Promise<YahooKeywordSearchResult> => {
   const janSearch = validJanCode(query) != null;
   const started = Date.now();
@@ -215,7 +199,7 @@ export const loadYahooKeywordSearch = cache(async (query: string): Promise<Yahoo
   let items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
   let cards = keywordCards(items);
   shapeMs += Date.now() - shapeStarted;
-  if (secondPromise && !usedSecond && cards.length < keywordSearchFillTarget) {
+  if (secondPromise && !usedSecond) {
     const waitStarted = Date.now();
     const second = await secondPromise;
     followMs += Date.now() - waitStarted;
@@ -225,19 +209,6 @@ export const loadYahooKeywordSearch = cache(async (query: string): Promise<Yahoo
       items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
       cards = keywordCards(items);
       shapeMs += Date.now() - shapeStarted;
-    }
-  } else if (secondPromise && !usedSecond) {
-    const waitStarted = Date.now();
-    const second = await settleWithin(secondPromise, keywordSecondPageWaitMs);
-    followMs += Date.now() - waitStarted;
-    if (second?.ok) {
-      sourceItems = [...sourceItems, ...second.items];
-      shapeStarted = Date.now();
-      items = matchingKeywordItems(query, dedupeYahooKeywordItems(sourceItems));
-      cards = keywordCards(items);
-      shapeMs += Date.now() - shapeStarted;
-    } else {
-      void secondPromise.then(() => undefined, () => undefined);
     }
   }
   if (!janSearch && cards.length < keywordSearchFillTarget) {
