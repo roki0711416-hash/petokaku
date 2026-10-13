@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AmazonAssociateLink } from "@/components/amazon-associate-link";
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
 import { PriceHistory } from "@/components/ui/price-history";
@@ -36,6 +37,7 @@ export function YahooProductView({
   priceCheckedAt,
   retrievalLimited = false,
   rakutenShopScope = "off",
+  amazonUrl = null,
 }: {
   product: ProductDetail;
   pageHref: string;
@@ -45,12 +47,13 @@ export function YahooProductView({
   priceCheckedAt?: string;
   retrievalLimited?: boolean;
   rakutenShopScope?: "off" | "ready" | "limited";
+  amazonUrl?: string | null;
 }) {
   const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
   const confirmed = confirmedPriceSummary(product.offers.filter((offer) => comparisonMallOf(offer)));
-  const hasAffiliate = product.offers.some((offer) => shopProductLink(offer).affiliate);
+  const hasAffiliate = Boolean(amazonUrl) || product.offers.some((offer) => shopProductLink(offer).affiliate);
   const crumbs: Crumb[] = [
     { label: "ホーム", href: "/" },
     { label: category.label, href: categorySearchHref(category.id) },
@@ -107,6 +110,7 @@ export function YahooProductView({
       {product.offers.length > 0 ? (
         <section id="compare" aria-labelledby="compare-heading" className="mt-5 scroll-mt-24">
           <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
+          {hasAffiliate ? <p className="mt-1 text-xs leading-5 text-muted">このページにはアフィリエイト広告が含まれています。</p> : null}
           <div className="mt-3">
             <MallCompare
               offers={product.offers}
@@ -120,6 +124,7 @@ export function YahooProductView({
       ) : (
         <p className="mt-5 text-sm text-muted">比較できる掲載はありません。</p>
       )}
+      {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
 
       {priceSummary !== undefined ? (
         <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} />

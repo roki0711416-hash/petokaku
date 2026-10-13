@@ -110,7 +110,6 @@ function VisitLink({ offer }: { offer: Offer }) {
   }
   return (
     <div>
-      {link.affiliate ? <p className="mb-1 text-xs font-medium text-clay">広告</p> : null}
       <a
         href={link.href}
         target="_blank"
@@ -118,7 +117,11 @@ function VisitLink({ offer }: { offer: Offer }) {
         className={className}
       >
         {label}
+        <span aria-hidden="true" className="ml-1">
+          ↗
+        </span>
       </a>
+      {link.affiliate ? <p className="mt-1 text-center text-xs text-muted">広告</p> : null}
     </div>
   );
 }

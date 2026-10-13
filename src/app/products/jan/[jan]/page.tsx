@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { YahooProductView, type YahooSizeChoice } from "@/components/yahoo-product-view";
+import { amazonAssociateLinks } from "@/data/amazon-links";
+import { amazonAssociateLink } from "@/lib/amazon/associate-link";
 import { confirmedJanOffers } from "@/lib/pricing/malls";
 import { rakutenComparisonDetail } from "@/lib/sources/rakuten/compare-detail";
 import { loadRakutenShopOffers } from "@/lib/sources/rakuten/item-search";
@@ -175,6 +177,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
           priceCheckedAt={new Date().toISOString()}
           retrievalLimited={fallback.truncated}
           rakutenShopScope={fallback.truncated ? "limited" : "ready"}
+          amazonUrl={amazonAssociateLink(jan, amazonAssociateLinks)?.url ?? null}
         />
       );
     }
@@ -244,6 +247,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
       priceCheckedAt={now}
       retrievalLimited={result.retrievalLimited}
       rakutenShopScope={rakutenShops.ok ? (rakutenShops.truncated ? "limited" : "ready") : "off"}
+      amazonUrl={amazonAssociateLink(jan, amazonAssociateLinks)?.url ?? null}
     />
   );
 }

@@ -163,15 +163,20 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
             <li key={offer.id} className="flex flex-wrap items-center justify-between gap-3">
               <p className="price-num text-2xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
               {link.href ? (
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel={link.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
-                  className="inline-flex min-h-10 items-center justify-center rounded-full border border-line bg-card px-4 text-sm text-ink"
-                >
-                  {link.affiliate ? "広告 · " : ""}
-                  {label}
-                </a>
+                <div className="min-w-36">
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel={link.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
+                    className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-line bg-card px-4 text-sm text-ink"
+                  >
+                    {label}
+                    <span aria-hidden="true" className="ml-1">
+                      ↗
+                    </span>
+                  </a>
+                  {link.affiliate ? <p className="mt-1 text-center text-xs text-muted">広告</p> : null}
+                </div>
               ) : (
                 <span className="text-sm text-muted">リンクなし</span>
               )}

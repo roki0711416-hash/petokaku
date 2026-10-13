@@ -126,9 +126,12 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-6xl px-4 py-5 text-xs leading-6 text-muted">
-          © 2026 ペトカク。商品の販売は行っていません。購入前に、販売店のページで価格・送料・在庫を確認してください。
-        </p>
+        <div className="mx-auto max-w-6xl px-4 py-5">
+          <p className="text-sm leading-6 text-muted">Amazonのアソシエイトとして、ペトカク運営事務局は適格販売により収入を得ています。</p>
+          <p className="mt-2 text-xs leading-6 text-muted">
+            © 2026 ペトカク。商品の販売は行っていません。購入前に、販売店のページで価格・送料・在庫を確認してください。
+          </p>
+        </div>
       </div>
     </footer>
   );
