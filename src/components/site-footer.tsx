@@ -37,29 +37,27 @@ const socials = [
     label: "Instagram",
     href: "https://www.instagram.com/petokaku/",
     icon: InstagramIcon,
-    mark: "bg-moss text-forest group-hover:bg-forest group-hover:text-card",
   },
   {
     label: "X",
     href: "https://x.com/petokaku",
     icon: XIcon,
-    mark: "bg-ink text-card group-hover:bg-forest",
   },
 ];
 
 function InstagramIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
-      <rect x="4" y="4" width="16" height="16" rx="5" />
-      <circle cx="12" cy="12" r="3.5" />
-      <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.6]">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.4" cy="6.6" r="0.9" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
 function XIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-current">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[15px] w-[15px] fill-current">
       <path d="M14.7 4h2.6l-5.7 6.5L18.6 20h-4.3l-3.4-4.9L7 20H4.4l6.1-7L4.2 4h4.4l3 4.4L14.7 4Zm-.9 14.4h1.4L8.3 5.5H6.8l7 12.9Z" />
     </svg>
   );
@@ -77,7 +75,7 @@ export function SiteFooter() {
           </div>
           <div>
             <p className="text-xs tracking-[0.14em] text-muted">公式アカウント</p>
-            <ul className="mt-3 flex flex-wrap gap-3" aria-label="公式アカウント">
+            <ul className="mt-4 flex gap-6" aria-label="公式アカウント">
               {socials.map((item) => (
                 <li key={item.href}>
                   <a
@@ -85,12 +83,12 @@ export function SiteFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${item.label}（新しいタブで開く）`}
-                    className="lift group inline-flex min-h-12 items-center gap-2.5 rounded-full border border-line bg-card py-1 pr-4 pl-1 text-sm text-ink shadow-[0_10px_24px_rgba(32,77,56,0.06)] hover:border-sage"
+                    className="group grid justify-items-center gap-2"
                   >
-                    <span className={`grid h-10 w-10 place-items-center rounded-full transition-colors ${item.mark}`}>
+                    <span className="grid h-11 w-11 place-items-center rounded-full border border-line bg-sand text-forest transition-colors duration-200 group-hover:border-forest group-hover:bg-forest group-hover:text-card">
                       <item.icon />
                     </span>
-                    {item.label}
+                    <span className="text-[11px] tracking-[0.14em] text-muted transition-colors group-hover:text-forest">{item.label}</span>
                   </a>
                 </li>
               ))}
