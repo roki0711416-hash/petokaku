@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isPetSupplyHit, petSupplyGenreCategoryId, preferDetailImageUrl, searchYahooItems, yahooDetailImageSize, yahooJanSearchLimit } from "./search.ts";
+import { isPetSupplyHit, petSupplyGenreCategoryId, preferDetailImageUrl, readYahooItem, searchYahooItems, yahooDetailImageSize, yahooJanSearchLimit } from "./search.ts";
 
 const rice = {
   name: "令和7年産 米 15kg",
@@ -44,9 +44,13 @@ test("ペット用品ジャンルIDはYahooカテゴリ一覧のペット用品�
 
 test("商品検索はリクエスト時点でペット用品ジャンルに絞り、それ以外を残さない", async () => {
   const previousAppId = process.env.YAHOO_CLIENT_ID;
+  const previousSid = process.env.YAHOO_AFFILIATE_SID;
+  const previousPid = process.env.YAHOO_AFFILIATE_PID;
   const previousFetch = globalThis.fetch;
   const requested: string[] = [];
   process.env.YAHOO_CLIENT_ID = "test-app";
+  delete process.env.YAHOO_AFFILIATE_SID;
+  delete process.env.YAHOO_AFFILIATE_PID;
   globalThis.fetch = (async (input: string | URL | Request) => {
     requested.push(String(input));
     return new Response(JSON.stringify({ hits: [rice, sheets] }), {
@@ -70,6 +74,8 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     assert.equal(keywordUrl.searchParams.get("genre_category_id"), "2509");
     assert.equal(keywordUrl.searchParams.get("query"), "アイリスオーヤマ");
     assert.equal(keywordUrl.searchParams.get("sort"), null);
+    assert.equal(keywordUrl.searchParams.get("affiliate_type"), null);
+    assert.equal(keywordUrl.searchParams.get("affiliate_id"), null);
     assert.equal(janUrl.searchParams.get("genre_category_id"), "2509");
     assert.equal(janUrl.searchParams.get("jan_code"), "3182550849647");
     assert.equal(janUrl.searchParams.get("query"), null);
@@ -104,5 +110,64 @@ test("商品検索はリクエスト時点でペット用品ジャンルに絞�
     } else {
       process.env.YAHOO_CLIENT_ID = previousAppId;
     }
+    if (previousSid == null) delete process.env.YAHOO_AFFILIATE_SID;
+    else process.env.YAHOO_AFFILIATE_SID = previousSid;
+    if (previousPid == null) delete process.env.YAHOO_AFFILIATE_PID;
+    else process.env.YAHOO_AFFILIATE_PID = previousPid;
+  }
+});
+
+test("識別子があるときだけアフィリエイトパラメータを1回の検索に足し、販売ページはvc_urlから取る", async () => {
+  const previousAppId = process.env.YAHOO_CLIENT_ID;
+  const previousSid = process.env.YAHOO_AFFILIATE_SID;
+  const previousPid = process.env.YAHOO_AFFILIATE_PID;
+  const previousFetch = globalThis.fetch;
+  const requested: string[] = [];
+  const storeUrl = "https://store.shopping.yahoo.co.jp/example-shop/item1.html";
+  const affiliateUrl = `http://ck.jp.ap.valuecommerce.com/servlet/referral?sid=11&pid=22&vc_url=${encodeURIComponent(storeUrl)}`;
+  process.env.YAHOO_CLIENT_ID = "test-app";
+  process.env.YAHOO_AFFILIATE_SID = "11";
+  process.env.YAHOO_AFFILIATE_PID = "22";
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    requested.push(String(input));
+    return new Response(
+      JSON.stringify({
+        hits: [
+          {
+            ...sheets,
+            url: affiliateUrl,
+            code: "item1",
+            seller: { sellerId: "example-shop", name: "例の店" },
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  }) as typeof fetch;
+  try {
+    const result = await searchYahooItems({ janCode: "4905009714353", results: 1 });
+    assert.equal(requested.length, 1);
+    const requestUrl = new URL(requested[0] ?? "");
+    assert.equal(requestUrl.searchParams.get("affiliate_type"), "vc");
+    assert.equal(
+      requestUrl.searchParams.get("affiliate_id"),
+      "http://ck.jp.ap.valuecommerce.com/servlet/referral?sid=11&pid=22&vc_url=",
+    );
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.items[0]?.url, storeUrl);
+      assert.equal(result.items[0]?.affiliateUrl, affiliateUrl);
+    }
+    const direct = readYahooItem({ name: "通常URL", url: storeUrl, genreCategory: { id: petSupplyGenreCategoryId } });
+    assert.equal(direct?.url, storeUrl);
+    assert.equal(direct?.affiliateUrl, null);
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousAppId == null) delete process.env.YAHOO_CLIENT_ID;
+    else process.env.YAHOO_CLIENT_ID = previousAppId;
+    if (previousSid == null) delete process.env.YAHOO_AFFILIATE_SID;
+    else process.env.YAHOO_AFFILIATE_SID = previousSid;
+    if (previousPid == null) delete process.env.YAHOO_AFFILIATE_PID;
+    else process.env.YAHOO_AFFILIATE_PID = previousPid;
   }
 });

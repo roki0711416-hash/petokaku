@@ -1,4 +1,5 @@
 import type { YahooItem } from "@/lib/sources/yahoo/adapter";
+import { splitYahooShoppingUrl, yahooAffiliateQuery } from "./affiliate-url.ts";
 
 const endpoint = "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch";
 
@@ -124,9 +125,11 @@ export function readYahooItem(value: unknown): YahooItem | null {
   const seller = asRecord(record.seller);
   const parents = Array.isArray(record.parentGenreCategories) ? record.parentGenreCategories : [];
 
+  const links = splitYahooShoppingUrl(record.url);
   return {
     name,
-    url: httpsUrl(record.url),
+    url: links.productUrl,
+    affiliateUrl: links.affiliateUrl,
     inStock: typeof record.inStock === "boolean" ? record.inStock : null,
     code: text(record.code),
     price: integer(record.price),
@@ -169,6 +172,11 @@ export async function searchYahooItems(params: YahooSearchParams): Promise<Yahoo
     url.searchParams.set("start", String(params.start));
   }
   url.searchParams.set("image_size", yahooDetailImageSize);
+  const affiliate = yahooAffiliateQuery(process.env.YAHOO_AFFILIATE_SID?.trim() ?? "", process.env.YAHOO_AFFILIATE_PID?.trim() ?? "");
+  if (affiliate) {
+    url.searchParams.set("affiliate_type", affiliate.affiliate_type);
+    url.searchParams.set("affiliate_id", affiliate.affiliate_id);
+  }
   if (params.sort) {
     url.searchParams.set("sort", params.sort);
   }

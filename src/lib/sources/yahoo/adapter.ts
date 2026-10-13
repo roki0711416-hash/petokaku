@@ -17,6 +17,7 @@ export type YahooShipping = {
 export type YahooItem = {
   name: string;
   url: string | null;
+  affiliateUrl?: string | null;
   inStock: boolean | null;
   code: string | null;
   price: number | null;
@@ -187,7 +188,7 @@ export function adaptYahooGroup(items: YahooItem[], observedAt: string): Adapted
       variantId,
       shopName: item.sellerName?.trim() || "ショップ名未設定",
       productUrl: item.url,
-      affiliateUrl: null,
+      affiliateUrl: item.affiliateUrl ?? null,
       source: "yahoo",
       provider: "yahoo",
       sellerId: item.sellerId,
@@ -225,7 +226,7 @@ export function adaptYahooGroup(items: YahooItem[], observedAt: string): Adapted
       price: price?.price ?? null,
       shippingFee: price?.shippingFee ?? null,
       productUrl: offer.productUrl,
-      affiliateUrl: null,
+      affiliateUrl: offer.affiliateUrl,
       priceCheckedAt: price?.observedAt ?? null,
       priceSnapshotId: price?.id ?? null,
       shippingStatus: price?.shippingStatus ?? "unknown",

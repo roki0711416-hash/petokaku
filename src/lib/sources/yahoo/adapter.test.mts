@@ -23,6 +23,17 @@ function item(overrides: Partial<YahooItem> = {}): YahooItem {
   };
 }
 
+test("アフィリエイトURLは購入リンクに使い、商品URLはショップのページのままにする", () => {
+  const storeUrl = "https://store.shopping.yahoo.co.jp/example/item.html";
+  const affiliateUrl = "http://ck.jp.ap.valuecommerce.com/servlet/referral?sid=11&pid=22&vc_url=https%3A%2F%2Fstore.shopping.yahoo.co.jp%2Fexample%2Fitem.html";
+  const adapted = adaptYahooGroup([item({ url: storeUrl, affiliateUrl })], observedAt);
+  assert.ok(adapted);
+  assert.equal(adapted.offers[0]?.productUrl, storeUrl);
+  assert.equal(adapted.offers[0]?.affiliateUrl, affiliateUrl);
+  assert.equal(adapted.detail.offers[0]?.productUrl, storeUrl);
+  assert.equal(adapted.detail.offers[0]?.affiliateUrl, affiliateUrl);
+});
+
 test("送料無料だけを0円にし、条件付き送料無料は金額なしにする", () => {
   assert.deepEqual(mapYahooShipping({ code: 2, name: "送料無料" }), { shippingFee: 0, shippingStatus: "free" });
   assert.deepEqual(mapYahooShipping({ code: 3, name: "条件付き送料無料" }), {
@@ -48,6 +59,8 @@ test("商品名に容量があっても容量はnullにし、JANは識別子の�
   assert.equal(adapted.variant.id, "prd_yh_3182550849654");
   assert.equal(adapted.product.id, "line_yh_3182550849654");
   assert.equal(adapted.offers[0]?.itemCode, "chanet_201962");
+  assert.equal(adapted.offers[0]?.productUrl, "https://store.shopping.yahoo.co.jp/example/item.html");
+  assert.equal(adapted.detail.offers[0]?.affiliateUrl, null);
   assert.equal(adapted.offers[0]?.id.includes("chanet_201962"), true);
   assert.equal(adapted.variant.id.includes("chanet"), false);
   assert.equal(adapted.detail.quantity, null);
