@@ -46,7 +46,11 @@ export default function GuidePage() {
       <h2>内容量が違う商品</h2>
       <p>名前が似ていても、4kgと10kgのように内容量が違う商品は別のJANコードとして扱います。同じ一覧の最安としては混ぜません。</p>
       <p>
-        操作で分からないことは、
+        比較の見方は
+        <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          お役立ち記事
+        </Link>
+        にもまとめています。操作で分からないことは、
         <Link href="/contact" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
           お問い合わせ
         </Link>

@@ -37,7 +37,7 @@ export function robotsPolicy(): MetadataRoute.Robots {
   };
 }
 
-const publicPaths = ["/", "/about", "/guide", "/contact", "/privacy", "/cookies", "/terms", "/affiliate"];
+const publicPaths = ["/", "/about", "/guide", "/articles", "/contact", "/privacy", "/cookies", "/terms", "/affiliate"];
 
 export const indexedJanLimit = 20;
 

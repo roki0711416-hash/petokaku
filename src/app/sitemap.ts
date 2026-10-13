@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { articles } from "@/data/articles";
+import { articleSitemapPaths } from "@/lib/articles/catalog";
 import { publishedProductPaths } from "@/lib/sitemap-products";
 import { getSiteUrl, sitemapEntries } from "@/lib/site";
 
@@ -16,5 +18,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
     .filter((entry) => !seen.has(entry.url));
-  return [...staticEntries, ...products];
+  const articleEntries = articleSitemapPaths(articles)
+    .map((path) => ({
+      url: new URL(path, siteUrl).toString(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }))
+    .filter((entry) => !seen.has(entry.url));
+  return [...staticEntries, ...articleEntries, ...products];
 }

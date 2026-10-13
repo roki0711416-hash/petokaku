@@ -8,7 +8,10 @@ const columns = [
   },
   {
     title: "ご利用ガイド",
-    links: [{ href: "/guide", label: "サイトの使い方" }],
+    links: [
+      { href: "/guide", label: "サイトの使い方" },
+      { href: "/articles", label: "お役立ち記事" },
+    ],
   },
   {
     title: "ポリシー・規約",

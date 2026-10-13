@@ -45,6 +45,7 @@ const publicSitemap = [
   "https://petokaku.com/",
   "https://petokaku.com/about",
   "https://petokaku.com/guide",
+  "https://petokaku.com/articles",
   "https://petokaku.com/contact",
   "https://petokaku.com/privacy",
   "https://petokaku.com/cookies",
@@ -172,6 +173,7 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   const sitemap = read("../app/sitemap.ts");
   assert.doesNotMatch(sitemap, /searchYahooItems|loadYahooJan/);
   assert.match(sitemap, /publishedProductPaths/);
+  assert.match(sitemap, /articleSitemapPaths/);
   assert.match(sitemap, /revalidate = 3600/);
   assert.doesNotMatch(sitemap, /3182550706933/);
   const robots = robotsPolicy.toString();

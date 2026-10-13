@@ -118,6 +118,10 @@ export default async function HomePage() {
             <Link href="/guide" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
               サイトの使い方
             </Link>
+            と
+            <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+              お役立ち記事
+            </Link>
             にまとめています。
           </p>
         </div>
