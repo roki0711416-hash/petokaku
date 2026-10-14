@@ -8,7 +8,7 @@ export function TopicArt({ image, glyph }: { image: StaticImageData; glyph: Cata
   const [failed, setFailed] = useState(false);
 
   return (
-    <span className="relative block aspect-square bg-sand">
+    <span className="relative block aspect-[4/3] bg-sand">
       {failed ? (
         <span className="grid h-full place-items-center text-forest">
           <span className="scale-150">

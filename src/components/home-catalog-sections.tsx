@@ -11,28 +11,28 @@ export function HomeCatalogSections({ catalog, articles }: { catalog: HomeCatalo
 
   return (
     <>
-      <section aria-labelledby="popular-products-heading" className="px-4 pb-8">
+      <HomeArticleCards articles={articles} />
+      <section aria-labelledby="popular-products-heading" className="px-4 pt-6 pb-2">
         <div className="mx-auto max-w-6xl">
-          <h2 id="popular-products-heading" className="text-lg font-medium text-ink">
+          <h2 id="popular-products-heading" className="text-base font-medium text-ink md:text-lg">
             人気のペット用品
           </h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">レビュー件数が多い順です。売上順ではありません。{note}</p>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">レビュー件数が多い順です。売上順ではありません。金額は商品価格で、送料込みではありません。{note}</p>
           {catalog.popular.length === 0 ? (
             <p className="mt-3 text-sm leading-6 text-muted">いま商品を表示できません。時間をおいて、もう一度開いてください。</p>
           ) : (
-            <div className="mt-4">
+            <div className="mt-3">
               <HomePopularBrowser cards={catalog.popular} />
             </div>
           )}
         </div>
       </section>
-      <HomeArticleCards articles={articles} />
-      <section aria-labelledby="category-products-heading" className="px-4 pb-8">
+      <section aria-labelledby="category-products-heading" className="px-4 pt-6 pb-2">
         <div className="mx-auto max-w-6xl">
-          <h2 id="category-products-heading" className="text-lg font-medium text-ink">
+          <h2 id="category-products-heading" className="text-base font-medium text-ink md:text-lg">
             カテゴリ別の商品
           </h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">ペットの種類ごとに、価格を比較できる商品を先に並べています。</p>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">種類を開くと、このページで商品を最大4件から見られます。一覧は別ページです。</p>
           <HomeCategoryBrowser categories={catalog.categories} />
         </div>
       </section>

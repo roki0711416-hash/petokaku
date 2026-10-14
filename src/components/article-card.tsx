@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Article } from "@/lib/articles/catalog";
 import { articlePath } from "@/lib/articles/catalog";
 
-export function ArticleCard({ article }: { article: Article }) {
+export function ArticleCard({ article, compact = false }: { article: Article; compact?: boolean }) {
   return (
     <Link
       href={articlePath(article.slug)}
@@ -24,7 +24,7 @@ export function ArticleCard({ article }: { article: Article }) {
       </span>
       <span className="flex flex-1 flex-col p-3">
         <span className="line-clamp-3 text-sm leading-6 font-medium text-ink md:text-base">{article.title}</span>
-        <span className="mt-1 line-clamp-3 text-sm leading-6 text-muted">{article.description}</span>
+        {compact ? null : <span className="mt-1 line-clamp-3 text-sm leading-6 text-muted">{article.description}</span>}
       </span>
     </Link>
   );

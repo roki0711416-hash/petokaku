@@ -29,12 +29,17 @@ function CatalogCard({ card }: { card: HomeCatalogCard }) {
         </span>
         <span className="flex flex-1 flex-col p-3">
           <span className="line-clamp-3 text-sm leading-5 font-medium text-ink">{card.name}</span>
-          {card.price != null ? (
-            <span className="price-num mt-3 text-xl leading-none text-ink">{formatYen(card.price)}</span>
-          ) : (
-            <span className="mt-3 text-xs leading-5 text-muted">価格は確認できませんでした。</span>
-          )}
-          <span className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-3 text-sm text-white">価格を比較する</span>
+          <span className="mt-auto flex flex-col pt-3">
+            {card.price != null ? (
+              <>
+                <span className="price-num text-xl leading-none text-ink">{formatYen(card.price)}</span>
+                <span className="mt-1 text-xs leading-5 text-muted">商品価格・送料別</span>
+              </>
+            ) : (
+              <span className="text-xs leading-5 text-muted">価格は確認できませんでした。</span>
+            )}
+            <span className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-3 text-sm text-white">価格を比較する</span>
+          </span>
         </span>
       </Link>
     </li>
@@ -95,11 +100,11 @@ function CategoryPanel({ category }: { category: HomeCatalogCategory }) {
             className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
           >
             <span className="text-base font-medium text-ink">{category.label}</span>
-            <span className="shrink-0 text-sm text-forest-deep">{open ? "閉じる" : "開く"}</span>
+            <span className="shrink-0 text-sm text-forest-deep">{open ? "閉じる" : "商品を開く"}</span>
           </button>
         </h3>
-        <Link href={category.href} className="shrink-0 text-sm text-forest-deep underline underline-offset-4">
-          商品を見る
+        <Link href={category.href} className="inline-flex min-h-11 shrink-0 items-center text-sm text-forest-deep underline underline-offset-4">
+          一覧を見る
         </Link>
       </div>
       {open ? (
@@ -112,7 +117,7 @@ function CategoryPanel({ category }: { category: HomeCatalogCategory }) {
               ) : null}
             </>
           ) : (
-            <p className="text-sm leading-6 text-muted">このカテゴリの商品は、商品を見るから一覧を開けます。</p>
+            <p className="text-sm leading-6 text-muted">このカテゴリの商品は、一覧を見るから別ページで開けます。</p>
           )}
         </div>
       ) : null}

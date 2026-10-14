@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HomeCatalogSections } from "@/components/home-catalog-sections";
-import { HomeTopics } from "@/components/home-topics";
+import { HomeSearchKeywords, HomeTopics } from "@/components/home-topics";
 import { SearchForm } from "@/components/search-form";
 import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
 import { publishedArticles } from "@/lib/articles/catalog";
@@ -69,7 +69,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} />
-      <section id="home-search" aria-labelledby="home-search-heading" className="scroll-mt-28 bg-card px-4 pt-6 pb-8 md:pt-10">
+      <section id="home-search" aria-labelledby="home-search-heading" className="scroll-mt-28 bg-card px-4 pt-5 pb-5 md:pt-10">
         <div className="mx-auto max-w-3xl">
           <h1 id="home-search-heading" className="text-[1.65rem] leading-snug font-medium tracking-tight text-ink min-[390px]:text-[1.8rem] md:text-4xl md:leading-tight">
             ペット用品を、<br className="sm:hidden" />
@@ -87,9 +87,10 @@ export default async function HomePage() {
             />
             <p className="mt-2 text-xs leading-5 text-muted">JANコードでの検索にも対応</p>
           </div>
+          <HomeSearchKeywords />
         </div>
       </section>
-      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-8">
+      <section id="categories" aria-labelledby="categories-heading" className="scroll-mt-28 px-4 pt-6">
         <div className="mx-auto max-w-6xl">
           <h2 id="categories-heading" className="text-base font-medium text-ink md:text-lg">
             ペットの種類から探す
@@ -98,14 +99,15 @@ export default async function HomePage() {
         </div>
       </section>
       <HomeTopics />
-      <section aria-labelledby="howto-heading" className="px-4 pt-8 pb-8 md:pt-10">
+      <HomeCatalogSections catalog={catalog} articles={publishedArticles(articles)} />
+      <section aria-labelledby="howto-heading" className="px-4 pt-6 pb-8">
         <div className="mx-auto max-w-6xl">
           <h2 id="howto-heading" className="text-base font-medium text-ink md:text-lg">
             サイトの使い方
           </h2>
-          <ol className="mt-3 grid gap-2 md:grid-cols-3 md:gap-3">
+          <ol className="mt-3 grid gap-2 md:grid-cols-3">
             {steps.map((step, index) => (
-              <li key={step.title} className="flex min-w-0 items-start gap-3 rounded-2xl bg-card px-3 py-3">
+              <li key={step.title} className="flex min-w-0 items-start gap-3 rounded-2xl bg-card px-3 py-2.5">
                 <span className="grid size-8 shrink-0 place-items-center rounded-full bg-forest text-sm text-white">{index + 1}</span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-ink">{step.title}</span>
@@ -114,7 +116,7 @@ export default async function HomePage() {
               </li>
             ))}
           </ol>
-          <p className="mt-4 text-sm leading-6 text-muted">
+          <p className="mt-3 text-sm leading-6 text-muted">
             詳しくは
             <Link href="/guide" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
               サイトの使い方
@@ -127,7 +129,6 @@ export default async function HomePage() {
           </p>
         </div>
       </section>
-      <HomeCatalogSections catalog={catalog} articles={publishedArticles(articles)} />
     </>
   );
 }
