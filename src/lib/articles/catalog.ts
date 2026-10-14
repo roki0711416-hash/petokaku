@@ -1,7 +1,10 @@
 export type ArticleBlock =
   | { type: "h2"; text: string }
+  | { type: "h3"; text: string }
   | { type: "p"; text: string }
-  | { type: "ul"; items: string[] };
+  | { type: "ul"; items: string[] }
+  | { type: "note"; text: string }
+  | { type: "table"; headers: string[]; rows: string[][] };
 
 export type ArticleProductLink = {
   href: string;
@@ -22,6 +25,7 @@ export type Article = {
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const productHrefPattern = /^\/products\/jan\/[0-9]{13}$/;
+const categoryHrefPattern = /^\/categories\/[a-z0-9-]+$/;
 
 function calendarDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -36,12 +40,20 @@ function calendarDate(value: string): boolean {
 }
 
 export function isArticleProductHref(href: string): boolean {
-  return productHrefPattern.test(href);
+  return productHrefPattern.test(href) || categoryHrefPattern.test(href);
 }
 
 function blockOk(block: ArticleBlock): boolean {
   if (block.type === "ul") {
     return block.items.length > 0 && block.items.every((item) => item.trim() !== "");
+  }
+  if (block.type === "table") {
+    return (
+      block.headers.length > 0 &&
+      block.headers.every((header) => header.trim() !== "") &&
+      block.rows.length > 0 &&
+      block.rows.every((row) => row.length === block.headers.length && row.every((cell) => cell.trim() !== ""))
+    );
   }
   return block.text.trim() !== "";
 }

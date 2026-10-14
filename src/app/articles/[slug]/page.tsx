@@ -80,6 +80,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </h2>
             );
           }
+          if (block.type === "h3") {
+            return (
+              <h3 key={`${block.text}-${index}`} className="text-base font-medium tracking-tight text-ink">
+                {block.text}
+              </h3>
+            );
+          }
           if (block.type === "ul") {
             return (
               <ul key={index} className="grid list-disc gap-2 pl-5 text-muted">
@@ -87,6 +94,41 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
+            );
+          }
+          if (block.type === "note") {
+            return (
+              <p key={index} className="text-xs leading-6 text-muted">
+                {block.text}
+              </p>
+            );
+          }
+          if (block.type === "table") {
+            return (
+              <div key={index} className="overflow-x-auto rounded-2xl border border-line bg-card">
+                <table className="w-full border-collapse text-left text-xs leading-5 md:text-sm">
+                  <thead>
+                    <tr className="border-b border-line bg-sand/70 text-muted">
+                      {block.headers.map((header) => (
+                        <th key={header} scope="col" className="px-3 py-2 font-medium">
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row) => (
+                      <tr key={row[0]} className="border-b border-line last:border-b-0">
+                        {row.map((cell, cellIndex) => (
+                          <td key={`${row[0]}-${cellIndex}`} className="px-3 py-3 align-top text-ink">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             );
           }
           return (

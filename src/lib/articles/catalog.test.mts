@@ -36,6 +36,7 @@ test("公開記事だけを一覧とサイトマップに出す", () => {
 
 test("商品リンクは既存のJAN詳細だけを受け、不正な記事は公開しない", () => {
   assert.equal(isArticleProductHref("/products/jan/3182550706933"), true);
+  assert.equal(isArticleProductHref("/categories/cat-litter"), true);
   assert.equal(isArticleProductHref("https://example.com/item"), false);
   assert.equal(isArticleProductHref("/search?q=猫砂"), false);
   const broken = article({ products: [{ href: "https://www.amazon.co.jp/dp/B00TEST", label: "外部" }] });
@@ -46,22 +47,22 @@ test("商品リンクは既存のJAN詳細だけを受け、不正な記事は�
 });
 
 test("初期の公開記事は比較ルールだけで、未確認の評価は含まない", () => {
-  const liveText = publishedArticles(articles)
-    .flatMap((item) => [
-      item.title,
-      item.description,
-      ...item.blocks.flatMap((block) => (block.type === "ul" ? block.items : [block.text])),
-      ...item.products.map((product) => product.label),
-    ])
-    .join("\n");
+  const howTo = publishedArticles(articles).find((item) => item.slug === "how-to-compare-pet-prices");
+  assert.ok(howTo);
+  const liveText = [
+    howTo.title,
+    howTo.description,
+    ...howTo.blocks.flatMap((block) => (block.type === "ul" ? block.items : block.type === "table" ? [...block.headers, ...block.rows.flat()] : [block.text])),
+    ...howTo.products.map((product) => product.label),
+  ].join("\n");
   for (const word of ["ランキング", "レビュー", "体験談", "おすすめ", "最安"]) {
     assert.equal(liveText.includes(word), false);
   }
   const live = publishedArticles(articles);
-  assert.equal(live.length, 1);
-  assert.equal(live[0]?.slug, "how-to-compare-pet-prices");
-  assert.deepEqual(live[0]?.products, [{ href: "/products/jan/3182550706933", label: "ロイヤルカナンの猫用4kg商品の価格比較" }]);
-  const data = articleStructuredData(live[0]!, "https://petokaku.com/articles/how-to-compare-pet-prices");
+  assert.equal(live.length, 2);
+  assert.equal(live.some((item) => item.slug === "cat-litter-types"), true);
+  assert.deepEqual(howTo.products, [{ href: "/products/jan/3182550706933", label: "ロイヤルカナンの猫用4kg商品の価格比較" }]);
+  const data = articleStructuredData(howTo, "https://petokaku.com/articles/how-to-compare-pet-prices");
   assert.equal(data["@type"], "Article");
   assert.equal(data.headline, "ペット用品の価格比較の見方");
   assert.equal(data.datePublished, "2026-10-13");
