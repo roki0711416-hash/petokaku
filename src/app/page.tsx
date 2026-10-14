@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HomeCatalogSections } from "@/components/home-catalog-sections";
 import { HomeTopics } from "@/components/home-topics";
 import { SearchForm } from "@/components/search-form";
 import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
+import { publishedArticles } from "@/lib/articles/catalog";
+import { articles } from "@/data/articles";
+import { loadHomeCatalog } from "@/lib/home-catalog";
 import { getSiteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -58,8 +62,9 @@ function homeStructuredData() {
   };
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const structured = homeStructuredData();
+  const catalog = await loadHomeCatalog();
 
   return (
     <>
@@ -122,6 +127,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+      <HomeCatalogSections catalog={catalog} articles={publishedArticles(articles)} />
     </>
   );
 }

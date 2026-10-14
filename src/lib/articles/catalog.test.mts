@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import test from "node:test";
 import { articles } from "../../data/articles.ts";
 import {
+  articleImageIsValid,
   articleIsValid,
   articleSitemapPaths,
   articleStructuredData,
@@ -44,6 +46,11 @@ test("商品リンクは既存のJAN詳細だけを受け、不正な記事は�
   assert.deepEqual(publishedArticles([broken]), []);
   const early = article({ updatedOn: "2026-10-12" });
   assert.equal(articleIsValid(early, [early]), false);
+  assert.equal(articleImageIsValid(undefined), true);
+  assert.equal(articleImageIsValid({ src: "/article-images/cat-litter-types.png", alt: "図" }), true);
+  assert.equal(articleImageIsValid({ src: "https://example.com/photo.jpg", alt: "外部" }), false);
+  const remote = article({ image: { src: "https://example.com/photo.jpg", alt: "外部" } });
+  assert.equal(articleIsValid(remote, [remote]), false);
 });
 
 test("初期の公開記事は比較ルールだけで、未確認の評価は含まない", () => {
@@ -65,7 +72,16 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
   const data = articleStructuredData(howTo, "https://petokaku.com/articles/how-to-compare-pet-prices");
   assert.equal(data["@type"], "Article");
   assert.equal(data.headline, "ペット用品の価格比較の見方");
+  assert.equal(data.image, "https://petokaku.com/article-images/how-to-compare-pet-prices.png");
   assert.equal(data.datePublished, "2026-10-13");
+  for (const item of live) {
+    assert.equal(item.published, true);
+    if (!item.image) {
+      continue;
+    }
+    assert.equal(item.image.src.startsWith("/article-images/"), true);
+    assert.equal(existsSync(new URL(`../../../public${item.image.src}`, import.meta.url)), true);
+  }
   assert.equal(data.dateModified, "2026-10-13");
   assert.equal(data.mainEntityOfPage, "https://petokaku.com/articles/how-to-compare-pet-prices");
 });

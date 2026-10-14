@@ -11,6 +11,11 @@ export type ArticleProductLink = {
   label: string;
 };
 
+export type ArticleImage = {
+  src: string;
+  alt: string;
+};
+
 export type Article = {
   slug: string;
   title: string;
@@ -18,12 +23,14 @@ export type Article = {
   publishedOn: string;
   updatedOn: string;
   published: boolean;
+  image?: ArticleImage;
   blocks: ArticleBlock[];
   relatedSlugs: string[];
   products: ArticleProductLink[];
 };
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const articleImagePattern = /^\/article-images\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:png|webp|jpg)$/;
 const productHrefPattern = /^\/products\/jan\/[0-9]{13}$/;
 const categoryHrefPattern = /^\/categories\/[a-z0-9-]+$/;
 
@@ -58,6 +65,13 @@ function blockOk(block: ArticleBlock): boolean {
   return block.text.trim() !== "";
 }
 
+export function articleImageIsValid(image: ArticleImage | undefined): boolean {
+  if (!image) {
+    return true;
+  }
+  return articleImagePattern.test(image.src) && image.alt.trim() !== "" && image.alt.length <= 80;
+}
+
 export function articleIsValid(article: Article, all: readonly Article[]): boolean {
   if (!slugPattern.test(article.slug) || article.slug.length > 80) {
     return false;
@@ -66,6 +80,9 @@ export function articleIsValid(article: Article, all: readonly Article[]): boole
     return false;
   }
   if (article.title.trim() === "" || article.description.trim() === "") {
+    return false;
+  }
+  if (!articleImageIsValid(article.image)) {
     return false;
   }
   if (!calendarDate(article.publishedOn) || !calendarDate(article.updatedOn) || article.updatedOn < article.publishedOn) {
@@ -116,6 +133,7 @@ export function articleStructuredData(article: Article, pageUrl: string): Record
     "@type": "Article",
     headline: article.title,
     description: article.description,
+    ...(article.image ? { image: new URL(article.image.src, pageUrl).toString() } : {}),
     datePublished: article.publishedOn,
     dateModified: article.updatedOn,
     mainEntityOfPage: pageUrl,

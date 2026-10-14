@@ -3,6 +3,7 @@ import type { Article } from "../lib/articles/catalog.ts";
 // 公開するのは、サイトの比較ルールとして確認済みの文章だけ。
 // 商品仕様、体験談、レビュー、順位は書かない。published が false の記事は出さない。
 // 商品リンクは /products/jan/ の13桁JANだけ。
+// image.src は public/article-images の自作図だけ。外部の写真は入れない。
 export const articles: Article[] = [
   {
     slug: "cat-litter-types",
@@ -11,6 +12,7 @@ export const articles: Article[] = [
     publishedOn: "2026-10-14",
     updatedOn: "2026-10-14",
     published: true,
+    image: { src: "/article-images/cat-litter-types.png", alt: "猫砂の種類を抽象的な形で並べた図" },
     relatedSlugs: ["how-to-compare-pet-prices"],
     products: [{ href: "/categories/cat-litter", label: "猫砂の価格比較を見る" }],
     blocks: [
@@ -219,6 +221,7 @@ export const articles: Article[] = [
     publishedOn: "2026-10-13",
     updatedOn: "2026-10-13",
     published: true,
+    image: { src: "/article-images/how-to-compare-pet-prices.png", alt: "価格のカードを三枚並べた図" },
     blocks: [
       {
         type: "p",

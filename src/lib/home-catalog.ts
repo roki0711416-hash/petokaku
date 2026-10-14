@@ -6,7 +6,8 @@ import { buildSearchCandidates, preferComparableCards, type SearchCandidateCard 
 import type { YahooItem } from "./sources/yahoo/adapter.ts";
 
 export const homePopularLimit = 12;
-export const homeCategoryLimit = 4;
+export const homeCategoryLimit = 8;
+export const homePreviewCount = 4;
 
 export type HomeCatalogStatus = "ready" | "empty" | "not-configured" | "request-failed";
 
