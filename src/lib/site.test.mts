@@ -152,9 +152,11 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   const home = read("../app/page.tsx");
   const cards = read("../components/comparable-products.tsx");
   const site = read("./site.ts");
-  assert.match(home, /selectIndexedJans\(indexedJanProducts\)/);
-  assert.match(home, /indexedJanPath\(product\.janCode\)/);
-  assert.match(home, /価格比較できる商品/);
+  assert.match(home, /ペットの種類から探す/);
+  assert.match(home, /サイトの使い方/);
+  assert.match(home, /お役立ち記事/);
+  assert.match(home, /alternates: \{ canonical: "\/" \}/);
+  assert.doesNotMatch(home, /loadHomeCatalog|HomeCatalogSections|価格比較できる商品|取得できた掲載/);
   assert.doesNotMatch(home, /ComparableProducts/);
   assert.match(cards, /価格比較できる商品/);
   assert.match(cards, /indexedJanPath\(card\.janCode\)/);
@@ -163,8 +165,6 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.match(site, /3182550706933/);
   assert.doesNotMatch(home, /searchYahooItems|loadYahooJan|loadYahooKeywordSearch/);
   const catalog = read("../components/home-catalog-sections.tsx");
-  assert.match(home, /loadHomeCatalog/);
-  assert.match(home, /HomeCatalogSections/);
   assert.match(catalog, /人気のペット用品/);
   assert.match(catalog, /カテゴリ別の商品/);
   assert.match(catalog, /確定した金額としては扱っていません/);

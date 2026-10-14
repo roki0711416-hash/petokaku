@@ -1,26 +1,9 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { SearchForm } from "@/components/search-form";
 import { CatalogIcon } from "@/components/ui/catalog-card";
-import { ProductCard } from "@/components/ui/product-card";
-import { itemGuides, type ItemGuide } from "@/lib/item-guides";
-import type { GuideListings } from "@/lib/item-guides-listings";
+import { guideListingQuery, itemGuides, type ItemGuide } from "@/lib/item-guides";
 
-const listingMessage: Record<Exclude<GuideListings["status"], "ready">, string> = {
-  empty: "この条件に合う掲載は、取得結果のなかにありませんでした。検索語を短くするか、品目の言葉だけで開き直してください。",
-  "not-configured": "商品一覧はいま表示できません。検索と、下の選び方は使えます。",
-  "request-failed": "商品一覧を取得できませんでした。時間をおいて、もう一度開いてください。",
-};
-
-export function ItemGuidePage({
-  guide,
-  userQuery,
-  listings,
-}: {
-  guide: ItemGuide;
-  userQuery: string;
-  listings: GuideListings;
-}) {
+export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
   const related = itemGuides.filter((item) => item.slug !== guide.slug);
 
   return (
@@ -43,24 +26,6 @@ export function ItemGuidePage({
           </div>
         </div>
 
-        <section aria-labelledby="guide-search-heading" className="mt-8">
-          <h2 id="guide-search-heading" className="text-lg font-medium text-ink">
-            この品目で探す
-          </h2>
-          <p className="mt-2 text-sm leading-7 text-muted">入力した言葉は「{guide.query}」と組み合わせて探します。空欄なら品目の言葉だけです。</p>
-          <div className="mt-4 max-w-2xl">
-            <SearchForm
-              id={`${guide.slug}-search`}
-              action={guide.path}
-              defaultValue={userQuery}
-              prominent
-              label={`${guide.crumb}の検索`}
-              buttonLabel="検索"
-              placeholder={guide.searchPlaceholder}
-            />
-          </div>
-        </section>
-
         <section aria-labelledby="guide-links-heading" className="mt-8">
           <h2 id="guide-links-heading" className="text-lg font-medium text-ink">
             ブランド・種類から探す
@@ -69,7 +34,7 @@ export function ItemGuidePage({
             {guide.searches.map((item) => (
               <li key={item.label} className="min-w-0">
                 <Link
-                  href={`${guide.path}?q=${encodeURIComponent(item.query)}`}
+                  href={`/search?q=${encodeURIComponent(guideListingQuery(guide, item.query))}`}
                   className="inline-flex min-h-11 max-w-full items-center rounded-full border border-line bg-card px-4 text-sm text-ink hover:border-sage"
                 >
                   {item.label}
@@ -79,26 +44,7 @@ export function ItemGuidePage({
           </ul>
         </section>
 
-        <section aria-labelledby="guide-products-heading" className="mt-10">
-          <h2 id="guide-products-heading" className="text-lg font-medium text-ink">
-            取得できた掲載
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">
-            表示は取得時点のYahoo!ショッピングの掲載です。全店舗の最安ではありません。価格は取得できた在庫ありの商品価格で、送料を含みません。JANコードがある商品は、商品ページで楽天市場の参考価格も見られることがあります。
-          </p>
-          <p className="mt-2 text-sm text-ink">検索語: {listings.query}</p>
-          {listings.status === "ready" ? (
-            <ul className="mt-4 grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3">
-              {listings.cards.map((card) => (
-                <ProductCard key={card.id} card={card} />
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 rounded-2xl bg-card px-4 py-4 text-sm leading-7 text-muted">{listingMessage[listings.status]}</p>
-          )}
-        </section>
-
-        <section aria-labelledby="guide-points-heading" className="mt-12">
+        <section aria-labelledby="guide-points-heading" className="mt-8">
           <h2 id="guide-points-heading" className="text-lg font-medium text-ink">
             商品を選ぶときのポイント
           </h2>

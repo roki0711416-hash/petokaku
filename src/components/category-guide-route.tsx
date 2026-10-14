@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ItemGuidePage } from "@/components/item-guide-page";
 import { itemGuideBySlug, type ItemGuideSlug } from "@/lib/item-guides";
-import { loadGuideListings } from "@/lib/item-guides-listings";
 import { privateRobots, robotsMetadata } from "@/lib/site";
 
 type SearchParams = Promise<{ q?: string | string[] }>;
@@ -34,12 +33,10 @@ export async function categoryGuideMetadata(slug: ItemGuideSlug, searchParams: S
   return { ...metadata, robots: robotsMetadata() };
 }
 
-export async function CategoryGuideScreen({ slug, searchParams }: { slug: ItemGuideSlug; searchParams: SearchParams }) {
+export function CategoryGuideScreen({ slug }: { slug: ItemGuideSlug; searchParams: SearchParams }) {
   const guide = itemGuideBySlug(slug);
   if (!guide) {
     notFound();
   }
-  const userQuery = userQueryOf((await searchParams).q);
-  const listings = await loadGuideListings(guide, userQuery);
-  return <ItemGuidePage guide={guide} userQuery={userQuery} listings={listings} />;
+  return <ItemGuidePage guide={guide} />;
 }

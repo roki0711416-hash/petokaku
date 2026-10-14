@@ -35,6 +35,14 @@ test("品目ページは4件だけで、title・説明・見出し・FAQがそ�
   assert.equal(itemGuideBySlug("dog-food")?.query, "ドッグフード");
 });
 
+test("品目ページは専用検索と取得掲載を出さず、候補は検索ページへつなぐ", () => {
+  const page = readFileSync(new URL("../components/item-guide-page.tsx", import.meta.url), "utf8");
+  const route = readFileSync(new URL("../components/category-guide-route.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(page, /この品目で探す|取得できた掲載|入力した言葉は/);
+  assert.match(page, /\/search\?q=/);
+  assert.doesNotMatch(route, /loadGuideListings/);
+});
+
 test("品目の検索語は空なら品目名、入力があれば品目名と組み合わせる", () => {
   const dog = itemGuideBySlug("dog-food");
   assert.ok(dog);

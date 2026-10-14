@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HomeCatalogSections } from "@/components/home-catalog-sections";
 import { HomeTopics } from "@/components/home-topics";
 import { SearchForm } from "@/components/search-form";
 import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
-import { loadHomeCatalog } from "@/lib/home-catalog";
-import { getSiteUrl, indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -60,10 +58,8 @@ function homeStructuredData() {
   };
 }
 
-export default async function HomePage() {
+export default function HomePage() {
   const structured = homeStructuredData();
-  const comparable = selectIndexedJans(indexedJanProducts);
-  const catalog = await loadHomeCatalog();
 
   return (
     <>
@@ -97,7 +93,7 @@ export default async function HomePage() {
         </div>
       </section>
       <HomeTopics />
-      <section aria-labelledby="howto-heading" className="px-4 py-8 md:py-10">
+      <section aria-labelledby="howto-heading" className="px-4 pt-8 pb-8 md:pt-10">
         <div className="mx-auto max-w-6xl">
           <h2 id="howto-heading" className="text-base font-medium text-ink md:text-lg">
             サイトの使い方
@@ -126,27 +122,6 @@ export default async function HomePage() {
           </p>
         </div>
       </section>
-      <HomeCatalogSections catalog={catalog} />
-      {comparable.length > 0 ? (
-        <section aria-labelledby="comparable-heading" className="px-4 pb-8">
-          <div className="mx-auto max-w-6xl">
-            <h2 id="comparable-heading" className="text-lg font-medium text-ink">
-              価格比較できる商品
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted">ショップごとの価格は、商品ページで見られます。</p>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {comparable.map((product) => (
-                <li key={product.janCode} className="min-w-0">
-                  <Link href={indexedJanPath(product.janCode)} className="flex h-full min-w-0 flex-col rounded-2xl border border-line bg-card px-4 py-4 hover:border-sage">
-                    <span className="text-sm leading-6 font-medium text-ink">{product.label}</span>
-                    <span className="mt-3 text-sm text-forest">価格を比較する</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ) : null}
     </>
   );
 }
