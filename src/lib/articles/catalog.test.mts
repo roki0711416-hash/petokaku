@@ -59,15 +59,36 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
   const liveText = [
     howTo.title,
     howTo.description,
-    ...howTo.blocks.flatMap((block) => (block.type === "ul" ? block.items : block.type === "table" ? [...block.headers, ...block.rows.flat()] : [block.text])),
+    ...howTo.blocks.flatMap((block) => {
+      if (block.type === "ul") {
+        return block.items;
+      }
+      if (block.type === "table") {
+        return [...block.headers, ...block.rows.flat()];
+      }
+      if (block.type === "p" || block.type === "h2" || block.type === "h3" || block.type === "note") {
+        return [block.text];
+      }
+      if (block.type === "source") {
+        return [block.label];
+      }
+      return [];
+    }),
     ...howTo.products.map((product) => product.label),
   ].join("\n");
   for (const word of ["ランキング", "レビュー", "体験談", "おすすめ", "最安"]) {
     assert.equal(liveText.includes(word), false);
   }
   const live = publishedArticles(articles);
-  assert.equal(live.length, 2);
-  assert.equal(live.some((item) => item.slug === "cat-litter-types"), true);
+  assert.equal(live.length, 5);
+  for (const slug of ["cat-litter-types", "how-to-choose-cat-food", "how-to-choose-dog-food", "how-to-choose-pet-sheets"]) {
+    assert.equal(live.some((item) => item.slug === slug), true);
+  }
+  assert.equal(articleSitemapPaths(articles).includes("/articles/how-to-choose-pet-sheets"), true);
+  const sheets = live.find((item) => item.slug === "how-to-choose-pet-sheets");
+  assert.ok(sheets);
+  assert.equal(sheets.products[0]?.href, "/products/jan/4520699667989");
+  assert.equal(sheets.image, undefined);
   assert.deepEqual(howTo.products, [{ href: "/products/jan/3182550706933", label: "ロイヤルカナンの猫用4kg商品の価格比較" }]);
   const data = articleStructuredData(howTo, "https://petokaku.com/articles/how-to-compare-pet-prices");
   assert.equal(data["@type"], "Article");

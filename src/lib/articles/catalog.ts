@@ -1,19 +1,37 @@
+export const articleDiagramIds = [
+  "litter-materials",
+  "dry-wet",
+  "food-checklist",
+  "dog-life",
+  "dog-cost",
+  "sheet-size",
+  "sheet-unit-price",
+] as const;
+
+export type ArticleDiagramId = (typeof articleDiagramIds)[number];
+
 export type ArticleBlock =
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
   | { type: "p"; text: string }
   | { type: "ul"; items: string[] }
   | { type: "note"; text: string }
-  | { type: "table"; headers: string[]; rows: string[][] };
+  | { type: "table"; headers: string[]; rows: string[][] }
+  | { type: "diagram"; id: ArticleDiagramId }
+  | { type: "source"; label: string; href: string }
+  | { type: "products" };
 
 export type ArticleProductLink = {
   href: string;
   label: string;
+  note?: string;
 };
 
 export type ArticleImage = {
   src: string;
   alt: string;
+  credit?: string;
+  creditUrl?: string;
 };
 
 export type Article = {
@@ -24,6 +42,7 @@ export type Article = {
   updatedOn: string;
   published: boolean;
   image?: ArticleImage;
+  takeaways?: string[];
   blocks: ArticleBlock[];
   relatedSlugs: string[];
   products: ArticleProductLink[];
@@ -50,6 +69,18 @@ export function isArticleProductHref(href: string): boolean {
   return productHrefPattern.test(href) || categoryHrefPattern.test(href);
 }
 
+const sourceHosts = new Set(["pffta.org", "www.pffta.org", "petfood.or.jp", "www.petfood.or.jp"]);
+const creditHosts = new Set(["commons.wikimedia.org", "unsplash.com", "creativecommons.org"]);
+
+function httpsHost(value: string, hosts: Set<string>): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && hosts.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 function blockOk(block: ArticleBlock): boolean {
   if (block.type === "ul") {
     return block.items.length > 0 && block.items.every((item) => item.trim() !== "");
@@ -62,6 +93,15 @@ function blockOk(block: ArticleBlock): boolean {
       block.rows.every((row) => row.length === block.headers.length && row.every((cell) => cell.trim() !== ""))
     );
   }
+  if (block.type === "diagram") {
+    return articleDiagramIds.includes(block.id);
+  }
+  if (block.type === "source") {
+    return block.label.trim() !== "" && block.label.length <= 80 && httpsHost(block.href, sourceHosts);
+  }
+  if (block.type === "products") {
+    return true;
+  }
   return block.text.trim() !== "";
 }
 
@@ -69,7 +109,16 @@ export function articleImageIsValid(image: ArticleImage | undefined): boolean {
   if (!image) {
     return true;
   }
-  return articleImagePattern.test(image.src) && image.alt.trim() !== "" && image.alt.length <= 80;
+  if (!articleImagePattern.test(image.src) || image.alt.trim() === "" || image.alt.length > 80) {
+    return false;
+  }
+  if (image.credit != null && (image.credit.trim() === "" || image.credit.length > 120)) {
+    return false;
+  }
+  if (image.creditUrl != null && !httpsHost(image.creditUrl, creditHosts)) {
+    return false;
+  }
+  return true;
 }
 
 export function articleIsValid(article: Article, all: readonly Article[]): boolean {
@@ -85,13 +134,20 @@ export function articleIsValid(article: Article, all: readonly Article[]): boole
   if (!articleImageIsValid(article.image)) {
     return false;
   }
+  if (article.takeaways && (article.takeaways.length < 2 || article.takeaways.length > 6 || article.takeaways.some((item) => item.trim() === "" || item.length > 90))) {
+    return false;
+  }
   if (!calendarDate(article.publishedOn) || !calendarDate(article.updatedOn) || article.updatedOn < article.publishedOn) {
     return false;
   }
   if (article.blocks.length === 0 || !article.blocks.every(blockOk)) {
     return false;
   }
-  if (!article.products.every((product) => product.label.trim() !== "" && isArticleProductHref(product.href))) {
+  if (
+    !article.products.every(
+      (product) => product.label.trim() !== "" && isArticleProductHref(product.href) && (product.note == null || (product.note.trim() !== "" && product.note.length <= 120)),
+    )
+  ) {
     return false;
   }
   const slugs = new Set(all.map((item) => item.slug));
