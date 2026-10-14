@@ -39,8 +39,8 @@ export default async function YahooPreviewPage({ searchParams }: YahooPreviewPag
               : "販売店の商品を取得できませんでした。しばらくしてから、もう一度開いてください。"}
         </p>
         <p className="mt-6">
-          <Link href="/products" className="font-bold text-forest-deep underline-offset-4 hover:underline">
-            サンプルの商品一覧へ
+          <Link href="/search" className="font-bold text-forest-deep underline-offset-4 hover:underline">
+            商品を検索する
           </Link>
         </p>
       </article>

@@ -136,10 +136,21 @@ test("商品を取得できないJANページはnoindex、取得できたペー�
 test("検索・プレビュー・サンプル商品は noindex、JANページは公開判定に従う", () => {
   assert.deepEqual(privateRobots(), { index: false, follow: false });
   const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
-  for (const path of ["../app/search/page.tsx", "../app/products/yahoo-preview/page.tsx", "../app/products/page.tsx", "../app/products/[id]/page.tsx"]) {
+  for (const path of ["../app/search/page.tsx", "../app/products/yahoo-preview/page.tsx"]) {
     const source = read(path);
     assert.match(source, /privateRobots\(\)/);
     assert.doesNotMatch(source, /robotsMetadata\(\)/);
+  }
+  const middleware = read("../middleware.ts");
+  assert.match(middleware, /status: 404/);
+  assert.match(middleware, /pathname === "\/products"/);
+  assert.match(middleware, /yahoo-preview/);
+  assert.doesNotMatch(middleware, /\/products\/jan/);
+  for (const path of ["../app/products/page.tsx", "../app/products/[id]/page.tsx"]) {
+    const source = read(path);
+    assert.match(source, /notFound\(\)/);
+    assert.match(source, /privateRobots\(\)/);
+    assert.doesNotMatch(source, /getAllProducts|サンプル商品|robotsMetadata\(\)/);
   }
   const jan = read("../app/products/jan/[jan]/page.tsx");
   const janMetadata = read("./seo/jan-metadata.ts");

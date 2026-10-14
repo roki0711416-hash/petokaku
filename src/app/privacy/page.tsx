@@ -4,7 +4,7 @@ import { InfoArticle } from "@/components/info-article";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "ペトカクが扱う情報、Googleアナリティクス、Cookie、お問い合わせの説明です。",
+  description: "ペトカクが扱う情報、Googleアナリティクス、Cookie、予定している広告配信、お問い合わせの説明です。",
   alternates: { canonical: "/privacy" },
 };
 
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
     <InfoArticle
       title="プライバシーポリシー"
       path="/privacy"
-      lead="ペトカク運営事務局が、このサイトで実際に扱う情報を説明します。2026年10月10日の実装に合わせています。"
+      lead="ペトカク運営事務局が、このサイトで実際に扱う情報と、導入を予定している広告を説明します。2026年10月14日に更新しました。"
     >
       <h2>取得する情報</h2>
       <p>会員登録、ログイン、問い合わせフォームはありません。氏名、住所、電話番号を、このサイトの入力欄からサーバーへ送る機能はありません。</p>
@@ -21,9 +21,7 @@ export default function PrivacyPage() {
       <p>
         JANコードの商品ページを開くと、接続できる場合に限り、そのJANコード、表示した価格、送料、在庫、ショップ名、商品URLを価格の記録として残そうとします。閲覧回数も、JANコード単位で残そうとします。これらは利用者の氏名とは結びつけていません。データベースへ接続できないときは記録せず、価格の比較は表示したままにします。
       </p>
-      <p>
-        動作確認用の商品ページを開くと、その商品IDを、見ているブラウザのlocalStorage（petokaku.recentProductIds）に保存することがあります。ペトカクのサーバーへは送りません。この一覧をページに出す機能は、現在は表示していません。
-      </p>
+      <p>動作確認用の架空商品の一覧と商品ページは、公開していません。公開中のページでは、その商品IDをブラウザへ保存する処理は動きません。</p>
       <h2>利用目的</h2>
       <p>検索語は、販売店の掲載を表示するために使います。JANコードと価格の記録は、同じ商品の価格の経過を見るために使います。アクセス解析は、どのページが開かれたかを知るために、利用者が許可したときだけ使います。</p>
       <h2>お問い合わせ情報</h2>
@@ -44,10 +42,40 @@ export default function PrivacyPage() {
       </p>
       <h2>Cookie等の識別子</h2>
       <p>
-        アクセス解析の選択は、ブラウザのlocalStorageと、Cookie「petokaku.cookie-choice」に保存します。このCookieは設定を覚えるためのもので、解析そのものではありません。解析を受け入れたあとは、GoogleアナリティクスがCookieを使うことがあります。広告の成果を測るCookieは、現在使っていません。
+        アクセス解析の選択は、ブラウザのlocalStorageと、Cookie「petokaku.cookie-choice」に保存します。このCookieは設定を覚えるためのもので、解析そのものではありません。解析を受け入れたあとは、GoogleアナリティクスがCookieを使うことがあります。
+      </p>
+      <h2>広告配信（Google AdSense）</h2>
+      <p>Google AdSenseの導入を予定しています。現時点では、AdSenseの広告タグは読み込んでおらず、広告の配信は開始していません。広告の成果を測るCookieも使っていません。</p>
+      <p>
+        導入後は、Googleなどの第三者配信事業者が、Cookie等を利用して広告の配信や測定を行う場合があります。その結果、利用者のサイト訪問履歴など、興味関心に基づく広告が表示される場合があります。
+      </p>
+      <p>
+        広告のパーソナライズを止めたり、興味関心の設定を変えたりするときは、
+        <a href="https://adssettings.google.com/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
+          Googleの広告設定
+        </a>
+        を開いてください。Googleが、Googleのサービスを使うサイトから得た情報をどのように扱うかは、
+        <a
+          href="https://policies.google.com/technologies/partner-sites"
+          className="mx-1 font-medium text-forest-deep underline underline-offset-4"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Googleの説明
+        </a>
+        に書かれています。
+      </p>
+      <p>
+        楽天市場、Yahoo!ショッピング、Amazonの購入リンクのうち、確認できたアフィリエイトリンクだけを広告として表示します。報酬の有無で、表示する価格を作り替えることはしません。詳しくは
+        <Link href="/affiliate" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          広告・アフィリエイト
+        </Link>
+        です。
       </p>
       <h2>外部サービスへの情報送信</h2>
-      <p>検索語は、掲載取得のためにYahoo!ショッピングの商品検索APIへ送られます。解析を受け入れたときのページ情報はGoogleへ送られます。ショップのリンクを開いたあとの情報は、その販売店が扱います。</p>
+      <p>
+        検索語は、掲載取得のためにYahoo!ショッピングの商品検索APIへ送られます。解析を受け入れたときのページ情報はGoogleへ送られます。広告タグは、現在は読み込みません。導入後は、広告の配信や測定のために、Googleなどの第三者へ情報が送られる場合があります。ショップのリンクを開いたあとの情報は、その販売店が扱います。
+      </p>
       <h2>保存期間と管理方法</h2>
       <p>
         Cookieの選択は、保存から最長1年です。ブラウザの保存データを消せば、localStorageの商品IDと選択も消えます。価格の記録に、自動で消す期限は設けていません。データベースの接続情報はサーバー側に置き、ブラウザへは渡しません。

@@ -5,13 +5,17 @@ import { InfoArticle } from "@/components/info-article";
 
 export const metadata: Metadata = {
   title: "Cookie設定",
-  description: "ペトカクのCookieと、アクセス解析を受け入れるか拒否するかの設定です。",
+  description: "ペトカクのCookie、アクセス解析の設定、導入を予定している広告Cookieの説明です。",
   alternates: { canonical: "/cookies" },
 };
 
 export default function CookiesPage() {
   return (
-    <InfoArticle title="Cookie設定" path="/cookies" lead="解析のCookieは、受け入れるまで読み込みません。設定はこのブラウザに保存します。">
+    <InfoArticle
+      title="Cookie設定"
+      path="/cookies"
+      lead="解析のCookieは、受け入れるまで読み込みません。広告の配信は、現在は開始していません。2026年10月14日に更新しました。"
+    >
       <h2>必須にあたるもの</h2>
       <p>
         このページで選んだ結果は、Cookie「petokaku.cookie-choice」と、ブラウザ内の保存領域に残します。サイトを表示するためだけに、これ以外のCookieをペトカクのプログラムが書き込むことはありません。
@@ -22,9 +26,25 @@ export default function CookiesPage() {
       </p>
       <CookieSettings />
       <h2>広告</h2>
-      <p>広告の成果を測るCookieや、広告配信のタグは、現在入れていません。そのため、広告Cookieのオンとオフはありません。</p>
+      <p>現時点では、Google AdSenseの広告は配信していません。広告配信のタグは読み込んでおらず、広告用のCookieも置いていません。広告Cookieのオンとオフの設定もありません。</p>
       <p>
-        取扱いの説明は
+        Google AdSenseの導入を予定しています。導入後は、Googleなどの第三者配信事業者がCookie等を使い、広告の配信や測定を行う場合があります。利用者の興味関心に基づく広告が表示される場合もあります。導入したあとに配信を止めたり、興味関心の設定を変えたりするときは、
+        <a href="https://adssettings.google.com/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
+          Googleの広告設定
+        </a>
+        を使ってください。Googleによる情報の利用は、
+        <a
+          href="https://policies.google.com/technologies/partner-sites"
+          className="mx-1 font-medium text-forest-deep underline underline-offset-4"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Googleの説明
+        </a>
+        に書かれています。
+      </p>
+      <p>
+        同じ説明は
         <Link href="/privacy" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
           プライバシーポリシー
         </Link>

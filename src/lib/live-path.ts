@@ -3,11 +3,6 @@ export function isLiveStorePath(pathname: string): boolean {
 }
 
 export function isSampleCatalogPath(pathname: string): boolean {
-  if (pathname === "/products") {
-    return true;
-  }
-  if (!pathname.startsWith("/products/")) {
-    return false;
-  }
-  return !pathname.startsWith("/products/jan/") && !pathname.startsWith("/products/yahoo-preview");
+  void pathname;
+  return false;
 }
