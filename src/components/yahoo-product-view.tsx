@@ -94,6 +94,7 @@ export function YahooProductView({
         <div className="min-w-0 flex-1">
           <p className="text-xs text-sage">{product.brand.trim() ? `メーカー ${product.brand.trim()}` : "メーカー情報なし"}</p>
           <h1 className="mt-0.5 text-base leading-snug font-medium tracking-tight text-ink sm:text-xl">{visibleName}</h1>
+          {hasAffiliate ? <p className="mt-1 text-sm leading-5 text-muted">広告・アフィリエイトリンクを含みます</p> : null}
           <p className="mt-1 text-sm leading-5 text-muted">
             容量 {capacity ?? "情報なし"}
             <span className="px-1.5 text-line">/</span>
@@ -110,7 +111,6 @@ export function YahooProductView({
       {product.offers.length > 0 ? (
         <section id="compare" aria-labelledby="compare-heading" className="mt-5 scroll-mt-24">
           <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
-          {hasAffiliate ? <p className="mt-1 text-xs leading-5 text-muted">このページにはアフィリエイト広告が含まれています。</p> : null}
           <div className="mt-3">
             <MallCompare
               offers={product.offers}
