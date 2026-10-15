@@ -1,6 +1,8 @@
 import { formatYen, stockLabel } from "@/lib/format";
 import { mallVisitLabel } from "@/lib/pricing/malls";
+import type { CompareSort } from "@/lib/pricing/shop-compare";
 import { shopProductLink } from "@/lib/pricing/shop-link";
+import { payableTotal } from "@/lib/pricing/visible-offers";
 import { shippingCell } from "@/components/ui/shop-card";
 import type { Offer } from "@/lib/types";
 
@@ -9,12 +11,20 @@ const mallLabel: Record<string, string> = {
   rakuten: "楽天市場",
 };
 
-export function ShopCompareList({ offers, ranks }: { offers: Offer[]; ranks: (number | null)[] | null }) {
+export function ShopCompareList({
+  offers,
+  ranks,
+  sort = "item",
+}: {
+  offers: Offer[];
+  ranks: (number | null)[] | null;
+  sort?: CompareSort;
+}) {
   return (
     <>
       <ol className="grid gap-2 lg:hidden">
         {offers.map((offer, index) => (
-          <MobileShop key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} />
+          <MobileShop key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} sort={sort} />
         ))}
       </ol>
       <div className="hidden overflow-hidden rounded-xl border border-line bg-card lg:block">
@@ -22,7 +32,7 @@ export function ShopCompareList({ offers, ranks }: { offers: Offer[]; ranks: (nu
           <thead>
             <tr className="border-b border-line bg-sand/70 text-xs text-muted">
               {ranks != null ? <th className="w-[8%] px-3 py-2 font-medium">順位</th> : null}
-              <th className="w-[16%] px-3 py-2 font-medium">商品価格</th>
+              <th className="w-[16%] px-3 py-2 font-medium">{sort === "total" ? "送料込み合計" : "商品価格"}</th>
               <th className="w-[14%] px-3 py-2 font-medium">送料</th>
               <th className="w-[12%] px-3 py-2 font-medium">在庫</th>
               <th className="px-3 py-2 font-medium">ショップ情報</th>
@@ -31,7 +41,7 @@ export function ShopCompareList({ offers, ranks }: { offers: Offer[]; ranks: (nu
           </thead>
           <tbody>
             {offers.map((offer, index) => (
-              <DesktopRow key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} />
+              <DesktopRow key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} sort={sort} />
             ))}
           </tbody>
         </table>
@@ -40,8 +50,10 @@ export function ShopCompareList({ offers, ranks }: { offers: Offer[]; ranks: (nu
   );
 }
 
-function MobileShop({ offer, rank, showRank }: { offer: Offer; rank: number | null; showRank: boolean }) {
+function MobileShop({ offer, rank, showRank, sort }: { offer: Offer; rank: number | null; showRank: boolean; sort: CompareSort }) {
   const first = rank === 1;
+  const total = payableTotal(offer);
+  const showTotal = sort === "total" && total != null;
   return (
     <li className={first ? "rounded-xl border border-forest bg-moss/70 p-3" : "rounded-xl border border-line bg-card p-3"}>
       <div className="flex items-start justify-between gap-3">
@@ -50,10 +62,14 @@ function MobileShop({ offer, rank, showRank }: { offer: Offer; rank: number | nu
           <p className="mt-1 text-xs font-medium text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
           <h3 className="text-base font-medium leading-6 text-ink">{offer.shopName}</h3>
         </div>
-        <p className="price-num shrink-0 text-3xl leading-none text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+        <div className="shrink-0 text-right">
+          {showTotal ? <p className="text-xs text-muted">送料込み</p> : null}
+          <p className="price-num text-3xl leading-none text-ink">{showTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
+          {showTotal && offer.price != null ? <p className="mt-1 text-xs text-muted">本体 {formatYen(offer.price)}</p> : null}
+        </div>
       </div>
       <p className="mt-2 text-sm text-ink">
-        送料 {shippingCell(offer)}
+        {shippingNote(offer)}
         <span className="px-1.5 text-line">/</span>
         {stockLabel(offer.stockStatus, offer.isSample)}
       </p>
@@ -64,8 +80,10 @@ function MobileShop({ offer, rank, showRank }: { offer: Offer; rank: number | nu
   );
 }
 
-function DesktopRow({ offer, rank, showRank }: { offer: Offer; rank: number | null; showRank: boolean }) {
+function DesktopRow({ offer, rank, showRank, sort }: { offer: Offer; rank: number | null; showRank: boolean; sort: CompareSort }) {
   const first = rank === 1;
+  const total = payableTotal(offer);
+  const showTotal = sort === "total" && total != null;
   return (
     <tr className={first ? "border-b border-line bg-moss/80" : "border-b border-line"}>
       {showRank ? (
@@ -74,9 +92,10 @@ function DesktopRow({ offer, rank, showRank }: { offer: Offer; rank: number | nu
         </td>
       ) : null}
       <td className="px-3 py-3 align-middle">
-        <span className="price-num text-2xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</span>
+        <span className="price-num text-2xl text-ink">{showTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price)}</span>
+        {showTotal && offer.price != null ? <p className="mt-1 text-xs text-muted">本体 {formatYen(offer.price)}</p> : null}
       </td>
-      <td className="px-3 py-3 align-middle text-sm text-ink">{shippingCell(offer)}</td>
+      <td className="px-3 py-3 align-middle text-sm text-ink">{shippingNote(offer, true)}</td>
       <td className="px-3 py-3 align-middle text-sm text-ink">{stockLabel(offer.stockStatus, offer.isSample)}</td>
       <td className="px-3 py-3 align-middle">
         <p className="text-xs text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
@@ -87,6 +106,14 @@ function DesktopRow({ offer, rank, showRank }: { offer: Offer; rank: number | nu
       </td>
     </tr>
   );
+}
+
+function shippingNote(offer: Offer, inColumn = false): string {
+  const unknown = offer.shippingFee == null && offer.shippingStatus !== "free" && offer.shippingStatus !== "conditional_free";
+  if (unknown) {
+    return "送料別・合計未確認";
+  }
+  return inColumn ? shippingCell(offer) : `送料 ${shippingCell(offer)}`;
 }
 
 function RankLabel({ rank }: { rank: number | null }) {

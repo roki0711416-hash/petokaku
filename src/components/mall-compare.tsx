@@ -1,5 +1,6 @@
 import { OfferList } from "@/components/offer-list";
 import { ShopPriceCompare } from "@/components/shop-price-compare";
+import { PriceSummary } from "@/components/ui/price-summary";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { groupOffersByMall } from "@/lib/pricing/malls";
 import type { Offer } from "@/lib/types";
@@ -19,7 +20,8 @@ export function MallCompare({
   if (malls.length === 0) {
     return (
       <div>
-        <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
+        <PriceSummary lowestPrice={null} shopCount={0} basis="total" />
+        <h2 id="compare-heading" className="mt-5 text-lg font-medium tracking-tight text-ink">
           すべてのショップで価格を比較
         </h2>
         <div className="mt-3">

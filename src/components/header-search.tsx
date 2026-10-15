@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { MobileMenu } from "@/components/mobile-menu";
 import { SearchForm } from "@/components/search-form";
 import { petPath } from "@/lib/pets";
@@ -14,6 +14,8 @@ const navLinks = [
   { href: "/about", label: "サイトについて" },
 ];
 
+const phoneQuery = "(max-width: 767px)";
+
 export function HeaderSearch() {
   const pathname = usePathname();
   return <HeaderSearchControls key={pathname} home={pathname === "/"} />;
@@ -21,30 +23,106 @@ export function HeaderSearch() {
 
 function HeaderSearchControls({ home }: { home: boolean }) {
   const [open, setOpen] = useState(!home);
+  const [collapsed, setCollapsed] = useState(false);
   const shouldFocus = useRef(false);
+  const wasAway = useRef(false);
+  const holdOpenUntil = useRef(0);
+  const shown = open && !collapsed;
 
   useEffect(() => {
-    if (!open || !shouldFocus.current) {
+    if (!shown || !shouldFocus.current) {
       return;
     }
     document.getElementById("header-search")?.focus();
     shouldFocus.current = false;
-  }, [open]);
+  }, [shown]);
+
+  useEffect(() => {
+    const media = window.matchMedia(phoneQuery);
+    let mobile = media.matches;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      if (!mobile) {
+        setCollapsed(false);
+        return;
+      }
+      if (Date.now() < holdOpenUntil.current) {
+        return;
+      }
+      const panel = document.getElementById("header-search-panel");
+      if (panel?.contains(document.activeElement)) {
+        return;
+      }
+      const y = window.scrollY;
+      if (y > 64) {
+        wasAway.current = true;
+        setCollapsed(true);
+        return;
+      }
+      if (y <= 4 && wasAway.current) {
+        wasAway.current = false;
+        setCollapsed(false);
+        setOpen(!home);
+      }
+    };
+
+    const onScroll = () => {
+      if (frame !== 0) {
+        return;
+      }
+      frame = window.requestAnimationFrame(update);
+    };
+    const onMedia = () => {
+      mobile = media.matches;
+      if (!mobile) {
+        setCollapsed(false);
+      }
+    };
+
+    media.addEventListener("change", onMedia);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      media.removeEventListener("change", onMedia);
+      window.removeEventListener("scroll", onScroll);
+      if (frame !== 0) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, [home]);
 
   function toggleSearch() {
-    shouldFocus.current = !open;
-    setOpen((current) => !current);
+    if (!shown) {
+      shouldFocus.current = true;
+      holdOpenUntil.current = Date.now() + 700;
+      setCollapsed(false);
+      setOpen(true);
+      return;
+    }
+    setOpen(false);
+  }
+
+  function closeFromKeyboard(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Escape") {
+      return;
+    }
+    event.preventDefault();
+    setOpen(false);
+    document.getElementById("header-search-toggle")?.focus();
   }
 
   return (
     <>
       <div className="order-3 ml-auto flex shrink-0 items-center gap-1">
         <button
+          id="header-search-toggle"
           type="button"
           className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-white"
-          aria-expanded={open}
+          aria-expanded={shown}
           aria-controls="header-search-panel"
-          aria-label={open ? "検索欄を閉じる" : "商品を検索"}
+          aria-label={shown ? "検索欄を閉じる" : "商品を検索"}
           onClick={toggleSearch}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
@@ -63,18 +141,21 @@ function HeaderSearchControls({ home }: { home: boolean }) {
           <MobileMenu />
         </div>
       </div>
-      {open ? (
-        <div id="header-search-panel" className="order-4 mt-1 w-full min-w-0 basis-full pb-1 md:order-2 md:mt-0 md:w-auto md:flex-1 md:basis-auto md:pb-0">
-          <SearchForm
-            id="header-search"
-            compact
-            action="/search"
-            label="商品名・ブランド・JANコード"
-            buttonLabel="検索"
-            placeholder="商品名・ブランド・JANコード"
-          />
-        </div>
-      ) : null}
+      <div
+        id="header-search-panel"
+        hidden={!shown}
+        className={shown ? "order-4 mt-1 w-full min-w-0 basis-full pb-1 md:order-2 md:mt-0 md:w-auto md:flex-1 md:basis-auto md:pb-0" : "hidden"}
+        onKeyDown={closeFromKeyboard}
+      >
+        <SearchForm
+          id="header-search"
+          compact
+          action="/search"
+          label="商品名・ブランド・JANコード"
+          buttonLabel="検索"
+          placeholder="商品名・ブランド・JANコード"
+        />
+      </div>
     </>
   );
 }

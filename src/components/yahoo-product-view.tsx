@@ -3,15 +3,14 @@ import { AmazonAssociateLink } from "@/components/amazon-associate-link";
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
 import { PriceHistory } from "@/components/ui/price-history";
-import { PriceSummary } from "@/components/ui/price-summary";
 import { categorySearchHref, getCategory } from "@/lib/categories";
 import { formatUnitAmount, formatYen } from "@/lib/format";
 import { readableListingTitle as compactVisibleTitle } from "@/lib/pricing/display-title";
 import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
 import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
 import { shopProductLink } from "@/lib/pricing/shop-link";
-import { comparisonMallOf, offersComparableAsNew } from "@/lib/pricing/malls";
-import { confirmedPriceSummary, isRakutenReferencePrice } from "@/lib/pricing/shop-compare";
+import { offersComparableAsNew } from "@/lib/pricing/malls";
+import { isRakutenReferencePrice } from "@/lib/pricing/shop-compare";
 import { productStructuredData } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
 import { readableListingTitle as cleanListingTitle } from "@/lib/sources/yahoo/listing-title";
@@ -52,7 +51,6 @@ export function YahooProductView({
   const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
-  const confirmed = confirmedPriceSummary(product.offers.filter((offer) => comparisonMallOf(offer)));
   const hasAffiliate = Boolean(amazonUrl) || product.offers.some((offer) => shopProductLink(offer).affiliate);
   const crumbs: Crumb[] = [
     { label: "ホーム", href: "/" },
@@ -107,18 +105,14 @@ export function YahooProductView({
           ) : null}
         </div>
       </header>
-      <PriceSummary lowestPrice={confirmed.lowestPrice} shopCount={confirmed.shopCount} />
       {product.offers.length > 0 ? (
-        <section id="compare" aria-labelledby="compare-heading" className="mt-5 scroll-mt-24">
-          <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
-          <div className="mt-3">
-            <MallCompare
-              offers={product.offers}
-              quantity={product.quantity}
-              quantityUnit={product.quantityUnit}
-              unitPriceType={product.unitPriceType}
-            />
-          </div>
+        <section id="compare" aria-labelledby="compare-heading" className="scroll-mt-24">
+          <MallCompare
+            offers={product.offers}
+            quantity={product.quantity}
+            quantityUnit={product.quantityUnit}
+            unitPriceType={product.unitPriceType}
+          />
           <CompareNotes retrievalLimited={retrievalLimited} rakutenShopScope={rakutenShopScope} hasAffiliate={hasAffiliate} />
         </section>
       ) : (
@@ -150,8 +144,8 @@ function CompareNotes({
       <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">比較条件について</summary>
       <div className="grid gap-2 pb-2 text-xs leading-6 text-muted">
         <p>同じ商品で、在庫がある同じ販売単位を一つの一覧にしています。セットや在庫なしは別の欄です。</p>
-        <p>楽天市場とYahoo!ショッピングを、同じ順で見られます。はじめに5件、続きは10件ずつ表示します。</p>
-        <p>送料が確認できない掲載は「送料不明」と表示し、合計価格は出していません。</p>
+        <p>楽天市場とYahoo!ショッピングを、同じ順で見られます。はじめに5件を表示し、続きはまとめて開けます。</p>
+        <p>送料が確認できない掲載は「送料別・合計未確認」と表示し、送料込みの順位には入れていません。</p>
         {rakutenShopScope !== "off" ? (
           <p>楽天市場は、商品名や説明にこのJANコードがある店舗を集めています。すべての店舗が並ぶとは限りません。</p>
         ) : null}
