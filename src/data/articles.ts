@@ -288,7 +288,7 @@ export const articles: Article[] = [
     title: "ペット用品の価格比較の見方",
     description: "ペトカクで同じ商品の価格と送料を見比べるときの見方です。金額は取得時点の掲載で、購入前にショップで確認します。",
     publishedOn: "2026-10-13",
-    updatedOn: "2026-10-13",
+    updatedOn: "2026-10-17",
     published: true,
     image: { src: "/article-images/how-to-compare-pet-prices.png", alt: "価格のカードを三枚並べた図" },
     blocks: [
@@ -323,7 +323,13 @@ export const articles: Article[] = [
       },
     ],
     relatedSlugs: ["cat-litter-types", "how-to-choose-cat-food"],
-    products: [{ href: "/products/jan/3182550706933", label: "ロイヤルカナンの猫用4kg商品の価格比較" }],
+    products: [
+      {
+        href: "/products/jan/3182550706933",
+        label: "ロイヤルカナン インドア 成猫用 4kg",
+        note: "比較の手順を確認したあと、同じJANの掲載を見比べます。",
+      },
+    ],
   },
   {
     slug: "how-to-choose-cat-food",
@@ -405,7 +411,7 @@ export const articles: Article[] = [
     title: "ドッグフードの選び方｜年齢・体格・価格の確認ポイント",
     description: "子犬・成犬・シニアの表示、体格と活動量、総合栄養食の見方、1日あたりの食費の計算手順をまとめています。計算例の数字は仮の値です。",
     publishedOn: "2026-10-14",
-    updatedOn: "2026-10-14",
+    updatedOn: "2026-10-17",
     published: true,
     takeaways: [
       "成長段階と、小型犬・中型犬などの体格区分を先に見る",
@@ -422,14 +428,14 @@ export const articles: Article[] = [
     relatedSlugs: ["how-to-choose-cat-food", "how-to-choose-pet-sheets", "how-to-compare-pet-prices"],
     products: [
       {
-        href: "/products/jan/4562358781797",
-        label: "ニュートロ シュプレモ 小型犬 成犬用 6kg",
-        note: "商品ページの見出しは、小型犬の成犬用、6kgです。子犬用とは別の商品です。",
+        href: "/products/jan/4562358781780",
+        label: "ニュートロ シュプレモ 小型犬 成犬用 3kg",
+        note: "小型犬の成犬用 3kg。6kgとは別の商品です。",
       },
       {
-        href: "/products/jan/3182550823913",
-        label: "ロイヤルカナン 柴犬 成犬用 8kg",
-        note: "商品ページの見出しは、柴犬の成犬用、8kgです。",
+        href: "/products/jan/4562358781797",
+        label: "ニュートロ シュプレモ 小型犬 成犬用 6kg",
+        note: "小型犬の成犬用 6kg。3kgとは別の商品です。",
       },
     ],
     blocks: [

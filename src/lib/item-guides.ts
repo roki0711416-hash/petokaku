@@ -2,6 +2,12 @@ export const itemGuideSlugs = ["dog-food", "cat-food", "cat-litter", "pet-sheets
 
 export type ItemGuideSlug = (typeof itemGuideSlugs)[number];
 
+export type ItemGuideProductLink = {
+  href: string;
+  label: string;
+  note?: string;
+};
+
 export type ItemGuide = {
   slug: ItemGuideSlug;
   path: string;
@@ -18,6 +24,8 @@ export type ItemGuide = {
   caution: string;
   faqs: { question: string; answer: string }[];
   relatedGuides?: { href: string; label: string }[];
+  // 品目から重点商品へ。件数は少なく保ち、記事の商品カードと役割を分ける。
+  relatedProducts?: ItemGuideProductLink[];
 };
 
 const maxListingQueryLength = 80;
@@ -72,6 +80,14 @@ export const itemGuides: readonly ItemGuide[] = [
         answer: "並ぶのは、そのとき取得できた掲載だけです。すべての販売店や、在庫のある全商品を含むわけではありません。",
       },
     ],
+    relatedGuides: [{ href: "/articles/how-to-choose-dog-food", label: "ドッグフードの選び方" }],
+    relatedProducts: [
+      {
+        href: "/products/jan/4562358781780",
+        label: "ニュートロ シュプレモ 小型犬 成犬用 3kg",
+        note: "小型犬の成犬用 3kg。容量違いの袋は別ページです。",
+      },
+    ],
   },
   {
     slug: "cat-food",
@@ -121,6 +137,14 @@ export const itemGuides: readonly ItemGuide[] = [
         question: "楽天市場の価格はこの一覧に出ますか？",
         answer:
           "この一覧はYahoo!ショッピングの掲載です。JANコードがある商品は、商品ページで楽天市場の参考価格を見られることがあります。その参考価格では、店舗ごとの送料と在庫は確認できません。",
+      },
+    ],
+    relatedGuides: [{ href: "/articles/how-to-choose-cat-food", label: "キャットフードの選び方" }],
+    relatedProducts: [
+      {
+        href: "/products/jan/3182550706933",
+        label: "ロイヤルカナン インドア 成猫用 4kg",
+        note: "室内で生活する成猫用 4kg。容量違いの袋は別ページです。",
       },
     ],
   },
@@ -176,6 +200,19 @@ export const itemGuides: readonly ItemGuide[] = [
       { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
       { href: "/pets/cat?category=litter", label: "猫用品の猫砂カテゴリ" },
     ],
+    // 記事 cat-litter-types と同じ2商品。記事カードは増やさず、カテゴリから商品へ直結する。
+    relatedProducts: [
+      {
+        href: "/products/jan/4905009714353",
+        label: "アイリスオーヤマ 紙の猫砂 7L",
+        note: "7L単品。セットは別ページです。",
+      },
+      {
+        href: "/products/jan/4903351011250",
+        label: "LION ニオイをとる砂 5L×4個",
+        note: "5L×4個。袋数違いも別ページです。",
+      },
+    ],
   },
   {
     slug: "pet-sheets",
@@ -223,6 +260,14 @@ export const itemGuides: readonly ItemGuide[] = [
       {
         question: "犬用と猫用は同じシーツですか？",
         answer: "サイズや使う場所が違う掲載は、同じ商品としてまとめません。猫砂のページとも分けています。",
+      },
+    ],
+    relatedGuides: [{ href: "/articles/how-to-choose-pet-sheets", label: "ペットシーツの選び方" }],
+    relatedProducts: [
+      {
+        href: "/products/jan/4520699667989",
+        label: "デオシート レギュラー ジャンボパック 112枚入 4袋",
+        note: "レギュラー 112枚入×4袋。枚数・サイズ違いも別ページです。",
       },
     ],
   },

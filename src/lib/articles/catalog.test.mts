@@ -90,7 +90,16 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
   assert.ok(sheets);
   assert.equal(sheets.products[0]?.href, "/products/jan/4520699667989");
   assert.equal(sheets.image, undefined);
-  assert.deepEqual(howTo.products, [{ href: "/products/jan/3182550706933", label: "ロイヤルカナンの猫用4kg商品の価格比較" }]);
+  assert.equal(howTo.products[0]?.href, "/products/jan/3182550706933");
+  assert.equal(howTo.products[0]?.label, "ロイヤルカナン インドア 成猫用 4kg");
+  const dogFood = live.find((item) => item.slug === "how-to-choose-dog-food");
+  assert.ok(dogFood);
+  assert.equal(dogFood.products[0]?.href, "/products/jan/4562358781780");
+  assert.equal(dogFood.products.some((product) => product.href === "/products/jan/4562358781797"), true);
+  const litter = live.find((item) => item.slug === "cat-litter-types");
+  assert.ok(litter);
+  assert.equal(litter.products.filter((product) => product.href === "/products/jan/4905009714353").length, 1);
+  assert.equal(litter.products.filter((product) => product.href === "/products/jan/4903351011250").length, 1);
   const data = articleStructuredData(howTo, "https://petokaku.com/articles/how-to-compare-pet-prices");
   assert.equal(data["@type"], "Article");
   assert.equal(data.headline, "ペット用品の価格比較の見方");
@@ -104,6 +113,6 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
     assert.equal(item.image.src.startsWith("/article-images/"), true);
     assert.equal(existsSync(new URL(`../../../public${item.image.src}`, import.meta.url)), true);
   }
-  assert.equal(data.dateModified, "2026-10-13");
+  assert.equal(data.dateModified, "2026-10-17");
   assert.equal(data.mainEntityOfPage, "https://petokaku.com/articles/how-to-compare-pet-prices");
 });

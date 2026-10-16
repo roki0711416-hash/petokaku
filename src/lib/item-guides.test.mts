@@ -52,6 +52,42 @@ test("猫砂ガイドは既存の種類記事と猫用品カテゴリへつな�
   ]);
 });
 
+test("品目ガイドは重点商品へ1〜2件だけつなぎ、記事カードと重複しすぎない", () => {
+  const dog = itemGuideBySlug("dog-food");
+  const cat = itemGuideBySlug("cat-food");
+  const litter = itemGuideBySlug("cat-litter");
+  const sheets = itemGuideBySlug("pet-sheets");
+  assert.ok(dog && cat && litter && sheets);
+
+  assert.deepEqual(
+    dog.relatedProducts?.map((item) => item.href),
+    ["/products/jan/4562358781780"],
+  );
+  assert.deepEqual(
+    cat.relatedProducts?.map((item) => item.href),
+    ["/products/jan/3182550706933"],
+  );
+  assert.deepEqual(
+    litter.relatedProducts?.map((item) => item.href),
+    ["/products/jan/4905009714353", "/products/jan/4903351011250"],
+  );
+  assert.deepEqual(
+    sheets.relatedProducts?.map((item) => item.href),
+    ["/products/jan/4520699667989"],
+  );
+
+  assert.equal(dog.relatedGuides?.[0]?.href, "/articles/how-to-choose-dog-food");
+  assert.equal(cat.relatedGuides?.[0]?.href, "/articles/how-to-choose-cat-food");
+  assert.equal(sheets.relatedGuides?.[0]?.href, "/articles/how-to-choose-pet-sheets");
+
+  for (const guide of [dog, cat, litter, sheets]) {
+    assert.ok((guide.relatedProducts?.length ?? 0) <= 2);
+  }
+
+  const page = readFileSync(new URL("../components/item-guide-page.tsx", import.meta.url), "utf8");
+  assert.match(page, /ComparableProductCards/);
+});
+
 test("品目の検索語は空なら品目名、入力があれば品目名と組み合わせる", () => {
   const dog = itemGuideBySlug("dog-food");
   assert.ok(dog);

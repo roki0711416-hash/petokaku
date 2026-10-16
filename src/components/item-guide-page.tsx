@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ComparableProductCards } from "@/components/comparable-product-cards";
 import { CatalogIcon } from "@/components/ui/catalog-card";
 import { guideListingQuery, itemGuides, type ItemGuide } from "@/lib/item-guides";
 
 export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
   const related = itemGuides.filter((item) => item.slug !== guide.slug);
+  const relatedProducts = guide.relatedProducts ?? [];
 
   return (
     <article className="px-4 py-8 md:py-12">
@@ -78,6 +80,16 @@ export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
             ))}
           </div>
         </section>
+
+        {relatedProducts.length > 0 ? (
+          <div className="mt-12 max-w-3xl">
+            <ComparableProductCards
+              sectionId={`guide-products-${guide.slug}`}
+              products={relatedProducts}
+              lead="品目の代表例です。価格と送料は商品ページで見比べます。この欄には金額を出していません。"
+            />
+          </div>
+        ) : null}
 
         {guide.relatedGuides && guide.relatedGuides.length > 0 ? (
           <section aria-labelledby="guide-article-heading" className="mt-12">
