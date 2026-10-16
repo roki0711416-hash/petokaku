@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/article-card";
 import { ArticleDiagram } from "@/components/article-diagrams";
+import { ArticleProductCards } from "@/components/article-product-cards";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { articles } from "@/data/articles";
 import {
@@ -50,34 +51,6 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       ...(article.image ? { images: [{ url: article.image.src, alt: article.image.alt }] } : {}),
     },
   };
-}
-
-function ProductCards({ article }: { article: Article }) {
-  if (article.products.length === 0) {
-    return null;
-  }
-  return (
-    <section aria-labelledby={`products-${article.slug}`} className="rounded-2xl border border-line bg-card p-4">
-      <h2 id={`products-${article.slug}`} className="text-base font-medium text-ink">
-        関連商品の価格を比較する
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-muted">価格と送料は、次の商品ページでショップの掲載を見比べます。この欄には金額を出していません。</p>
-      <ul className="mt-3 grid gap-3">
-        {article.products.map((product) => (
-          <li key={product.href} className="rounded-xl bg-sand px-4 py-4">
-            <p className="text-sm leading-6 font-medium text-ink">{product.label}</p>
-            {product.note ? <p className="mt-1 text-sm leading-6 text-muted">{product.note}</p> : null}
-            <Link
-              href={product.href}
-              className="mt-3 inline-flex min-h-11 items-center rounded-full bg-forest px-4 text-sm font-medium text-white"
-            >
-              価格を比較する
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
 }
 
 function ArticleBlockView({ block, index, article }: { block: ArticleBlock; index: number; article: Article }) {
@@ -154,7 +127,7 @@ function ArticleBlockView({ block, index, article }: { block: ArticleBlock; inde
     );
   }
   if (block.type === "products") {
-    return <ProductCards article={article} />;
+    return <ArticleProductCards article={article} />;
   }
   return <p className="text-muted">{block.text}</p>;
 }
@@ -238,7 +211,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </div>
       {article.products.length > 0 && !article.blocks.some((block) => block.type === "products") ? (
         <div className="mt-8">
-          <ProductCards article={article} />
+          <ArticleProductCards article={article} />
         </div>
       ) : null}
       {related.length > 0 ? (
