@@ -9,8 +9,10 @@ const columns = [
   {
     title: "ご利用ガイド",
     links: [
+      { href: "/pets/dog", label: "犬用品の価格比較" },
+      { href: "/pets/cat", label: "猫用品の価格比較" },
+      { href: "/articles", label: "ペット用品の選び方" },
       { href: "/guide", label: "サイトの使い方" },
-      { href: "/articles", label: "お役立ち記事" },
     ],
   },
   {

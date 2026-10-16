@@ -15,6 +15,7 @@ const petLinks = [
 ];
 
 const infoLinks = [
+  { href: "/articles", label: "ペット用品の選び方" },
   { href: "/about", label: "サイトについて" },
   { href: "/about#operator", label: "運営者情報" },
   { href: "/terms", label: "利用規約" },

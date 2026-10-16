@@ -11,17 +11,21 @@ import { getSiteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const title = "ペット用品を、かしこく比較 | ペトカク";
-const description = "ペット用品の本体価格と送料を、販売店の掲載から見比べるサイトです。商品名やJANコードで探し、購入は各ショップで行います。";
+const title = "ペトカク - ペット用品の価格比較ならペトカク";
+const description =
+  "ドッグフード・キャットフード・猫砂・ペットシーツ・キャットタワーなどの価格を比較。複数ショップからお得な商品を探せます。";
+const siteName = "ペトカク｜ペット用品の価格比較サイト";
 
 export const metadata: Metadata = {
   title: { absolute: title },
   description,
+  applicationName: "ペトカク",
   alternates: { canonical: "/" },
   openGraph: {
-    title,
+    title: siteName,
     description,
     url: "/",
+    siteName: "ペトカク",
   },
 };
 
@@ -39,6 +43,7 @@ function homeStructuredData() {
       {
         "@type": "Organization",
         name: "ペトカク",
+        alternateName: siteName,
         url: siteUrl,
         email: "petokaku@outlook.jp",
         logo: new URL("/logo.png", siteUrl).toString(),
@@ -47,8 +52,10 @@ function homeStructuredData() {
       {
         "@type": "WebSite",
         name: "ペトカク",
+        alternateName: siteName,
         url: siteUrl,
-        publisher: { "@type": "Organization", name: "ペトカク" },
+        description,
+        publisher: { "@type": "Organization", name: "ペトカク", url: siteUrl },
         potentialAction: {
           "@type": "SearchAction",
           target: {
@@ -123,7 +130,7 @@ export default async function HomePage() {
             </Link>
             と
             <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
-              お役立ち記事
+              ペット用品の選び方（お役立ち記事）
             </Link>
             にまとめています。
           </p>

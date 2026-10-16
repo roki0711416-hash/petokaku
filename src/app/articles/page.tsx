@@ -5,8 +5,8 @@ import { articles } from "@/data/articles";
 import { publishedArticles } from "@/lib/articles/catalog";
 import { robotsMetadata } from "@/lib/site";
 
-const title = "ペット用品お役立ち記事";
-const description = "ペット用品の価格と送料の見方を説明する記事です。商品ページでは、ショップごとの掲載を見比べられます。";
+const title = "ペット用品の選び方";
+const description = "お役立ち記事・購入ガイド。フードや猫砂、シーツの選び方と、価格比較の見方をまとめています。";
 
 export const metadata: Metadata = {
   title,
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/articles" },
   robots: robotsMetadata(),
   openGraph: {
-    title,
+    title: `${title} | ペトカク`,
     description,
     url: "/articles",
     type: "website",
@@ -29,11 +29,11 @@ export default function ArticlesPage() {
       <Breadcrumbs
         items={[
           { label: "ホーム", href: "/" },
-          { label: "お役立ち記事", href: "/articles", current: true },
+          { label: "ペット用品の選び方", href: "/articles", current: true },
         ]}
       />
       <h1 className="mt-4 text-2xl leading-snug font-medium tracking-tight text-ink md:text-3xl">{title}</h1>
-      <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
+      <p className="mt-2 text-sm leading-6 text-muted">お役立ち記事・購入ガイドとして、比較の見方と品目ごとの選び方をまとめています。</p>
       {list.length === 0 ? (
         <p className="mt-6 text-sm leading-7 text-muted">公開中の記事はまだありません。</p>
       ) : (

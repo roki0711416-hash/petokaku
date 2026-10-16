@@ -10,7 +10,7 @@ import { petPath } from "@/lib/pets";
 const navLinks = [
   { href: petPath("dog"), label: "犬用品" },
   { href: petPath("cat"), label: "猫用品" },
-  { href: "/#categories", label: "カテゴリー" },
+  { href: "/articles", label: "選び方" },
   { href: "/about", label: "サイトについて" },
 ];
 

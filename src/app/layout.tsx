@@ -21,21 +21,24 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+const siteDescription =
+  "ドッグフード・キャットフード・猫砂・ペットシーツ・キャットタワーなどの価格を比較。複数ショップからお得な商品を探せます。";
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
     default: "ペット用品の価格比較",
     template: "%s | ペトカク",
   },
-  description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
+  description: siteDescription,
   applicationName: "ペトカク",
   robots: robotsMetadata(),
   openGraph: {
     siteName: "ペトカク",
     locale: "ja_JP",
     type: "website",
-    title: "ペット用品の価格比較 | ペトカク",
-    description: "ドッグフード、キャットフード、猫砂などの価格をかんたん比較。商品名やJANコードから、購入先を探せます。",
+    title: "ペトカク｜ペット用品の価格比較サイト",
+    description: siteDescription,
   },
 };
 
