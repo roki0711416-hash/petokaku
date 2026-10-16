@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import type { Article, ArticleProductLink } from "@/lib/articles/catalog";
 import { janFromArticleProductHref } from "@/lib/articles/product-href";
 import { articleProductImageUrl } from "@/lib/articles/product-images";
@@ -16,7 +17,14 @@ export async function ArticleProductCards({ article }: { article: Article }) {
     return null;
   }
 
-  const cards = await Promise.all(article.products.map((product) => loadCard(product)));
+  // 静的生成時にYahoo取得が失敗すると「画像なし」がISRに焼き込まれるため、
+  // 商品詳細と同様にリクエスト時点で画像URLを取り直す。
+  await connection();
+
+  const cards: CardModel[] = [];
+  for (const product of article.products) {
+    cards.push(await loadCard(product));
+  }
 
   return (
     <section aria-labelledby={`products-${article.slug}`} className="rounded-2xl border border-line bg-card p-3 sm:p-4">
