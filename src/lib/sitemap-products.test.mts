@@ -21,10 +21,11 @@ test("サイトマップの商品URLは比較ページの正規JANだけにす�
   );
 });
 
-test("商品サイトマップは掲載中の比較結果だけを読み、JAN検索は直接しない", () => {
+test("商品サイトマップは掲載結果に確認済みJANパスを足し、ここではJAN検索しない", () => {
   const source = readFileSync(new URL("./sitemap-products.ts", import.meta.url), "utf8");
   assert.match(source, /loadPetListings/);
   assert.match(source, /group.status !== "ready"/);
   assert.match(source, /card.compare/);
+  assert.match(source, /curatedJanPaths/);
   assert.doesNotMatch(source, /searchYahooItems|loadYahooJan|affiliateUrl/);
 });

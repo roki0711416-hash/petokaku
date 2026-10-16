@@ -1,3 +1,4 @@
+import { curatedJanPaths } from "./curated-jans.ts";
 import { petPages } from "./pets.ts";
 import { loadPetListings, type PetListingGroup } from "./pets-listings.ts";
 import { validJanCode } from "./sources/yahoo/adapter.ts";
@@ -34,5 +35,7 @@ function publishedHrefs(group: PetListingGroup): string[] {
 
 export async function publishedProductPaths(): Promise<string[]> {
   const listings = await Promise.all(petPages().map((pet) => loadPetListings(pet)));
-  return canonicalJanPaths(listings.flatMap((listing) => [...publishedHrefs(listing.yahoo), ...publishedHrefs(listing.rakuten)]));
+  const discovered = listings.flatMap((listing) => [...publishedHrefs(listing.yahoo), ...publishedHrefs(listing.rakuten)]);
+  // 確認済みの追加JANはAPIを呼ばずパスだけ足す。discovery側でも同じJANを探す。
+  return canonicalJanPaths([...discovered, ...curatedJanPaths()]);
 }

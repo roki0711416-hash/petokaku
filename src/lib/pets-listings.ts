@@ -1,3 +1,4 @@
+import { curatedJansForPet } from "./curated-jans.ts";
 import { comparableShopKey, detailHrefForJan, prepareComparableCards, salesUnitKeyOf, type ShopCountedListing } from "./listing-eligibility.ts";
 import { mentionsExactJan, rakutenReviewSearchRequest } from "./sources/rakuten/item-search.ts";
 import { buildSearchCandidates, preferComparableCards } from "./sources/yahoo/search-candidates.ts";
@@ -513,6 +514,22 @@ export async function loadPetDiscoveryItems(
         (result.totalAvailable != null ? yahooListingResults < result.totalAvailable : result.returnedCount >= yahooListingResults);
     }
     items.push(...result.items);
+  }
+  for (const curated of curatedJansForPet(pet.id)) {
+    const result = await paceDiscovery(() =>
+      searchYahooItems({
+        janCode: curated.janCode,
+        genreCategoryId: yahooPetGenreCategoryIds[pet.id],
+        results: yahooListingResults,
+        revalidate: petPageRevalidateSeconds[pet.id],
+      }),
+    );
+    if (!result.ok) {
+      failure = result.reason;
+      continue;
+    }
+    sawReady = true;
+    items.push(...result.items.filter((item) => validJanCode(item.janCode) === curated.janCode));
   }
   if (!sawReady) {
     return { ok: false, reason: failure };
