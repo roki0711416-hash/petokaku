@@ -19,10 +19,19 @@ test("Lが確定した単品は本体と送料込みの参考単価を出す", (
   assert.equal(lines.shippingTotal, "送料込み参考：￥900 / L");
 });
 
+test("内部表現がmlでもper_lなら1Lあたりを出す", () => {
+  const lines = referenceLiterUnitLines(offer(), 5000, "ml", "per_l");
+  assert.equal(lines.item, "参考：￥800 / L");
+  assert.equal(lines.shippingTotal, "送料込み参考：￥900 / L");
+});
+
 test("セットは総容量で割り、セット全体と明示する", () => {
   const lines = referenceLiterUnitLines(offer({ packCount: 4, totalQuantity: 20 }), 5, "l", "per_l");
   assert.equal(lines.item, "参考：セット全体 ￥200 / L");
   assert.equal(lines.shippingTotal, "送料込み参考：セット全体 ￥225 / L");
+  const asMl = referenceLiterUnitLines(offer({ packCount: 4, totalQuantity: 20_000 }), 5000, "ml", "per_l");
+  assert.equal(asMl.item, "参考：セット全体 ￥200 / L");
+  assert.equal(asMl.shippingTotal, "送料込み参考：セット全体 ￥225 / L");
 });
 
 test("送料不明のときは送料込み参考単価を出さない", () => {

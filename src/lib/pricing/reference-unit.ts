@@ -8,8 +8,9 @@ export type ReferenceUnitLines = {
   shippingTotal: string | null;
 };
 
-// L単位で容量が確定し、掲載側も同じ単位で単価計算できるときだけ参考単価を返す。
-// kgや容量不明、セット総量が読めない場合は出さない。送料込みは送料確定時のみ。
+// 容量が体積として確定し、単価種別が per_l のときだけ参考単価を返す。
+// 内部表現は l または ml（例: 5L → 5000ml）どちらでもよい。kgや容量不明は出さない。
+// セット総量が読めない場合も出さない。送料込みは送料確定時のみ。
 export function referenceLiterUnitLines(
   offer: Pick<Offer, "price" | "shippingFee" | "packCount" | "totalQuantity" | "unitPriceReady">,
   quantity: number | null,
@@ -17,7 +18,10 @@ export function referenceLiterUnitLines(
   unitPriceType: UnitPriceType,
 ): ReferenceUnitLines {
   const empty: ReferenceUnitLines = { item: null, shippingTotal: null };
-  if (unitPriceType !== "per_l" || quantityUnit !== "l" || !offer.unitPriceReady) {
+  if (unitPriceType !== "per_l" || !offer.unitPriceReady) {
+    return empty;
+  }
+  if (quantityUnit !== "l" && quantityUnit !== "ml") {
     return empty;
   }
   const pricedQuantity = unitPriceQuantity(quantity, offer.packCount, offer.totalQuantity);
