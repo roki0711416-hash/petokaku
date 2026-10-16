@@ -95,6 +95,7 @@ const pets: readonly PetPage[] = [
       { href: petPath("dog"), label: "犬用品" },
       { href: "/categories/cat-food", label: "キャットフード" },
       { href: "/categories/cat-litter", label: "猫砂" },
+      { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
       { href: "/categories/pet-sheets", label: "ペットシーツ" },
     ],
     points: [

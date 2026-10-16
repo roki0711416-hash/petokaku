@@ -1,5 +1,7 @@
 import { formatYen, stockLabel } from "@/lib/format";
+import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { mallVisitLabel } from "@/lib/pricing/malls";
+import { referenceLiterUnitLines } from "@/lib/pricing/reference-unit";
 import type { CompareSort } from "@/lib/pricing/shop-compare";
 import { shopProductLink } from "@/lib/pricing/shop-link";
 import { payableTotal } from "@/lib/pricing/visible-offers";
@@ -15,16 +17,31 @@ export function ShopCompareList({
   offers,
   ranks,
   sort = "item",
+  quantity = null,
+  quantityUnit = null,
+  unitPriceType = "none",
 }: {
   offers: Offer[];
   ranks: (number | null)[] | null;
   sort?: CompareSort;
+  quantity?: number | null;
+  quantityUnit?: QuantityUnit | null;
+  unitPriceType?: UnitPriceType;
 }) {
   return (
     <>
       <ol className="grid gap-2 lg:hidden">
         {offers.map((offer, index) => (
-          <MobileShop key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} sort={sort} />
+          <MobileShop
+            key={offer.id}
+            offer={offer}
+            rank={ranks ? (ranks[index] ?? null) : null}
+            showRank={ranks != null}
+            sort={sort}
+            quantity={quantity}
+            quantityUnit={quantityUnit}
+            unitPriceType={unitPriceType}
+          />
         ))}
       </ol>
       <div className="hidden overflow-hidden rounded-xl border border-line bg-card lg:block">
@@ -41,7 +58,16 @@ export function ShopCompareList({
           </thead>
           <tbody>
             {offers.map((offer, index) => (
-              <DesktopRow key={offer.id} offer={offer} rank={ranks ? (ranks[index] ?? null) : null} showRank={ranks != null} sort={sort} />
+              <DesktopRow
+                key={offer.id}
+                offer={offer}
+                rank={ranks ? (ranks[index] ?? null) : null}
+                showRank={ranks != null}
+                sort={sort}
+                quantity={quantity}
+                quantityUnit={quantityUnit}
+                unitPriceType={unitPriceType}
+              />
             ))}
           </tbody>
         </table>
@@ -50,7 +76,48 @@ export function ShopCompareList({
   );
 }
 
-function MobileShop({ offer, rank, showRank, sort }: { offer: Offer; rank: number | null; showRank: boolean; sort: CompareSort }) {
+function UnitHints({
+  offer,
+  quantity,
+  quantityUnit,
+  unitPriceType,
+  align = "left",
+}: {
+  offer: Offer;
+  quantity: number | null;
+  quantityUnit: QuantityUnit | null;
+  unitPriceType: UnitPriceType;
+  align?: "left" | "right";
+}) {
+  const lines = referenceLiterUnitLines(offer, quantity, quantityUnit, unitPriceType);
+  if (!lines.item && !lines.shippingTotal) {
+    return null;
+  }
+  return (
+    <div className={`mt-1 grid gap-0.5 text-xs leading-5 text-muted ${align === "right" ? "text-right" : ""}`}>
+      {lines.item ? <p>{lines.item}</p> : null}
+      {lines.shippingTotal ? <p>{lines.shippingTotal}</p> : null}
+    </div>
+  );
+}
+
+function MobileShop({
+  offer,
+  rank,
+  showRank,
+  sort,
+  quantity,
+  quantityUnit,
+  unitPriceType,
+}: {
+  offer: Offer;
+  rank: number | null;
+  showRank: boolean;
+  sort: CompareSort;
+  quantity: number | null;
+  quantityUnit: QuantityUnit | null;
+  unitPriceType: UnitPriceType;
+}) {
   const first = rank === 1;
   const total = payableTotal(offer);
   const showTotal = sort === "total" && total != null;
@@ -66,6 +133,7 @@ function MobileShop({ offer, rank, showRank, sort }: { offer: Offer; rank: numbe
           {showTotal ? <p className="text-xs text-muted">送料込み</p> : null}
           <p className="price-num text-3xl leading-none text-ink">{showTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
           {showTotal && offer.price != null ? <p className="mt-1 text-xs text-muted">本体 {formatYen(offer.price)}</p> : null}
+          <UnitHints offer={offer} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} align="right" />
         </div>
       </div>
       <p className="mt-2 text-sm text-ink">
@@ -80,7 +148,23 @@ function MobileShop({ offer, rank, showRank, sort }: { offer: Offer; rank: numbe
   );
 }
 
-function DesktopRow({ offer, rank, showRank, sort }: { offer: Offer; rank: number | null; showRank: boolean; sort: CompareSort }) {
+function DesktopRow({
+  offer,
+  rank,
+  showRank,
+  sort,
+  quantity,
+  quantityUnit,
+  unitPriceType,
+}: {
+  offer: Offer;
+  rank: number | null;
+  showRank: boolean;
+  sort: CompareSort;
+  quantity: number | null;
+  quantityUnit: QuantityUnit | null;
+  unitPriceType: UnitPriceType;
+}) {
   const first = rank === 1;
   const total = payableTotal(offer);
   const showTotal = sort === "total" && total != null;
@@ -94,6 +178,7 @@ function DesktopRow({ offer, rank, showRank, sort }: { offer: Offer; rank: numbe
       <td className="px-3 py-3 align-middle">
         <span className="price-num text-2xl text-ink">{showTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price)}</span>
         {showTotal && offer.price != null ? <p className="mt-1 text-xs text-muted">本体 {formatYen(offer.price)}</p> : null}
+        <UnitHints offer={offer} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} />
       </td>
       <td className="px-3 py-3 align-middle text-sm text-ink">{shippingNote(offer, true)}</td>
       <td className="px-3 py-3 align-middle text-sm text-ink">{stockLabel(offer.stockStatus, offer.isSample)}</td>

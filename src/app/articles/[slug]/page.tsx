@@ -144,6 +144,15 @@ function ArticleBlockView({ block, index, article }: { block: ArticleBlock; inde
       </p>
     );
   }
+  if (block.type === "link") {
+    return (
+      <p>
+        <Link href={block.href} className="font-medium text-forest-deep underline-offset-4 hover:underline">
+          {block.label}
+        </Link>
+      </p>
+    );
+  }
   if (block.type === "products") {
     return <ProductCards article={article} />;
   }

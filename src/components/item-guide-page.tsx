@@ -79,6 +79,26 @@ export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
           </div>
         </section>
 
+        {guide.relatedGuides && guide.relatedGuides.length > 0 ? (
+          <section aria-labelledby="guide-article-heading" className="mt-12">
+            <h2 id="guide-article-heading" className="text-lg font-medium text-ink">
+              あわせて読む
+            </h2>
+            <ul className="mt-4 flex min-w-0 flex-wrap gap-2">
+              {guide.relatedGuides.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-4 text-sm text-forest-deep hover:border-sage"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <section aria-labelledby="guide-related-heading" className="mt-12">
           <h2 id="guide-related-heading" className="text-lg font-medium text-ink">
             関連する品目

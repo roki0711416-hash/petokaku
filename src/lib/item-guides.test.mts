@@ -43,6 +43,15 @@ test("品目ページは専用検索と取得掲載を出さず、候補は検�
   assert.doesNotMatch(route, /loadGuideListings/);
 });
 
+test("猫砂ガイドは既存の種類記事と猫用品カテゴリへつなぐ", () => {
+  const litter = itemGuideBySlug("cat-litter");
+  assert.ok(litter);
+  assert.deepEqual(litter.relatedGuides, [
+    { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
+    { href: "/pets/cat?category=litter", label: "猫用品の猫砂カテゴリ" },
+  ]);
+});
+
 test("品目の検索語は空なら品目名、入力があれば品目名と組み合わせる", () => {
   const dog = itemGuideBySlug("dog-food");
   assert.ok(dog);

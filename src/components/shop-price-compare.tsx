@@ -30,6 +30,9 @@ type MallFilter = "all" | ComparisonMall;
 
 export function ShopPriceCompare({
   offers,
+  quantity,
+  quantityUnit,
+  unitPriceType,
 }: {
   offers: Offer[];
   quantity: number | null;
@@ -56,6 +59,7 @@ export function ShopPriceCompare({
   const counts = listingShopCounts(ranked);
   const prices = cheapestPrices(parts.ranked);
   const viewKey = `${mall}:${sort}`;
+  const unitProps = { quantity, quantityUnit, unitPriceType };
 
   return (
     <div className="grid min-w-0 gap-3">
@@ -103,6 +107,7 @@ export function ShopPriceCompare({
           showRank
           reveal="shops"
           emptyLabel="この条件で順位に入れられる掲載はありません。"
+          {...unitProps}
         />
         {shippingUnconfirmed.length > 0 ? (
           <FoldedSection
@@ -117,6 +122,7 @@ export function ShopPriceCompare({
               sort="item"
               reveal="more"
               emptyLabel="送料が確認できない掲載はありません。"
+              {...unitProps}
             />
           </FoldedSection>
         ) : null}
@@ -132,6 +138,7 @@ export function ShopPriceCompare({
                 sort={sort}
                 reveal="more"
                 emptyLabel="この販売単位の掲載はありません。"
+                {...unitProps}
               />
             </FoldedSection>
           ))}
@@ -149,6 +156,7 @@ export function ShopPriceCompare({
             sort={sort}
             reveal="more"
             emptyLabel="在庫が確認できない掲載はありません。"
+            {...unitProps}
           />
         </FoldedSection>
       ) : null}
@@ -266,6 +274,9 @@ function PagedOffers({
   emptyLabel,
   resetKey,
   reveal,
+  quantity,
+  quantityUnit,
+  unitPriceType,
 }: {
   offers: Offer[];
   sort: CompareSort;
@@ -273,6 +284,9 @@ function PagedOffers({
   emptyLabel: string;
   resetKey: string;
   reveal: "shops" | "more";
+  quantity: number | null;
+  quantityUnit: QuantityUnit | null;
+  unitPriceType: UnitPriceType;
 }) {
   const [visible, setVisible] = useState(initialCompareCount);
   const [seenKey, setSeenKey] = useState(resetKey);
@@ -299,7 +313,14 @@ function PagedOffers({
 
   return (
     <div className="mt-3 min-w-0">
-      <ShopCompareList offers={shown} ranks={ranks} sort={sort} />
+      <ShopCompareList
+        offers={shown}
+        ranks={ranks}
+        sort={sort}
+        quantity={quantity}
+        quantityUnit={quantityUnit}
+        unitPriceType={unitPriceType}
+      />
       {page.remaining > 0 ? (
         <button
           type="button"

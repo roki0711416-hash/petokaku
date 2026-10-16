@@ -17,6 +17,7 @@ export type ItemGuide = {
   points: { heading: string; body: string }[];
   caution: string;
   faqs: { question: string; answer: string }[];
+  relatedGuides?: { href: string; label: string }[];
 };
 
 const maxListingQueryLength = 80;
@@ -170,6 +171,10 @@ export const itemGuides: readonly ItemGuide[] = [
         question: "袋が安い猫砂が得ですか？",
         answer: "袋の安さだけでは判断できません。1回に使う量と交換の頻度が違うと、同じ期間の金額はそろいません。",
       },
+    ],
+    relatedGuides: [
+      { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
+      { href: "/pets/cat?category=litter", label: "猫用品の猫砂カテゴリ" },
     ],
   },
   {

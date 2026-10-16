@@ -19,6 +19,7 @@ export type ArticleBlock =
   | { type: "table"; headers: string[]; rows: string[][] }
   | { type: "diagram"; id: ArticleDiagramId }
   | { type: "source"; label: string; href: string }
+  | { type: "link"; label: string; href: string }
   | { type: "products" };
 
 export type ArticleProductLink = {
@@ -52,6 +53,8 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const articleImagePattern = /^\/article-images\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:png|webp|jpg)$/;
 const productHrefPattern = /^\/products\/jan\/[0-9]{13}$/;
 const categoryHrefPattern = /^\/categories\/[a-z0-9-]+$/;
+const petsCategoryHrefPattern = /^\/pets\/(?:dog|cat)\?category=[a-z]+$/;
+const articleHrefPattern = /^\/articles\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function calendarDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -66,7 +69,11 @@ function calendarDate(value: string): boolean {
 }
 
 export function isArticleProductHref(href: string): boolean {
-  return productHrefPattern.test(href) || categoryHrefPattern.test(href);
+  return productHrefPattern.test(href) || categoryHrefPattern.test(href) || petsCategoryHrefPattern.test(href);
+}
+
+export function isArticleInternalHref(href: string): boolean {
+  return categoryHrefPattern.test(href) || petsCategoryHrefPattern.test(href) || articleHrefPattern.test(href);
 }
 
 const sourceHosts = new Set(["pffta.org", "www.pffta.org", "petfood.or.jp", "www.petfood.or.jp"]);
@@ -98,6 +105,9 @@ function blockOk(block: ArticleBlock): boolean {
   }
   if (block.type === "source") {
     return block.label.trim() !== "" && block.label.length <= 80 && httpsHost(block.href, sourceHosts);
+  }
+  if (block.type === "link") {
+    return block.label.trim() !== "" && block.label.length <= 80 && isArticleInternalHref(block.href);
   }
   if (block.type === "products") {
     return true;

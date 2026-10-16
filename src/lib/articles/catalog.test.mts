@@ -39,6 +39,7 @@ test("公開記事だけを一覧とサイトマップに出す", () => {
 test("商品リンクは既存のJAN詳細だけを受け、不正な記事は公開しない", () => {
   assert.equal(isArticleProductHref("/products/jan/3182550706933"), true);
   assert.equal(isArticleProductHref("/categories/cat-litter"), true);
+  assert.equal(isArticleProductHref("/pets/cat?category=litter"), true);
   assert.equal(isArticleProductHref("https://example.com/item"), false);
   assert.equal(isArticleProductHref("/search?q=猫砂"), false);
   const broken = article({ products: [{ href: "https://www.amazon.co.jp/dp/B00TEST", label: "外部" }] });
