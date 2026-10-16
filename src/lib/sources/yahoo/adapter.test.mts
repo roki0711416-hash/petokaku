@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { adaptYahooGroup, mapYahooShipping, sameJanItems, type YahooItem } from "./adapter.ts";
+import { adaptYahooGroup, mapYahooShipping, sameJanItems, validJanCode, type YahooItem } from "./adapter.ts";
+
+test("JANは13桁数字だけ通し、全0のダミーは商品JANにしない", () => {
+  assert.equal(validJanCode("3182550706933"), "3182550706933");
+  assert.equal(validJanCode("4900000000018"), "4900000000018");
+  assert.equal(validJanCode("0000000000000"), null);
+  assert.equal(validJanCode("123"), null);
+  assert.equal(validJanCode(""), null);
+  assert.equal(validJanCode(null), null);
+});
 
 const observedAt = "2026-10-01T14:30:00.000Z";
 

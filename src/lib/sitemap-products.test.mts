@@ -11,6 +11,8 @@ test("サイトマップの商品URLは比較ページの正規JANだけにす�
       `/products/jan/${jan}`,
       `/products/jan/${jan}?with=${other}`,
       `https://petokaku.com/products/jan/${other}`,
+      "/products/jan/0000000000000",
+      "https://petokaku.com/products/jan/0000000000000",
       "/search?q=猫砂",
       "/products/yahoo-preview",
       "/products/sample-food",

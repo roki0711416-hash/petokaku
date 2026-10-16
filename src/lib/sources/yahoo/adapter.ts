@@ -46,7 +46,8 @@ function token(value: string): string {
 }
 
 export function validJanCode(value: string | null): string | null {
-  if (value && /^[0-9]{13}$/.test(value)) {
+  // 13桁数字でも全0はモール側の未設定・ダミー値として扱い、商品JANにしない。
+  if (value && /^[0-9]{13}$/.test(value) && value !== "0000000000000") {
     return value;
   }
   return null;

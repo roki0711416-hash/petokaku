@@ -11,6 +11,7 @@ test("確認済みキュレーションJANは13桁とチェックデジットと
   assert.deepEqual(
     selectCuratedJans([
       { janCode: "123", label: "桁不足", petId: "dog" },
+      { janCode: "0000000000000", label: "全0ダミー", petId: "dog" },
       { janCode: "4580518141427", label: "重複前", petId: "dog" },
       { janCode: "4580518141427", label: "重複", petId: "dog" },
       { janCode: "4580518141428", label: "チェックデジット不正", petId: "dog" },

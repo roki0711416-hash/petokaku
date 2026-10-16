@@ -64,6 +64,7 @@ test("不正なJANからは詳細URLを作らない", () => {
   assert.equal(detailHrefForJan(jan), `/products/jan/${jan}`);
   assert.equal(detailHrefForJan("123"), null);
   assert.equal(detailHrefForJan(""), null);
+  assert.equal(detailHrefForJan("0000000000000"), null);
 });
 
 test("Yahooだけ、楽天だけ、両モール合わせて2ショップなら掲載する", () => {
