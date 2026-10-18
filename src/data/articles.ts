@@ -288,7 +288,7 @@ export const articles: Article[] = [
     title: "ペット用品の価格比較の見方",
     description: "ペトカクで同じ商品の価格と送料を見比べるときの見方です。金額は取得時点の掲載で、購入前にショップで確認します。",
     publishedOn: "2026-10-13",
-    updatedOn: "2026-10-17",
+    updatedOn: "2026-10-18",
     published: true,
     image: { src: "/article-images/how-to-compare-pet-prices.png", alt: "価格のカードを三枚並べた図" },
     blocks: [
@@ -321,13 +321,24 @@ export const articles: Article[] = [
         type: "p",
         text: "「広告」と表示したリンクは、ショップの紹介に報酬が発生することがあります。比較の順番は、その報酬では決めていません。",
       },
+      { type: "products" },
     ],
-    relatedSlugs: ["cat-litter-types", "how-to-choose-cat-food"],
+    relatedSlugs: ["cat-litter-types", "how-to-choose-cat-food", "how-to-choose-dog-food"],
     products: [
       {
         href: "/products/jan/3182550706933",
         label: "ロイヤルカナン インドア 成猫用 4kg",
-        note: "比較の手順を確認したあと、同じJANの掲載を見比べます。",
+        note: "フードの例。同じJAN・同じ容量の掲載を見比べます。",
+      },
+      {
+        href: "/products/jan/4903351011250",
+        label: "LION ニオイをとる砂 5L×4個",
+        note: "猫砂のセット例。袋数違いの掲載は別ページです。",
+      },
+      {
+        href: "/products/jan/4562358781780",
+        label: "ニュートロ シュプレモ 小型犬 成犬用 3kg",
+        note: "ドッグフードの例。容量違いの袋は別ページです。",
       },
     ],
   },

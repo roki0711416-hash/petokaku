@@ -46,8 +46,13 @@ export type IndexedJanProduct = {
   label: string;
 };
 
+// 重点商品。TOPでは使わず、使い方ページなどから容量が分かる文言でつなぐ。
 export const indexedJanProducts: readonly IndexedJanProduct[] = [
-  { janCode: "3182550706933", label: "ロイヤルカナンの猫用4kg商品" },
+  { janCode: "4903351011250", label: "LION ニオイをとる砂 5L×4個" },
+  { janCode: "4520699667989", label: "デオシート レギュラー 112枚×4袋" },
+  { janCode: "3182550706933", label: "ロイヤルカナン インドア 成猫用 4kg" },
+  { janCode: "4562358781780", label: "ニュートロ シュプレモ 小型犬 成犬用 3kg" },
+  { janCode: "4905009714353", label: "アイリスオーヤマ 紙の猫砂 7L" },
 ];
 
 const indexedJanPattern = /^[0-9]{13}$/;

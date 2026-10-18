@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "サイトの使い方",
   description: "商品名、ブランド名、JANコードから販売店を探し、価格と送料を見比べて、外部ショップで購入する手順です。",
   alternates: { canonical: "/guide" },
 };
+
+const exampleProducts = selectIndexedJans(indexedJanProducts);
 
 const steps = [
   {
@@ -45,6 +48,20 @@ export default function GuidePage() {
       </p>
       <h2>内容量が違う商品</h2>
       <p>名前が似ていても、4kgと10kgのように内容量が違う商品は別のJANコードとして扱います。同じ一覧の最安としては混ぜません。</p>
+      <h2>価格比較の例</h2>
+      <p>同じJAN・同じ容量の掲載を、ショップごとに見比べる例です。金額や店舗数はこの一覧には出していません。</p>
+      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        {exampleProducts.map((item) => (
+          <li key={item.janCode}>
+            <Link
+              href={indexedJanPath(item.janCode)}
+              className="inline-flex min-h-11 items-center font-medium text-forest-deep underline-offset-4 hover:underline"
+            >
+              {item.label}の価格比較
+            </Link>
+          </li>
+        ))}
+      </ul>
       <p>
         比較の見方は
         <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">

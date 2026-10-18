@@ -104,8 +104,12 @@ test("サイトマップの固定ページは公開ページだけで、商品�
 });
 
 test("確認済みJANは13桁だけを上限まで選ぶ", () => {
-  assert.deepEqual(indexedJanProducts, [{ janCode: "3182550706933", label: "ロイヤルカナンの猫用4kg商品" }]);
-  assert.equal(selectIndexedJans(indexedJanProducts).length, 1);
+  assert.deepEqual(
+    indexedJanProducts.map((item) => item.janCode),
+    ["4903351011250", "4520699667989", "3182550706933", "4562358781780", "4905009714353"],
+  );
+  assert.equal(selectIndexedJans(indexedJanProducts).length, 5);
+  assert.ok(indexedJanProducts.every((item) => /\d/.test(item.label)));
   const extra = [
     ...indexedJanProducts,
     { janCode: "123", label: "桁不足" },
@@ -117,7 +121,7 @@ test("確認済みJANは13桁だけを上限まで選ぶ", () => {
   ];
   const selected = selectIndexedJans(extra);
   assert.equal(selected.length, indexedJanLimit);
-  assert.equal(selected[0]?.janCode, "3182550706933");
+  assert.equal(selected[0]?.janCode, "4903351011250");
   assert.ok(selected.every((item) => /^[0-9]{13}$/.test(item.janCode)));
   assert.equal(new Set(selected.map((item) => item.janCode)).size, selected.length);
 });
@@ -177,6 +181,12 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.match(cards, /loadYahooJan/);
   assert.doesNotMatch(cards, /searchYahooItems|loadYahooKeywordSearch/);
   assert.match(site, /3182550706933/);
+  assert.match(site, /4903351011250/);
+  assert.match(site, /4562358781780/);
+  const guide = read("../app/guide/page.tsx");
+  assert.match(guide, /indexedJanProducts/);
+  assert.match(guide, /価格比較の例/);
+  assert.match(guide, /金額や店舗数はこの一覧には出していません/);
   assert.doesNotMatch(home, /searchYahooItems|loadYahooJan|loadYahooKeywordSearch/);
   const catalog = read("../components/home-catalog-sections.tsx");
   const browser = read("../components/home-catalog-browser.tsx");

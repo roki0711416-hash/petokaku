@@ -62,6 +62,8 @@ const pets: readonly PetPage[] = [
       { href: petPath("cat"), label: "猫用品" },
       { href: "/categories/dog-food", label: "ドッグフード" },
       { href: "/categories/pet-sheets", label: "ペットシーツ" },
+      { href: "/products/jan/4562358781780", label: "ニュートロ シュプレモ 小型犬 成犬用 3kg" },
+      { href: "/products/jan/4520699667989", label: "デオシート レギュラー 112枚×4袋" },
     ],
     points: [
       { heading: "フードはライフステージを分ける", body: "子犬、成犬、シニアで必要な栄養は違います。商品名の対象年齢と、今の年齢が合うかをショップのページで確認してください。" },
@@ -97,6 +99,9 @@ const pets: readonly PetPage[] = [
       { href: "/categories/cat-litter", label: "猫砂" },
       { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
       { href: "/categories/pet-sheets", label: "ペットシーツ" },
+      { href: "/products/jan/3182550706933", label: "ロイヤルカナン インドア 成猫用 4kg" },
+      { href: "/products/jan/4903351011250", label: "LION ニオイをとる砂 5L×4個" },
+      { href: "/products/jan/4905009714353", label: "アイリスオーヤマ 紙の猫砂 7L" },
     ],
     points: [
       { heading: "ドライとウェットを分ける", body: "カリカリとパウチは水分も価格の単位も違います。商品名の種類を見てから、同じ形の商品どうしを比べてください。" },

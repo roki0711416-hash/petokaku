@@ -90,8 +90,12 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
   assert.ok(sheets);
   assert.equal(sheets.products[0]?.href, "/products/jan/4520699667989");
   assert.equal(sheets.image, undefined);
-  assert.equal(howTo.products[0]?.href, "/products/jan/3182550706933");
+  assert.deepEqual(
+    howTo.products.map((product) => product.href),
+    ["/products/jan/3182550706933", "/products/jan/4903351011250", "/products/jan/4562358781780"],
+  );
   assert.equal(howTo.products[0]?.label, "ロイヤルカナン インドア 成猫用 4kg");
+  assert.equal(howTo.products.length <= 3, true);
   const dogFood = live.find((item) => item.slug === "how-to-choose-dog-food");
   assert.ok(dogFood);
   assert.equal(dogFood.products[0]?.href, "/products/jan/4562358781780");
@@ -113,6 +117,6 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
     assert.equal(item.image.src.startsWith("/article-images/"), true);
     assert.equal(existsSync(new URL(`../../../public${item.image.src}`, import.meta.url)), true);
   }
-  assert.equal(data.dateModified, "2026-10-17");
+  assert.equal(data.dateModified, "2026-10-18");
   assert.equal(data.mainEntityOfPage, "https://petokaku.com/articles/how-to-compare-pet-prices");
 });

@@ -72,8 +72,13 @@ test("犬と猫は既存の品目ページへつなぎ、別種の強い語は�
     ["フード", "ケージ", "ライト", "飼育用品"],
   );
   assert.equal(dog.related.some((item) => item.href === "/categories/dog-food"), true);
+  assert.equal(dog.related.some((item) => item.href === "/products/jan/4562358781780"), true);
+  assert.equal(dog.related.some((item) => item.href === "/products/jan/4520699667989"), true);
   assert.equal(cat.related.some((item) => item.href === "/categories/cat-food"), true);
   assert.equal(cat.related.some((item) => item.href === "/categories/cat-litter"), true);
+  assert.equal(cat.related.some((item) => item.href === "/products/jan/3182550706933"), true);
+  assert.equal(cat.related.some((item) => item.href === "/products/jan/4903351011250"), true);
+  assert.equal(cat.related.some((item) => item.href === "/products/jan/4905009714353"), true);
   assert.equal(petCategory(dog, undefined), null);
   assert.equal(petCategory(dog, "missing"), null);
   assert.equal(petCategory(dog, "food")?.query, "ドッグフード");
