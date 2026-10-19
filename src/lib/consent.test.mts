@@ -25,3 +25,13 @@ test("GA4は許可があるときだけ読み、自動ページビューと重�
   assert.equal(tag.match(/gtag\/js/g)?.length, 1);
   assert.doesNotMatch(layout, /googletagmanager|gtag\/js/);
 });
+
+test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く", () => {
+  const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  const script = readFileSync(new URL("../components/adsense-script.tsx", import.meta.url), "utf8");
+  assert.equal(layout.match(/<AdSenseScript/g)?.length, 1);
+  assert.match(script, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=ca-pub-6861979311690077/);
+  assert.match(script, /crossOrigin="anonymous"/);
+  assert.match(script, /strategy="beforeInteractive"/);
+  assert.doesNotMatch(script, /adsbygoogle\s*=|data-ad-client|data-ad-slot|enable_page_level_ads/);
+});

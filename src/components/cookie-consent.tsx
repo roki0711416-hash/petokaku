@@ -94,7 +94,9 @@ export function CookieSettings() {
           </label>
         </div>
       </fieldset>
-      <p className="text-sm leading-7 text-muted">広告の成果を測るCookieは、現在使っていません。切り替える項目はありません。</p>
+      <p className="text-sm leading-7 text-muted">
+        AdSenseの確認用スクリプトは全ページで読み込みます。広告ユニットの表示設定は入れていません。広告Cookieの切り替え項目はありません。
+      </p>
       <button type="submit" className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-5 text-sm text-white hover:bg-forest-deep sm:w-auto">
         設定を保存する
       </button>

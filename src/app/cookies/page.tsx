@@ -14,7 +14,7 @@ export default function CookiesPage() {
     <InfoArticle
       title="Cookie設定"
       path="/cookies"
-      lead="解析のCookieは、受け入れるまで読み込みません。広告の配信は、現在は開始していません。2026年10月19日に更新しました。"
+      lead="解析のCookieは、受け入れるまで読み込みません。AdSenseの確認用スクリプトは全ページで読み込みます。2026年10月19日に更新しました。"
     >
       <h2>必須にあたるもの</h2>
       <p>
@@ -26,9 +26,11 @@ export default function CookiesPage() {
       </p>
       <CookieSettings />
       <h2>広告</h2>
-      <p>現時点では、Google AdSenseの広告は配信していません。広告配信のタグは読み込んでおらず、広告用のCookieも置いていません。広告Cookieのオンとオフの設定もありません。</p>
       <p>
-        Google AdSenseの導入を予定しています。導入後は、Googleなどの第三者配信事業者がCookieを使い、利用者がこのサイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信する場合があります。Googleの広告Cookieにより、Googleおよびそのパートナーが適切な広告を表示できるようになる場合もあります。パーソナライズを止めるときは
+        サイト所有権の確認のため、Google AdSenseのローダースクリプトを全ページで読み込みます。現時点では広告ユニットや自動広告の表示設定は入れていません。このスクリプトにより、Google側がCookie等を使う場合があります。広告Cookieのオンとオフを切り替える設定は、このページにはありません。
+      </p>
+      <p>
+        Googleなどの第三者配信事業者がCookieを使い、利用者がこのサイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信する場合があります。Googleの広告Cookieにより、Googleおよびそのパートナーが適切な広告を表示できるようになる場合もあります。パーソナライズを止めるときは
         <a href="https://adssettings.google.com/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
           Googleの広告設定
         </a>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
 import { Suspense } from "react";
+import { AdSenseScript } from "@/components/adsense-script";
 import { CookieBanner } from "@/components/cookie-consent";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { NoticeBar } from "@/components/notice-bar";
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ja" className={`${fraunces.variable} h-full`} style={{ colorScheme: "light" }}>
       <body className="flex min-h-full flex-col">
+        <AdSenseScript />
         <a href="#main" className="skip-link">
           本文へスキップ
         </a>
