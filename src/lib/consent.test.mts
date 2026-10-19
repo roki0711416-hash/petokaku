@@ -36,3 +36,9 @@ test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く
   assert.match(script, /strategy="beforeInteractive"/);
   assert.doesNotMatch(script, /adsbygoogle\s*=|data-ad-client|data-ad-slot|enable_page_level_ads/);
 });
+
+test("AdSense所有権確認用メタタグは共通metadataに1回だけ置く", () => {
+  const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  assert.match(layout, /"google-adsense-account":\s*"ca-pub-6861979311690077"/);
+  assert.equal(layout.match(/google-adsense-account/g)?.length, 1);
+});

@@ -34,6 +34,10 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "ペトカク",
   robots: robotsMetadata(),
+  // AdSenseサイト所有権確認用（広告ユニットの設定ではない）
+  other: {
+    "google-adsense-account": "ca-pub-6861979311690077",
+  },
   openGraph: {
     siteName: "ペトカク",
     locale: "ja_JP",
