@@ -13,7 +13,7 @@ export default function PrivacyPage() {
     <InfoArticle
       title="プライバシーポリシー"
       path="/privacy"
-      lead="ペトカク運営事務局が、このサイトで実際に扱う情報と、導入を予定している広告を説明します。2026年10月14日に更新しました。"
+      lead="ペトカク運営事務局が、このサイトで実際に扱う情報と、導入を予定している広告を説明します。2026年10月19日に更新しました。"
     >
       <h2>取得する情報</h2>
       <p>会員登録、ログイン、問い合わせフォームはありません。氏名、住所、電話番号を、このサイトの入力欄からサーバーへ送る機能はありません。</p>
@@ -45,16 +45,27 @@ export default function PrivacyPage() {
         アクセス解析の選択は、ブラウザのlocalStorageと、Cookie「petokaku.cookie-choice」に保存します。このCookieは設定を覚えるためのもので、解析そのものではありません。解析を受け入れたあとは、GoogleアナリティクスがCookieを使うことがあります。
       </p>
       <h2>広告配信（Google AdSense）</h2>
-      <p>Google AdSenseの導入を予定しています。現時点では、AdSenseの広告タグは読み込んでおらず、広告の配信は開始していません。広告の成果を測るCookieも使っていません。</p>
       <p>
-        導入後は、Googleなどの第三者配信事業者が、Cookie等を利用して広告の配信や測定を行う場合があります。その結果、利用者のサイト訪問履歴など、興味関心に基づく広告が表示される場合があります。
+        Google AdSenseの導入を予定しています。現時点では、AdSenseの広告タグは読み込んでおらず、広告の配信は開始していません。広告用のCookieも置いていません。以下は、導入後に当てはまる説明です。
       </p>
+      <p>導入後は、次のとおりです。</p>
+      <ul>
+        <li>Googleなどの第三者配信事業者がCookieを使用して、利用者がこのサイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信することがあります。</li>
+        <li>Googleが広告Cookieを使用することにより、利用者がこのサイトや他のサイトにアクセスした際の情報に基づいて、Googleおよびそのパートナーが適切な広告を表示できるようになる場合があります。</li>
+        <li>
+          パーソナライズド広告を無効にするときは、
+          <a href="https://adssettings.google.com/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
+            Googleの広告設定
+          </a>
+          を開いてください。第三者配信事業者のCookieによるパーソナライズド広告を無効にする案内は、
+          <a href="https://www.aboutads.info/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
+            aboutads.info
+          </a>
+          にもあります。
+        </li>
+      </ul>
       <p>
-        広告のパーソナライズを止めたり、興味関心の設定を変えたりするときは、
-        <a href="https://adssettings.google.com/" className="mx-1 font-medium text-forest-deep underline underline-offset-4" target="_blank" rel="noopener noreferrer">
-          Googleの広告設定
-        </a>
-        を開いてください。Googleが、Googleのサービスを使うサイトから得た情報をどのように扱うかは、
+        Googleが、Googleのサービスを使うサイトから得た情報をどのように扱うかは、
         <a
           href="https://policies.google.com/technologies/partner-sites"
           className="mx-1 font-medium text-forest-deep underline underline-offset-4"
@@ -63,7 +74,7 @@ export default function PrivacyPage() {
         >
           Googleの説明
         </a>
-        に書かれています。
+        に書かれています。第三者の広告ネットワークを追加で使う場合は、その事業者名と案内へのリンクを、このポリシーに追記します。
       </p>
       <p>
         楽天市場、Yahoo!ショッピング、Amazonの購入リンクのうち、確認できたアフィリエイトリンクだけを広告として表示します。報酬の有無で、表示する価格を作り替えることはしません。詳しくは
