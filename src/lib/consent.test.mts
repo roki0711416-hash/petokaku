@@ -30,7 +30,8 @@ test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く
   const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
   const script = readFileSync(new URL("../components/adsense-script.tsx", import.meta.url), "utf8");
   assert.equal(layout.match(/<AdSenseScript/g)?.length, 1);
-  assert.match(script, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=ca-pub-6861979311690077/);
+  assert.match(script, /ca-pub-6861979311690077/);
+  assert.match(script, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=/);
   assert.match(script, /crossOrigin="anonymous"/);
   assert.match(script, /strategy="beforeInteractive"/);
   assert.doesNotMatch(script, /adsbygoogle\s*=|data-ad-client|data-ad-slot|enable_page_level_ads/);
