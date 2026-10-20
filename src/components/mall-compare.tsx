@@ -22,7 +22,7 @@ export function MallCompare({
       <div>
         <PriceSummary lowestPrice={null} shopCount={0} basis="total" />
         <h2 id="compare-heading" className="mt-5 text-lg font-medium tracking-tight text-ink">
-          すべてのショップで価格を比較
+          ショップ別価格比較
         </h2>
         <div className="mt-3">
           <OfferList offers={offers} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} />

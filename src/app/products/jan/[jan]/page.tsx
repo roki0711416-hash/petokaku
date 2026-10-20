@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { YahooProductView, type YahooSizeChoice } from "@/components/yahoo-product-view";
 import { amazonAssociateLinks } from "@/data/amazon-links";
+import { articles } from "@/data/articles";
 import { amazonAssociateLink } from "@/lib/amazon/associate-link";
+import { articlesLinkingToJan } from "@/lib/articles/related-for-jan";
 import { confirmedJanOffers } from "@/lib/pricing/malls";
 import { rakutenComparisonDetail } from "@/lib/sources/rakuten/compare-detail";
 import { loadRakutenShopOffers } from "@/lib/sources/rakuten/item-search";
@@ -174,6 +176,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
         <YahooProductView
           product={fallback.product}
           pageHref={`/products/jan/${jan}`}
+          relatedArticles={articlesLinkingToJan(jan, articles)}
           priceCheckedAt={new Date().toISOString()}
           retrievalLimited={fallback.truncated}
           rakutenShopScope={fallback.truncated ? "limited" : "ready"}
@@ -242,6 +245,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
       product={product}
       pageHref={`/products/jan/${jan}`}
       sizeChoices={sizeChoicesFor(result.adapted.detail, companions)}
+      relatedArticles={articlesLinkingToJan(jan, articles)}
       priceSummary={priceSummary}
       priceSeries={priceSeries}
       priceCheckedAt={now}

@@ -63,15 +63,18 @@ export function ShopPriceCompare({
 
   return (
     <div className="grid min-w-0 gap-3">
-      <PriceSummary
-        lowestPrice={sort === "total" ? prices.shippingTotal : prices.itemPrice}
-        shopCount={counts.shopCount}
-        basis={sort}
-      />
+      {/* スマホは商品概要で最安値を出すため、ここではPC向けに残す */}
+      <div className="hidden md:block">
+        <PriceSummary
+          lowestPrice={sort === "total" ? prices.shippingTotal : prices.itemPrice}
+          shopCount={counts.shopCount}
+          basis={sort}
+        />
+      </div>
       <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
       <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
-          すべてのショップで価格を比較
+          ショップ別価格比較
         </h2>
         <p className="text-sm text-ink">
           <span className="price-num text-lg">{counts.listingCount}</span>

@@ -5,7 +5,7 @@ import { referenceLiterUnitLines } from "@/lib/pricing/reference-unit";
 import type { CompareSort } from "@/lib/pricing/shop-compare";
 import { shopProductLink } from "@/lib/pricing/shop-link";
 import { payableTotal } from "@/lib/pricing/visible-offers";
-import { shippingCell } from "@/components/ui/shop-card";
+import { offerUnitLabel, shippingCell, shippingLine } from "@/components/ui/shop-card";
 import type { Offer } from "@/lib/types";
 
 const mallLabel: Record<string, string> = {
@@ -30,7 +30,7 @@ export function ShopCompareList({
 }) {
   return (
     <>
-      <ol className="grid gap-2 lg:hidden">
+      <ol className="grid gap-2 md:hidden">
         {offers.map((offer, index) => (
           <MobileShop
             key={offer.id}
@@ -44,7 +44,7 @@ export function ShopCompareList({
           />
         ))}
       </ol>
-      <div className="hidden overflow-hidden rounded-xl border border-line bg-card lg:block">
+      <div className="hidden overflow-hidden rounded-xl border border-line bg-card md:block">
         <table className="w-full table-fixed border-collapse text-left">
           <thead>
             <tr className="border-b border-line bg-sand/70 text-xs text-muted">
@@ -89,14 +89,15 @@ function UnitHints({
   unitPriceType: UnitPriceType;
   align?: "left" | "right";
 }) {
-  const lines = referenceLiterUnitLines(offer, quantity, quantityUnit, unitPriceType);
-  if (!lines.item && !lines.shippingTotal) {
+  const unit = offerUnitLabel(offer, quantity, quantityUnit, unitPriceType);
+  const liter = referenceLiterUnitLines(offer, quantity, quantityUnit, unitPriceType);
+  if (!unit && !liter.item && !liter.shippingTotal) {
     return null;
   }
   return (
-    <div className={`mt-1 grid gap-0.5 text-xs leading-5 text-muted ${align === "right" ? "text-right" : ""}`}>
-      {lines.item ? <p>{lines.item}</p> : null}
-      {lines.shippingTotal ? <p>{lines.shippingTotal}</p> : null}
+    <div className={`grid gap-0.5 text-xs leading-5 text-muted ${align === "right" ? "text-right" : ""}`}>
+      {unit ? <p>参考単価 {unit}</p> : liter.item ? <p>{liter.item}</p> : null}
+      {liter.shippingTotal ? <p>{liter.shippingTotal}</p> : null}
     </div>
   );
 }
@@ -120,29 +121,50 @@ function MobileShop({
 }) {
   const first = rank === 1;
   const total = payableTotal(offer);
-  const showTotal = sort === "total" && total != null;
+  const totalReady = total != null;
+  const emphasizeTotal = sort === "total" && totalReady;
+  const headline = emphasizeTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price);
+  const headlineLabel = emphasizeTotal ? "送料込み" : "商品価格";
   return (
-    <li className={first ? "rounded-xl border border-forest bg-moss/70 p-3" : "rounded-xl border border-line bg-card p-3"}>
-      <div className="flex items-start justify-between gap-3">
+    <li className={first ? "rounded-2xl border border-forest bg-moss/60 px-3 py-3" : "rounded-2xl border border-line bg-card px-3 py-3"}>
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+        {showRank ? <RankLabel rank={rank} /> : null}
+        {first && emphasizeTotal ? (
+          <span className="rounded-full bg-forest px-2 py-0.5 text-xs font-bold text-white">送料込み最安</span>
+        ) : null}
+        <p className="text-xs font-medium text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
+      </div>
+      <h3 className="mt-0.5 break-words text-base leading-6 font-bold text-ink">{offer.shopName}</h3>
+
+      <div className="mt-2 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          {showRank ? <RankLabel rank={rank} /> : null}
-          <p className="mt-1 text-xs font-medium text-sage">{mallLabel[offer.provider] ?? "ショップ"}</p>
-          <h3 className="text-base font-medium leading-6 text-ink">{offer.shopName}</h3>
+          <p className="text-xs font-medium text-muted">{headlineLabel}</p>
+          <p className="price-num text-3xl leading-none font-semibold text-ink">{headline}</p>
         </div>
-        <div className="shrink-0 text-right">
-          {showTotal ? <p className="text-xs text-muted">送料込み</p> : null}
-          <p className="price-num text-3xl leading-none text-ink">{showTotal ? formatYen(total) : offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
-          {showTotal && offer.price != null ? <p className="mt-1 text-xs text-muted">本体 {formatYen(offer.price)}</p> : null}
-          <UnitHints offer={offer} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} align="right" />
+        <div className="w-[8.25rem] shrink-0">
+          <VisitLink offer={offer} buyLabel />
         </div>
       </div>
-      <p className="mt-2 text-sm text-ink">
-        {shippingNote(offer)}
+
+      <p className="mt-2 text-sm leading-5 text-ink">
+        {totalReady ? shippingCell(offer) : shippingLine(offer)}
         <span className="px-1.5 text-line">/</span>
         {stockLabel(offer.stockStatus, offer.isSample)}
+        {emphasizeTotal && offer.price != null ? (
+          <>
+            <span className="px-1.5 text-line">/</span>
+            本体 {formatYen(offer.price)}
+          </>
+        ) : null}
+        {!emphasizeTotal && totalReady ? (
+          <>
+            <span className="px-1.5 text-line">/</span>
+            送料込み {formatYen(total)}
+          </>
+        ) : null}
       </p>
-      <div className="mt-3">
-        <VisitLink offer={offer} />
+      <div className="mt-1">
+        <UnitHints offer={offer} quantity={quantity} quantityUnit={quantityUnit} unitPriceType={unitPriceType} />
       </div>
     </li>
   );
@@ -208,11 +230,12 @@ function RankLabel({ rank }: { rank: number | null }) {
   return <span className={rank === 1 ? "text-base font-medium text-forest" : "text-base font-medium text-ink"}>{rank}位</span>;
 }
 
-function VisitLink({ offer }: { offer: Offer }) {
+function VisitLink({ offer, buyLabel = false }: { offer: Offer; buyLabel?: boolean }) {
   const link = shopProductLink(offer);
-  const label = mallVisitLabel(offer.provider);
-  const className =
-    "inline-flex min-h-11 w-full items-center justify-center rounded-full bg-forest px-3 text-sm font-medium text-white hover:bg-forest-deep";
+  const label = buyLabel ? "ショップで購入" : mallVisitLabel(offer.provider);
+  const className = buyLabel
+    ? "inline-flex min-h-11 w-full items-center justify-center rounded-full bg-forest px-2 text-[13px] font-bold whitespace-nowrap text-white hover:bg-forest-deep"
+    : "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-forest px-3 text-sm font-medium text-white hover:bg-forest-deep";
   if (!link.href) {
     return (
       <button type="button" className={`${className} cursor-not-allowed opacity-70`} disabled>
@@ -222,6 +245,7 @@ function VisitLink({ offer }: { offer: Offer }) {
   }
   return (
     <div>
+      {link.affiliate ? <p className="mb-1 text-center text-xs font-medium text-clay">広告</p> : null}
       <a
         href={link.href}
         target="_blank"
@@ -233,7 +257,6 @@ function VisitLink({ offer }: { offer: Offer }) {
           ↗
         </span>
       </a>
-      {link.affiliate ? <p className="mt-1 text-center text-xs text-muted">広告</p> : null}
     </div>
   );
 }
