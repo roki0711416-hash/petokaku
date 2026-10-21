@@ -95,7 +95,6 @@ function ShopVisit({ offer, wide }: { offer: Offer; wide?: boolean }) {
 
   return (
     <div>
-      {isAdvertisement ? <p className="mb-1 text-xs font-medium text-clay">広告</p> : null}
       <a
         href={href}
         target="_blank"

@@ -26,6 +26,18 @@ const mallLabels: Record<ComparisonMall, string> = {
   rakuten: "楽天市場",
 };
 
+export function PrMark() {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-md border border-line bg-sand px-1.5 py-0.5 text-xs leading-none font-bold text-ink">
+      PR
+    </span>
+  );
+}
+
+export function AffiliateDisclosure() {
+  return <p className="text-sm leading-5 text-muted">※購入リンクにはアフィリエイト広告が含まれます。</p>;
+}
+
 type MallFilter = "all" | ComparisonMall;
 
 export function ShopPriceCompare({
@@ -58,6 +70,7 @@ export function ShopPriceCompare({
   const unavailable = sortComparedOffers(parts.unavailable, sort);
   const counts = listingShopCounts(ranked);
   const prices = cheapestPrices(parts.ranked);
+  const hasAffiliateLinks = offers.some((offer) => shopProductLink(offer).affiliate);
   const viewKey = `${mall}:${sort}`;
   const unitProps = { quantity, quantityUnit, unitPriceType };
 
@@ -72,16 +85,18 @@ export function ShopPriceCompare({
         />
       </div>
       <p className="text-xs leading-5 text-muted">価格・送料・在庫は変更される場合があります。購入前にショップでご確認ください。</p>
-      <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 id="compare-heading" className="text-lg font-medium tracking-tight text-ink">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <h2 id="compare-heading" className="flex min-w-0 items-center gap-2 text-lg font-medium tracking-tight text-ink">
           ショップ別価格比較
+          {hasAffiliateLinks ? <PrMark /> : null}
         </h2>
-        <p className="text-sm text-ink">
+        <p className="shrink-0 text-sm text-ink">
           <span className="price-num text-lg">{counts.listingCount}</span>
           件 / <span className="price-num text-lg">{counts.shopCount}</span>
           店舗
         </p>
       </div>
+      {hasAffiliateLinks ? <AffiliateDisclosure /> : null}
       {present.length > 1 ? (
         <div className="flex min-w-0 flex-wrap gap-2" role="group" aria-label="モールで絞り込み">
           <FilterChip selected={mall === "all"} onClick={() => setMall("all")}>
@@ -257,7 +272,6 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
                       ↗
                     </span>
                   </a>
-                  {link.affiliate ? <p className="mt-1 text-center text-xs text-muted">広告</p> : null}
                 </div>
               ) : (
                 <span className="text-sm text-muted">リンクなし</span>

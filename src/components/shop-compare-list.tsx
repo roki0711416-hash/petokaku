@@ -245,7 +245,6 @@ function VisitLink({ offer, buyLabel = false }: { offer: Offer; buyLabel?: boole
   }
   return (
     <div>
-      {link.affiliate ? <p className="mb-1 text-center text-xs font-medium text-clay">広告</p> : null}
       <a
         href={link.href}
         target="_blank"

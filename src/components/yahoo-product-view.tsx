@@ -293,7 +293,7 @@ function CompareNotes({
         ) : null}
         {rakutenShopScope === "limited" ? <p>楽天市場には、ここに出ていない店舗があります。</p> : null}
         {retrievalLimited ? <p>Yahoo!ショッピングにも、ここに出ていない店舗があります。</p> : null}
-        {hasAffiliate ? <p>「広告」とあるリンクは、ショップの紹介に報酬が発生します。表示している価格は、その報酬では決めていません。</p> : null}
+        {hasAffiliate ? <p>購入リンクにはアフィリエイト広告が含まれることがあります。表示している価格は、その報酬では決めていません。</p> : null}
         <p>表示は取得時点の掲載です。価格・送料・在庫は変わることがあります。すべての販売店を含むとは限りません。</p>
       </div>
     </details>
