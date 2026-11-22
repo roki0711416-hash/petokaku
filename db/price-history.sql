@@ -1,5 +1,7 @@
--- 価格履歴のスキーマ。まだ実行しない。
--- Supabase への接続、このファイルの適用、本番DBの作成は別の段で行う。
+-- 価格履歴のスキーマ。アプリからは実行しない。Supabase SQL Editor で人間が一度だけ実行する。
+-- テーブルが既にある本番へ、このファイルを再実行しない。CREATE TABLE で失敗する。
+-- 権限は db/price-history-service-role-grants.sql、閲覧対象は db/jan-views.sql、
+-- 日次更新のロックは db/price-refresh-lock.sql。確認は db/price-history-check.sql。
 --
 -- 関係: products → variants → offers → price_observations
 -- 価格行は offer に紐づく。シリーズや容量を消しても履歴が連動して消えないよう、

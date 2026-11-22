@@ -1,26 +1,22 @@
-import { PriceHistoryChart } from "@/components/price-history-chart";
-import { PriceInfoCard } from "@/components/price-info-card";
-import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
-import type { PriceInfoOffer } from "@/lib/pricing/price-info-view";
+import { presentShippingHistory, type RankedShippingPoint } from "@/lib/pricing/shipping-history";
+import type { Offer } from "@/lib/types";
+import { ShippingPriceHistoryView } from "@/components/price-history-chart";
 
 export function PriceHistory({
-  summary,
   offers,
-  series = [],
-  now,
-  chart = false,
+  history = [],
+  fetchedAt = null,
+  recordedDays = null,
 }: {
-  summary: PriceHistorySummary | null;
-  offers: PriceInfoOffer[];
-  series?: DailyPricePoint[];
-  now?: string;
-  chart?: boolean;
+  offers: Offer[];
+  history?: RankedShippingPoint[];
+  fetchedAt?: string | null;
+  recordedDays?: number | null;
 }) {
-  if (chart) {
-    if (series.length === 0 || !now) {
-      return null;
-    }
-    return <PriceHistoryChart points={series} now={now} />;
-  }
-  return <PriceInfoCard summary={summary} offers={offers} placement="history" />;
+  const view = presentShippingHistory({
+    offers,
+    history,
+    fetchedAt,
+  });
+  return <ShippingPriceHistoryView view={view} recordedDays={recordedDays} />;
 }

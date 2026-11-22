@@ -1,22 +1,6 @@
-"use client";
-
-import { useState } from "react";
 import { formatYen } from "@/lib/format";
-import {
-  chartHasOlderThan30Days,
-  chartToday,
-  chartWindowValues,
-  consecutiveChartSegments,
-  type ChartSourcePoint,
-  type ChartValue,
-} from "@/lib/pricing/price-chart";
-
-function addCalendarDays(isoDate: string, days: number): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  const date = new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1));
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
-}
+import { shippingChartLabel, shippingChartSegments, type ShippingHistoryPresentation } from "@/lib/pricing/shipping-history";
+import type { ChartValue } from "@/lib/pricing/price-chart";
 
 function dayIndex(start: string, date: string): number {
   const from = Date.parse(`${start}T00:00:00Z`);
@@ -24,90 +8,120 @@ function dayIndex(start: string, date: string): number {
   return Math.round((to - from) / 86_400_000);
 }
 
-function ChartSvg({ points, start, days }: { points: ChartValue[]; start: string; days: number }) {
+function shortDate(isoDate: string): string {
+  const [, month, day] = isoDate.split("-");
+  return `${Number(month)}/${Number(day)}`;
+}
+
+function ShippingChartSvg({ points }: { points: ChartValue[] }) {
   const width = 320;
-  const height = 120;
-  const pad = 8;
+  const height = 112;
+  const padX = 12;
+  const padY = 14;
   const values = points.map((point) => point.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = Math.max(max - min, 1);
-  const xFor = (date: string) => pad + (dayIndex(start, date) / Math.max(days - 1, 1)) * (width - pad * 2);
-  const yFor = (value: number) => pad + (1 - (value - min) / span) * (height - pad * 2);
-  const segments = consecutiveChartSegments(points);
+  const start = points[0]?.date ?? "";
+  const end = points.at(-1)?.date ?? start;
+  const daySpan = Math.max(dayIndex(start, end), 1);
+  const xFor = (date: string) => padX + (dayIndex(start, date) / daySpan) * (width - padX * 2);
+  const yFor = (value: number) => padY + (1 - (value - min) / span) * (height - padY * 2);
+  const segments = shippingChartSegments(points);
+  const label = shippingChartLabel(points);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="記録のある日の価格" className="mt-3 h-32 w-full">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="h-28 w-full">
+      <title>{label}</title>
       {segments.map((segment) =>
         segment.length > 1 ? (
           <polyline
             key={segment[0]?.date}
             fill="none"
-            stroke="#24584a"
+            stroke="currentColor"
             strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
             points={segment.map((point) => `${xFor(point.date)},${yFor(point.value)}`).join(" ")}
           />
         ) : null,
       )}
       {points.map((point) => (
-        <circle key={point.date} cx={xFor(point.date)} cy={yFor(point.value)} r="3" fill="#17382f">
-          <title>{`${point.date} ${formatYen(point.value)}`}</title>
+        <circle key={point.date} cx={xFor(point.date)} cy={yFor(point.value)} r="3.5" fill="currentColor">
+          <title>{`${shortDate(point.date)} ${formatYen(point.value)}`}</title>
         </circle>
       ))}
     </svg>
   );
 }
 
-export function PriceHistoryChart({ points, now }: { points: ChartSourcePoint[]; now: string }) {
-  const today = chartToday(now);
-  const selling30 = chartWindowValues({ points, today, days: 30, mode: "selling" });
-  const selling90 = chartWindowValues({ points, today, days: 90, mode: "selling" });
-  const [days, setDays] = useState<30 | 90>(selling30.length >= 2 ? 30 : 90);
-  const [mode, setMode] = useState<"selling" | "shipping">("selling");
-  const selling = days === 30 ? selling30 : selling90;
-  const shipping = chartWindowValues({ points, today, days, mode: "shipping" });
-  const shown = mode === "shipping" && shipping.length >= 2 ? shipping : selling;
-  if (selling90.length < 2 || shown.length < 2) {
+export function ShippingPriceHistoryView({
+  view,
+  recordedDays,
+}: {
+  view: ShippingHistoryPresentation;
+  recordedDays?: number | null;
+}) {
+  if (!view.headline && !view.showChart) {
     return null;
   }
-  const start = addCalendarDays(today, -(days - 1));
-  const older = chartHasOlderThan30Days(points, today);
+  const points = view.points;
+  const first = points[0];
+  const last = points.at(-1);
+  const chartLabel = view.showChart ? shippingChartLabel(points) : null;
 
   return (
-    <section aria-labelledby="price-chart-heading" className="mt-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h3 id="price-chart-heading" className="text-base font-bold">
-          最近の価格
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {shipping.length >= 2 ? (
-            <button
-              type="button"
-              aria-pressed={mode === "shipping"}
-              onClick={() => setMode(mode === "shipping" ? "selling" : "shipping")}
-              className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-3 text-sm font-bold"
-            >
-              {mode === "shipping" ? "商品価格を見る" : "送料込みを見る"}
-            </button>
+    <section aria-labelledby="shipping-history-heading" className="mt-4 min-w-0">
+      <h2 id="shipping-history-heading" className="text-sm font-bold text-forest-deep">
+        送料込み最安の記録
+      </h2>
+      {view.headline ? (
+        <p className="mt-1 text-sm leading-6 text-ink">
+          {view.total != null ? (
+            <>
+              <span className="font-bold">最安（送料込み）</span>
+              <span className="price-num mx-1 align-middle text-xl font-semibold text-ink">{formatYen(view.total)}</span>
+            </>
+          ) : (
+            <span className="text-muted">送料込みの最安は、送料が分かる在庫のある掲載がありません。</span>
+          )}
+          {view.asOfLabel ? <span className="text-muted">{view.total != null ? "　" : " "}{view.asOfLabel}</span> : null}
+        </p>
+      ) : null}
+      {view.showChart && chartLabel ? (
+        <div className="mt-2 max-w-md text-forest-deep">
+          <ShippingChartSvg points={points} />
+          {first && last ? (
+            <p className="mt-1 flex justify-between gap-3 text-xs text-muted">
+              <span>{shortDate(first.date)}</span>
+              <span>{shortDate(last.date)}</span>
+            </p>
           ) : null}
-          {older ? (
-            <button
-              type="button"
-              aria-pressed={days === 90}
-              onClick={() => setDays(days === 30 ? 90 : 30)}
-              className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-3 text-sm font-bold"
-            >
-              {days === 30 ? "90日を見る" : "30日を見る"}
-            </button>
-          ) : null}
+          <table className="sr-only">
+            <caption>{chartLabel}</caption>
+            <thead>
+              <tr>
+                <th scope="col">日付</th>
+                <th scope="col">送料込み最安</th>
+              </tr>
+            </thead>
+            <tbody>
+              {points.map((point) => (
+                <tr key={point.date}>
+                  <th scope="row">{point.date}</th>
+                  <td>{formatYen(point.value)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-      <p className="mt-1 text-xs text-muted">{mode === "shipping" && shipping.length >= 2 ? "送料込みの記録" : "商品価格の記録"}</p>
-      <ChartSvg points={shown} start={start} days={days} />
-      <p className="mt-1 flex justify-between text-xs text-muted">
-        <span>{shown[0]?.date}</span>
-        <span className="price-num">{formatYen(shown.at(-1)?.value ?? 0)}</span>
-      </p>
+      ) : (
+        <p className="sr-only">
+          {recordedDays != null && recordedDays < 2
+            ? `価格の記録は${recordedDays}日分です。グラフは2日分以上になってから表示します。`
+            : "グラフは2日分以上になってから表示します。"}
+        </p>
+      )}
     </section>
   );
 }

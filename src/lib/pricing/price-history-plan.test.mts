@@ -274,6 +274,25 @@ test("13桁の別JANは保存でき、販売者不明やURLのJAN不一致は保
   );
   assert.equal(listingsForJanDetail("3182550849654", adapted(offers), observedAt).length, 0);
   assert.equal(listingsForJanDetail("not-a-jan", adapted(offers), observedAt).length, 0);
+  const withRakuten = listingsForJanDetail(
+    pilotListingKey.janCode,
+    adapted([
+      ...offers,
+      offer({
+        provider: "rakuten",
+        sellerId: "rakuten-shop",
+        itemCode: "rakuten-shop:10001",
+        shopName: "楽天ショップ",
+        price: 4480,
+        shippingFee: 0,
+        shippingStatus: "free",
+      }),
+      offer({ provider: "rakuten", sellerId: null, itemCode: "new", shopName: "楽天市場", price: 4000 }),
+    ]),
+    observedAt,
+  );
+  assert.equal(withRakuten.some((item) => item.offer.provider === "rakuten" && item.offer.itemCode === "rakuten-shop:10001"), true);
+  assert.equal(withRakuten.some((item) => item.offer.shopName === "楽天市場"), false);
 });
 
 test("別容量に紐づく掲載は保存しない", () => {

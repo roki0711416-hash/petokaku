@@ -61,6 +61,16 @@ export function formatCheckedAt(value: string | null): string {
   return `${parts.year}年${parts.month}月${parts.day}日 ${parts.hour}:${parts.minute}`;
 }
 
+export function formatAsOf(value: string | null): string | null {
+  const parts = value ? tokyoParts(value) : null;
+  if (!parts) {
+    return null;
+  }
+  const hour = String(Number(parts.hour));
+  const minute = parts.minute.padStart(2, "0");
+  return `${parts.year}年${parts.month}月${parts.day}日 ${hour}:${minute}時点`;
+}
+
 export function formatPriceChecked(value: string | null): string {
   if (!value) {
     return "価格確認：未確認";
