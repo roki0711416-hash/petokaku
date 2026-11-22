@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { hubPageCrumbs } from "@/lib/indexable-hubs";
 import { PetListingBrowser } from "@/components/pet-listing-browser";
 import { formatCheckedAt } from "@/lib/format";
 import { listingPageHref, type PetListings } from "@/lib/pets-listings";
@@ -11,13 +12,7 @@ export function PetKindPage({ pet, listings, categoryId }: { pet: PetPage; listi
   return (
     <article className="px-4 pt-3 pb-8 md:pt-5 md:pb-10">
       <div className="mx-auto min-w-0 max-w-6xl">
-        <Breadcrumbs
-          items={[
-            { label: "ホーム", href: "/" },
-            { label: "ペットの種類", href: "/#categories" },
-            { label: pet.label, href: pet.path, current: true },
-          ]}
-        />
+        <Breadcrumbs items={hubPageCrumbs({ label: pet.label, href: pet.path })} />
         <h1 className="mt-3 text-xl leading-tight font-medium tracking-tight text-ink md:text-3xl">{pet.h1}</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">{pet.lead}</p>
 

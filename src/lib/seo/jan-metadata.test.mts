@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { curatedJanSeo, janProductMetadata } from "./jan-metadata.ts";
+import { curatedJanSeo, janComparisonName, janProductMetadata } from "./jan-metadata.ts";
 import { defaultShareImage } from "./share-metadata.ts";
 
 test("商品詳細のtitleとdescriptionとcanonicalはJANごとに決まる", () => {
@@ -93,6 +93,7 @@ test("重点5商品はモール見出しではなく短い比較向けtitle・de
     assert.equal(metadata.description, curated.description);
     assert.equal(metadata.alternates?.canonical, `/products/jan/${item.jan}`);
     assert.equal(metadata.openGraph?.title, item.title);
+    assert.equal(janComparisonName({ jan: item.jan, name: item.name, brand: item.brand }), item.title.replace(/の価格比較$/, ""));
     assert.equal(metadata.openGraph?.description, curated.description);
     const description = String(metadata.description);
     for (const word of item.descriptionIncludes) {

@@ -146,6 +146,8 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
         name: fallback.product.name,
         brand: fallback.product.brand,
         imageUrl: safeHttpUrl(fallback.product.imageUrl),
+        sizeLabel: fallback.product.sizeLabel,
+        quantityConfidence: fallback.product.quantityConfidence,
       });
     }
     return { title: outcome === "missing" ? "商品が見つかりません" : "商品を表示できません", robots: janPageRobots(false) };
@@ -156,6 +158,8 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
     name: detail.name,
     brand: detail.brand,
     imageUrl: safeHttpUrl(detail.imageUrl),
+    sizeLabel: detail.sizeLabel,
+    quantityConfidence: detail.quantityConfidence,
   });
 }
 

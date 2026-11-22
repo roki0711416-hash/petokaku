@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { hubPageCrumbs } from "@/lib/indexable-hubs";
 import { ComparableProductCards } from "@/components/comparable-product-cards";
 import { CatalogIcon } from "@/components/ui/catalog-card";
 import { guideListingQuery, itemGuides, type ItemGuide } from "@/lib/item-guides";
@@ -11,13 +12,7 @@ export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
   return (
     <article className="px-4 py-8 md:py-12">
       <div className="mx-auto min-w-0 max-w-6xl">
-        <Breadcrumbs
-          items={[
-            { label: "ホーム", href: "/" },
-            { label: "商品を検索", href: "/#home-search" },
-            { label: guide.crumb, href: guide.path, current: true },
-          ]}
-        />
+        <Breadcrumbs items={hubPageCrumbs({ label: guide.crumb, href: guide.path })} />
         <div className="mt-6 flex min-w-0 items-start gap-3">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-moss text-forest">
             <CatalogIcon glyph={guide.glyph} />
