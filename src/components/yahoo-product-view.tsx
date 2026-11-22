@@ -140,12 +140,14 @@ export function YahooProductView({
             quantityUnit={product.quantityUnit}
             unitPriceType={product.unitPriceType}
           />
+          {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
           <CompareNotes retrievalLimited={retrievalLimited} rakutenShopScope={rakutenShopScope} hasAffiliate={hasAffiliate} />
         </section>
       ) : (
-        <p id="compare" className="mt-5 scroll-mt-[var(--product-section-offset,7rem)] text-sm text-muted lg:scroll-mt-24">
-          比較できる掲載はありません。
-        </p>
+        <div id="compare" className="scroll-mt-[var(--product-section-offset,7rem)] lg:scroll-mt-24">
+          <p className="mt-5 text-sm text-muted">比較できる掲載はありません。</p>
+          {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
+        </div>
       )}
 
       <section id="product-info" aria-labelledby="product-info-heading" className="mt-5 scroll-mt-[var(--product-section-offset,7rem)] md:mt-8 lg:scroll-mt-24">
@@ -180,8 +182,6 @@ export function YahooProductView({
           </ul>
         </section>
       ) : null}
-
-      {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
 
       {priceSummary !== undefined ? (
         <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} />

@@ -37,11 +37,16 @@ test("商品ページ以外や未確認の登録は出さない", () => {
   assert.equal(amazonAssociateLink("4900000000000", [entry()]), null);
 });
 
-test("初期データに未確認のAmazon URLは無い", () => {
+test("確認済みのAmazonリンクは一意で、追跡ID付きの商品URLだけ", () => {
   const source = readFileSync(new URL("../../data/amazon-links.ts", import.meta.url), "utf8");
   assert.equal(source.includes("link.amazon/B0irHe5OO"), false);
-  assert.equal(amazonAssociateLinks.length, 0);
+  const seen = new Set<string>();
+  assert.ok(amazonAssociateLinks.length > 0);
   for (const item of amazonAssociateLinks) {
-    assert.ok(amazonAssociateLink(item.jan, [item]));
+    assert.equal(seen.has(item.jan), false);
+    seen.add(item.jan);
+    assert.match(item.url, /^https:\/\/www\.amazon\.co\.jp\/dp\/[A-Z0-9]{10}\?tag=petokaku-22$/);
+    assert.equal(item.confirmedOn, "2026-11-22");
+    assert.equal(amazonAssociateLink(item.jan, amazonAssociateLinks)?.url, item.url);
   }
 });
