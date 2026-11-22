@@ -35,6 +35,7 @@ const steps = [
   { title: "ショップで確認", body: "購入は各ショップのページで行います。" },
 ];
 
+// 検索結果は noindex で robots からも除外しているため、WebSite に検索アクションは付けない。
 function homeStructuredData() {
   const siteUrl = getSiteUrl();
   return {
@@ -56,14 +57,6 @@ function homeStructuredData() {
         url: siteUrl,
         description,
         publisher: { "@type": "Organization", name: "ペトカク", url: siteUrl },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${siteUrl}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
       },
     ],
   };

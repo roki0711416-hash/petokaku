@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { StaticImageData } from "next/image";
 import catFood from "@/assets/topics/cat-food.jpg";
 import catLitter from "@/assets/topics/cat-litter.jpg";
 import dogFood from "@/assets/topics/dog-food.jpg";
@@ -7,18 +8,16 @@ import toys from "@/assets/topics/toys.jpg";
 import treats from "@/assets/topics/treats.jpg";
 import { TopicArt } from "@/components/ui/topic-art";
 import type { CatalogGlyph } from "@/components/ui/catalog-card";
-import type { StaticImageData } from "next/image";
+import { homeCategoryCards, homeKeywordLinks } from "@/lib/indexable-hubs";
 
-const topicCards: { label: string; query: string; image: StaticImageData; glyph: CatalogGlyph }[] = [
-  { label: "ドッグフード", query: "ドッグフード", image: dogFood, glyph: "food" },
-  { label: "キャットフード", query: "キャットフード", image: catFood, glyph: "food" },
-  { label: "猫砂・トイレ用品", query: "猫砂", image: catLitter, glyph: "toilet" },
-  { label: "ペットシーツ", query: "ペットシーツ", image: petSheets, glyph: "sheet" },
-  { label: "おやつ", query: "おやつ", image: treats, glyph: "treat" },
-  { label: "おもちゃ・グッズ", query: "おもちゃ", image: toys, glyph: "toy" },
-];
-
-const searchKeywords = ["ドッグフード", "キャットフード", "猫砂", "ペットシーツ", "ロイヤルカナン", "おやつ", "おもちゃ", "チモシー", "ネクトン"];
+const topicArt = {
+  ドッグフード: { image: dogFood, glyph: "food" },
+  キャットフード: { image: catFood, glyph: "food" },
+  "猫砂・トイレ用品": { image: catLitter, glyph: "toilet" },
+  ペットシーツ: { image: petSheets, glyph: "sheet" },
+  おやつ: { image: treats, glyph: "treat" },
+  "おもちゃ・グッズ": { image: toys, glyph: "toy" },
+} as const satisfies Record<(typeof homeCategoryCards)[number]["label"], { image: StaticImageData; glyph: CatalogGlyph }>;
 
 export function HomeSearchKeywords() {
   return (
@@ -27,13 +26,13 @@ export function HomeSearchKeywords() {
         人気の検索キーワード
       </h2>
       <ul aria-labelledby="keyword-heading" className="mt-2 flex flex-wrap gap-2">
-        {searchKeywords.map((keyword) => (
-          <li key={keyword}>
+        {homeKeywordLinks.map((keyword) => (
+          <li key={keyword.label}>
             <Link
-              href={`/search?q=${encodeURIComponent(keyword)}`}
+              href={keyword.href}
               className="inline-flex min-h-11 items-center rounded-full border border-line bg-paper px-3 text-sm text-ink hover:border-sage"
             >
-              {keyword}
+              {keyword.label}
             </Link>
           </li>
         ))}
@@ -50,13 +49,13 @@ export function HomeTopics() {
           人気のカテゴリ
         </h2>
         <ul className="mt-3 grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-3">
-          {topicCards.map((topic) => (
+          {homeCategoryCards.map((topic) => (
             <li key={topic.label} className="min-w-0">
               <Link
-                href={`/search?q=${encodeURIComponent(topic.query)}`}
+                href={topic.href}
                 className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-card shadow-[0_8px_20px_rgba(32,77,56,0.06)] hover:ring-2 hover:ring-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
               >
-                <TopicArt image={topic.image} glyph={topic.glyph} />
+                <TopicArt image={topicArt[topic.label].image} glyph={topicArt[topic.label].glyph} />
                 <span className="flex min-h-11 items-center px-3 py-2 text-sm leading-5 font-medium text-ink">{topic.label}</span>
               </Link>
             </li>
