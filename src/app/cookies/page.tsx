@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { CookieSettings } from "@/components/cookie-consent";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "Cookie設定",
   description: "ペトカクのCookie、アクセス解析の設定、導入を予定している広告Cookieの説明です。",
-  alternates: { canonical: "/cookies" },
-};
+  path: "/cookies",
+});
 
 export default function CookiesPage() {
   return (

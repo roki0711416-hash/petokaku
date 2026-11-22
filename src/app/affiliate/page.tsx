@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "広告・アフィリエイト",
   description: "楽天市場とYahoo!ショッピングの購入リンクは、確認できたアフィリエイトURLがあるときだけ広告です。Amazonは、確認して登録したリンクだけを表示します。",
-  alternates: { canonical: "/affiliate" },
-};
+  path: "/affiliate",
+});
 
 export default function AffiliatePage() {
   return (

@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "お問い合わせ",
   description: "ペトカク運営事務局への連絡先です。",
-  alternates: { canonical: "/contact" },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

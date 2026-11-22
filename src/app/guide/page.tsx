@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { indexedJanPath, indexedJanProducts, selectIndexedJans } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "サイトの使い方",
   description: "商品名、ブランド名、JANコードから販売店を探し、価格と送料を見比べて、外部ショップで購入する手順です。",
-  alternates: { canonical: "/guide" },
-};
+  path: "/guide",
+});
 
 const exampleProducts = selectIndexedJans(indexedJanProducts);
 

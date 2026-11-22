@@ -8,6 +8,7 @@ import { NoticeBar } from "@/components/notice-bar";
 import { SampleBanner } from "@/components/sample-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { defaultShareImage } from "@/lib/seo/share-metadata";
 import { getSiteUrl, robotsMetadata } from "@/lib/site";
 import { getPriceMode } from "@/lib/sources/status";
 import "./globals.css";
@@ -42,8 +43,10 @@ export const metadata: Metadata = {
     siteName: "ペトカク",
     locale: "ja_JP",
     type: "website",
-    title: "ペトカク｜ペット用品の価格比較サイト",
-    description: siteDescription,
+    images: [defaultShareImage],
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

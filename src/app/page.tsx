@@ -7,6 +7,7 @@ import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
 import { publishedArticles } from "@/lib/articles/catalog";
 import { articles } from "@/data/articles";
 import { loadHomeCatalog } from "@/lib/home-catalog";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { getSiteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -17,16 +18,8 @@ const description =
 const siteName = "ペトカク｜ペット用品の価格比較サイト";
 
 export const metadata: Metadata = {
-  title: { absolute: title },
-  description,
+  ...shareMetadata({ title, description, path: "/", absoluteTitle: true }),
   applicationName: "ペトカク",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: siteName,
-    description,
-    url: "/",
-    siteName: "ペトカク",
-  },
 };
 
 const steps = [

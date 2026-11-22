@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { curatedJanSeo, janProductMetadata } from "./jan-metadata.ts";
+import { defaultShareImage } from "./share-metadata.ts";
 
 test("商品詳細のtitleとdescriptionとcanonicalはJANごとに決まる", () => {
   const metadata = janProductMetadata({
@@ -15,7 +16,22 @@ test("商品詳細のtitleとdescriptionとcanonicalはJANごとに決まる", (
   assert.match(String(metadata.description), /ロイヤルカナン/);
   assert.equal(metadata.alternates?.canonical, "/products/jan/3182550706940");
   assert.equal(metadata.openGraph?.url, "/products/jan/3182550706940");
-  assert.equal(metadata.openGraph?.images, undefined);
+  assert.equal(metadata.openGraph?.type, "website");
+  assert.deepEqual(metadata.openGraph?.images, [defaultShareImage]);
+  assert.equal(metadata.twitter?.card, "summary_large_image");
+});
+
+test("httpsの商品画像だけをog:imageにする", () => {
+  const metadata = janProductMetadata({
+    jan: "4903351011250",
+    name: "LION ニオイをとる砂",
+    brand: "LION",
+    imageUrl: "https://item-shopping.c.yimg.jp/i/l/example",
+  });
+  assert.deepEqual(metadata.openGraph?.images, [
+    { url: "https://item-shopping.c.yimg.jp/i/l/example", alt: "LION ニオイをとる砂 5L×4個の価格比較" },
+  ]);
+  assert.deepEqual(metadata.twitter?.images, metadata.openGraph?.images);
 });
 
 test("重点5商品はモール見出しではなく短い比較向けtitle・descriptionを使う", () => {

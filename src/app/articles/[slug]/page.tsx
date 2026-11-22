@@ -17,6 +17,7 @@ import {
   type Article,
   type ArticleBlock,
 } from "@/lib/articles/catalog";
+import { defaultShareImage } from "@/lib/seo/share-metadata";
 import { getSiteUrl, privateRobots, robotsMetadata } from "@/lib/site";
 
 type ArticlePageProps = {
@@ -36,6 +37,9 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     return { title: "記事が見つかりません", robots: privateRobots() };
   }
   const canonical = articlePath(article.slug);
+  const image = article.image
+    ? { url: article.image.src, alt: article.image.alt }
+    : defaultShareImage;
   return {
     title: article.title,
     description: article.description,
@@ -45,10 +49,18 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       title: article.title,
       description: article.description,
       url: canonical,
+      siteName: "ペトカク",
+      locale: "ja_JP",
       type: "article",
       publishedTime: article.publishedOn,
       modifiedTime: article.updatedOn,
-      ...(article.image ? { images: [{ url: article.image.src, alt: article.image.alt }] } : {}),
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.description,
+      images: [image],
     },
   };
 }

@@ -4,15 +4,17 @@ import { SearchForm } from "@/components/search-form";
 import { YahooSearchResults } from "@/components/yahoo-search-results";
 import Link from "next/link";
 import { relatedCategoryLinks } from "@/lib/categories";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { privateRobots } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = shareMetadata({
   title: "商品を探す",
   description: "商品名から、販売店の掲載を検索します。",
+  path: "/search",
   robots: privateRobots(),
-};
+});
 
 function normalizeQuery(value: string | undefined): string {
   return (value ?? "").replace(/\s+/g, " ").trim().slice(0, 80);

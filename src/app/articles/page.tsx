@@ -3,22 +3,15 @@ import { ArticleCard } from "@/components/article-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { articles } from "@/data/articles";
 import { publishedArticles } from "@/lib/articles/catalog";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { robotsMetadata } from "@/lib/site";
 
 const title = "ペット用品の選び方";
 const description = "お役立ち記事・購入ガイド。フードや猫砂、シーツの選び方と、価格比較の見方をまとめています。";
 
 export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: "/articles" },
+  ...shareMetadata({ title, description, path: "/articles" }),
   robots: robotsMetadata(),
-  openGraph: {
-    title: `${title} | ペトカク`,
-    description,
-    url: "/articles",
-    type: "website",
-  },
 };
 
 export default function ArticlesPage() {
