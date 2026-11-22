@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { nonAliasVercelNoindexHeader, productionAliasRedirect } from "./src/lib/host-routing.ts";
 
 const nextConfig: NextConfig = {
   images: {
@@ -9,6 +10,9 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   agentRules: false,
+  async redirects() {
+    return [productionAliasRedirect];
+  },
   async headers() {
     return [
       {
@@ -20,6 +24,7 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      nonAliasVercelNoindexHeader,
     ];
   },
   // スマホは 192.168.x.x で開く。開発中のJavaScriptをそのアドレスからも読めるようにする。
