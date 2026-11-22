@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { readableListingTitle as compactVisibleTitle } from "../pricing/display-title.ts";
+import { brandMentioned, comparisonProductName, type ComparisonNameInput } from "./comparison-name.ts";
 import { janPageRobots } from "../site.ts";
-import { readableListingTitle as cleanListingTitle } from "../sources/yahoo/listing-title.ts";
 
 export type JanSeoCopy = {
   title: string;
@@ -43,16 +42,29 @@ export function curatedJanSeo(jan: string): JanSeoCopy | null {
   return curatedJanSeoCopy[jan] ?? null;
 }
 
-function autoJanSeo(input: { jan: string; name: string; brand: string }): JanSeoCopy {
-  const visible = compactVisibleTitle(cleanListingTitle(input.name));
+export function comparisonNameFromTitle(title: string): string {
+  return title.endsWith("の価格比較") ? title.slice(0, -"の価格比較".length) : title;
+}
+
+// キュレートした比較名があればそれを、なければモール見出しの正規化結果を返す。
+export function janComparisonName(input: ComparisonNameInput & { jan: string }): string {
+  const curated = curatedJanSeo(input.jan);
+  if (curated) {
+    return comparisonNameFromTitle(curated.title);
+  }
+  return comparisonProductName(input);
+}
+
+function autoJanSeo(input: ComparisonNameInput & { jan: string }): JanSeoCopy {
+  const visible = janComparisonName(input);
   const title = `${visible || "商品"}の価格比較`;
-  const brand = input.brand.trim();
-  const brandPrefix = brand !== "" && !title.includes(brand) ? `${brand}の` : "";
+  const brand = input.brand?.trim() ?? "";
+  const brandPrefix = brand !== "" && !brandMentioned(title, brand) ? `${brand}の` : "";
   const description = `${brandPrefix}${title}（JAN ${input.jan}）の販売価格と送料を、ショップごとに見比べられます。購入前にショップで確認してください。`;
   return { title, description };
 }
 
-export function janProductMetadata(input: { jan: string; name: string; brand: string; imageUrl?: string | null }): Metadata {
+export function janProductMetadata(input: ComparisonNameInput & { jan: string; imageUrl?: string | null }): Metadata {
   const copy = curatedJanSeo(input.jan) ?? autoJanSeo(input);
   const canonical = `/products/jan/${input.jan}`;
   const image = input.imageUrl?.startsWith("https://") ? input.imageUrl : null;

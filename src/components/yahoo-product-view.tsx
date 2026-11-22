@@ -7,15 +7,14 @@ import { PriceHistory } from "@/components/ui/price-history";
 import type { RelatedArticleLink } from "@/lib/articles/related-for-jan";
 import { productPageCrumbs } from "@/lib/indexable-hubs";
 import { formatUnitAmount, formatYen } from "@/lib/format";
-import { readableListingTitle as compactVisibleTitle } from "@/lib/pricing/display-title";
 import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
 import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
 import { shopProductLink } from "@/lib/pricing/shop-link";
-import { comparisonMallOf, offersComparableAsNew } from "@/lib/pricing/malls";
-import { cheapestPrices, listingShopCounts, partitionShopComparison, isRakutenReferencePrice } from "@/lib/pricing/shop-compare";
-import { productStructuredData } from "@/lib/seo/product-jsonld";
+import { comparisonMallOf } from "@/lib/pricing/malls";
+import { cheapestPrices, listingShopCounts, partitionShopComparison } from "@/lib/pricing/shop-compare";
+import { janComparisonName } from "@/lib/seo/jan-metadata";
+import { pageComparisonJsonOffers, productStructuredData } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
-import { readableListingTitle as cleanListingTitle } from "@/lib/sources/yahoo/listing-title";
 import type { SingleSizeQuote } from "@/lib/sources/yahoo/size-family";
 import type { ProductDetail } from "@/lib/types";
 import { safeHttpUrl } from "@/lib/urls";
@@ -53,7 +52,13 @@ export function YahooProductView({
   amazonUrl?: string | null;
 }) {
   const imageUrl = safeHttpUrl(product.imageUrl);
-  const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
+  const visibleName = janComparisonName({
+    jan: product.janCode ?? "",
+    name: product.name,
+    brand: product.brand,
+    sizeLabel: product.sizeLabel,
+    quantityConfidence: product.quantityConfidence,
+  });
   const brand = product.brand.trim();
   const hasAffiliate = Boolean(amazonUrl) || product.offers.some((offer) => shopProductLink(offer).affiliate);
   const crumbs = productPageCrumbs({
@@ -78,19 +83,7 @@ export function YahooProductView({
     imageUrl,
     pageUrl: new URL(pageHref, getSiteUrl()).toString(),
     sizeLabel: capacity,
-    offers: offersComparableAsNew(product.offers).flatMap((offer) => {
-      if (offer.isSample || isRakutenReferencePrice(offer)) {
-        return [];
-      }
-      return [
-        {
-          shopName: offer.shopName,
-          price: offer.price,
-          url: safeHttpUrl(offer.productUrl),
-          stockStatus: offer.stockStatus,
-        },
-      ];
-    }),
+    offers: pageComparisonJsonOffers(product.offers),
   });
 
   return (
@@ -98,15 +91,37 @@ export function YahooProductView({
       <Breadcrumbs items={crumbs} />
       {structured ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }} /> : null}
 
-      {/* スマホ：商品概要（画像を大きく、価格を目立たせる） */}
-      <div className="mt-2 md:hidden">
-        <ProductImage imageUrl={imageUrl} alt={visibleName} size="hero" />
-        <p className={imageUrl ? "mt-3 text-sm font-medium text-sage" : "mt-2 text-sm font-medium text-sage"}>
-          {brand ? brand : "メーカー情報なし"}
-        </p>
-        <h1 className="mt-0.5 break-words text-lg leading-snug font-bold tracking-tight text-ink">{visibleName}</h1>
-        {capacity ? <p className="mt-0.5 text-sm text-muted">{capacity}</p> : null}
-        {hasAffiliate ? <p className="mt-1 text-sm leading-5 text-muted">広告・アフィリエイトリンクを含みます</p> : null}
+      <header className="mt-2 min-w-0 md:mt-3 md:flex md:items-start md:gap-3">
+        <div className="md:w-24 md:shrink-0">
+          <ProductImage imageUrl={imageUrl} alt={visibleName} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className={imageUrl ? "mt-3 text-sm font-medium text-sage md:mt-0 md:text-xs" : "mt-2 text-sm font-medium text-sage md:mt-0 md:text-xs"}>
+            {brand ? (
+              <>
+                <span className="hidden md:inline">メーカー </span>
+                {brand}
+              </>
+            ) : (
+              "メーカー情報なし"
+            )}
+          </p>
+          <h1 className="mt-0.5 break-words text-lg leading-snug font-bold tracking-tight text-ink md:text-xl md:font-medium">{visibleName}</h1>
+          {capacity ? <p className="mt-0.5 text-sm text-muted md:hidden">{capacity}</p> : null}
+          {hasAffiliate ? <p className="mt-1 text-sm leading-5 text-muted">広告・アフィリエイトリンクを含みます</p> : null}
+          <p className="mt-1 hidden text-sm leading-5 text-muted md:block">
+            容量 {capacity ?? "情報なし"}
+            <span className="px-1.5 text-line">/</span>
+            JAN {product.janCode ?? "情報なし"}
+          </p>
+          {sizeChoices.length > 1 ? (
+            <div className="mt-2 hidden md:block">
+              <SizeChoices choices={sizeChoices} />
+            </div>
+          ) : null}
+        </div>
+      </header>
+      <div className="md:hidden">
         <OverviewPrice overview={overview} />
         {sizeChoices.length > 1 ? (
           <div className="mt-3">
@@ -116,28 +131,6 @@ export function YahooProductView({
         ) : null}
       </div>
       <ProductSectionTabs tabs={tabs} />
-
-      {/* PC：従来に近いヘッダー構成 */}
-      <header className="mt-3 hidden min-w-0 items-start gap-3 md:flex lg:flex">
-        <div className="w-24 shrink-0">
-          <ProductImage imageUrl={imageUrl} alt={visibleName} size="thumb" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs text-sage">{brand ? `メーカー ${brand}` : "メーカー情報なし"}</p>
-          <h1 className="mt-0.5 text-xl leading-snug font-medium tracking-tight text-ink">{visibleName}</h1>
-          {hasAffiliate ? <p className="mt-1 text-sm leading-5 text-muted">広告・アフィリエイトリンクを含みます</p> : null}
-          <p className="mt-1 text-sm leading-5 text-muted">
-            容量 {capacity ?? "情報なし"}
-            <span className="px-1.5 text-line">/</span>
-            JAN {product.janCode ?? "情報なし"}
-          </p>
-          {sizeChoices.length > 1 ? (
-            <div className="mt-2">
-              <SizeChoices choices={sizeChoices} />
-            </div>
-          ) : null}
-        </div>
-      </header>
 
       {product.offers.length > 0 ? (
         <section id="compare" aria-labelledby="compare-heading" className="scroll-mt-[var(--product-section-offset,7rem)] lg:scroll-mt-24">
@@ -301,29 +294,25 @@ function CompareNotes({
   );
 }
 
-function ProductImage({ imageUrl, alt, size }: { imageUrl: string | null; alt: string; size: "hero" | "thumb" }) {
-  if (!imageUrl && size === "hero") {
+function ProductImage({ imageUrl, alt }: { imageUrl: string | null; alt: string }) {
+  if (!imageUrl) {
     return (
-      <div className="flex h-11 items-center justify-center rounded-xl border border-dashed border-line bg-moss/50">
-        <p className="text-sm text-sage">画像なし</p>
-      </div>
+      <>
+        <div className="flex h-11 items-center justify-center rounded-xl border border-dashed border-line bg-moss/50 md:hidden">
+          <p className="text-sm text-sage">画像なし</p>
+        </div>
+        <div className="hidden overflow-hidden rounded-xl border border-line bg-card md:block">
+          <div className="grid aspect-square place-items-center bg-moss px-2 text-center">
+            <p className="text-[10px] leading-4 text-sage">画像なし</p>
+          </div>
+        </div>
+      </>
     );
   }
-  const frame =
-    size === "hero"
-      ? "mx-auto flex h-56 w-full max-w-xs items-center justify-center overflow-hidden rounded-2xl border border-line bg-card"
-      : "overflow-hidden rounded-xl border border-line bg-card";
-  const imageClass = size === "hero" ? "max-h-52 w-full object-contain p-2" : "mx-auto aspect-square w-full object-contain p-1.5";
   return (
-    <div className={frame}>
-      {imageUrl ? (
-        // Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。
-        <img src={imageUrl} alt={alt} className={imageClass} />
-      ) : (
-        <div className="grid aspect-square place-items-center bg-moss px-2 text-center">
-          <p className="text-[10px] leading-4 text-sage">画像なし</p>
-        </div>
-      )}
+    <div className="mx-auto flex h-56 w-full max-w-xs items-center justify-center overflow-hidden rounded-2xl border border-line bg-card md:mx-0 md:h-auto md:w-full md:max-w-none md:rounded-xl">
+      {/* Yahooの画像URLは取得のたびにホストが変わり得るため、next/imageの許可リストには載せない。 */}
+      <img src={imageUrl} alt={alt} className="max-h-52 w-full object-contain p-2 md:aspect-square md:max-h-none md:p-1.5" />
     </div>
   );
 }

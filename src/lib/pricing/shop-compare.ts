@@ -180,6 +180,17 @@ export function cheapestPrices<T extends { price: number | null; shippingFee: nu
   return { itemPrice, shippingTotal };
 }
 
+export function confirmedShippingOffers<T extends { price: number | null; shippingFee: number | null }>(offers: readonly T[]): T[] {
+  return offers.filter((offer) => payableTotal(offer) != null);
+}
+
+// 商品ページの初期表示（送料込み合計が安い順）で順位が付く掲載。
+// 送料未確認、別の販売単位、在庫なし、楽天の参考価格は含まない。
+export function shippingComparisonOffers<T extends PricedOffer>(offers: readonly T[]): T[] {
+  const ranked = partitionShopComparison([...offers]).ranked;
+  return confirmedShippingOffers(sortComparedOffers(ranked, "total"));
+}
+
 export function sortComparedOffers<T extends { price: number | null; shippingFee: number | null }>(offers: T[], sort: CompareSort): T[] {
   if (sort === "item") {
     return byItemPrice(offers);

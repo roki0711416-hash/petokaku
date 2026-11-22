@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cheapestPrices, compareWindow, competitionRanks, confirmedPriceSummary, groupOtherSalesUnits, initialCompareCount, itemPriceGap, listingShopCounts, partitionShopComparison, sortComparedOffers } from "./shop-compare.ts";
+import { cheapestPrices, compareWindow, competitionRanks, confirmedPriceSummary, groupOtherSalesUnits, initialCompareCount, itemPriceGap, listingShopCounts, partitionShopComparison, shippingComparisonOffers, sortComparedOffers } from "./shop-compare.ts";
 import { payableTotal } from "./visible-offers.ts";
 import { yahooRetrievalLimited } from "../sources/yahoo/search.ts";
 
@@ -198,6 +198,21 @@ test("件数は出品ごと、店舗数は同じ店舗を1件に数える", () =
       offer({ id: "c", price: 150, shippingFee: 0, provider: "rakuten", sellerId: "other", shopName: "B店" }),
     ]),
     { listingCount: 3, shopCount: 2 },
+  );
+});
+
+test("送料込みの順位に入る掲載だけを比較対象にし、送料未確認や別単位は外す", () => {
+  const compared = shippingComparisonOffers([
+    offer({ id: "ranked", price: 1000, shippingFee: 0, shopName: "A店", sellerId: "a" }),
+    offer({ id: "no-shipping", price: 634, shippingFee: null, shopName: "B店", sellerId: "b" }),
+    offer({ id: "out", price: 521, shippingFee: 0, stockStatus: "out_of_stock", shopName: "C店", sellerId: "c" }),
+    offer({ id: "set", price: 3380, shippingFee: 0, packCount: 6, shopName: "D店", sellerId: "d", listingTitle: "紙の猫砂 7L×6袋" }),
+    offer({ id: "ref", price: 508, shippingFee: null, provider: "rakuten", sellerId: null, shopName: "楽天市場", listingTitle: "参考価格" }),
+    offer({ id: "with-fee", price: 900, shippingFee: 130, shopName: "E店", sellerId: "e" }),
+  ]);
+  assert.deepEqual(
+    compared.map((item) => item.id),
+    ["ranked", "with-fee"],
   );
 });
 
