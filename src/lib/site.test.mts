@@ -167,10 +167,13 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   const home = read("../app/page.tsx");
   const cards = read("../components/comparable-products.tsx");
   const site = read("./site.ts");
+  const share = read("./seo/share-metadata.ts");
   assert.match(home, /ペットの種類から探す/);
   assert.match(home, /サイトの使い方/);
   assert.match(home, /お役立ち記事/);
-  assert.match(home, /alternates: \{ canonical: "\/" \}/);
+  assert.match(home, /shareMetadata\(\{/);
+  assert.match(home, /path: "\/"/);
+  assert.match(share, /alternates: \{ canonical: input\.path \}/);
   assert.match(home, /loadHomeCatalog/);
   assert.match(home, /HomeCatalogSections/);
   assert.match(home, /publishedArticles\(articles\)/);

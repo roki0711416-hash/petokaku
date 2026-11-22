@@ -10,6 +10,15 @@ export const pilotListingKey = {
   itemCode: "1096dog_50676",
 } as const;
 
+export type HistoryProvider = "yahoo" | "rakuten";
+
+export function historyProvider(value: string): HistoryProvider | null {
+  if (value === "yahoo" || value === "rakuten") {
+    return value;
+  }
+  return null;
+}
+
 export type VerifiedListing = {
   observedAt: string;
   product: {
@@ -30,7 +39,7 @@ export type VerifiedListing = {
     modelNumber: string | null;
   };
   offer: {
-    provider: "yahoo";
+    provider: HistoryProvider;
     sellerId: string;
     itemCode: string;
     shopName: string;
@@ -78,7 +87,7 @@ export type VariantInsert = {
 
 export type OfferInsert = {
   variant_id: ParentRef;
-  provider: "yahoo";
+  provider: HistoryProvider;
   seller_id: string;
   item_code: string;
   shop_name: string;
@@ -92,7 +101,7 @@ export type OfferInsert = {
 
 export type ObservationInsert = {
   offer_id: ParentRef;
-  provider: "yahoo";
+  provider: HistoryProvider;
   jan_code: string;
   seller_id: string;
   item_code: string;
@@ -211,20 +220,66 @@ export function verifiedListingFromAdapted(adapted: AdaptedYahooProduct, observe
   };
 }
 
-export function listingsForJanDetail(urlJan: string, adapted: AdaptedYahooProduct, observedAt: string): VerifiedListing[] {
+export type HistoryOfferInput = {
+  provider: string;
+  sellerId: string | null;
+  itemCode: string | null;
+  shopName: string;
+  productUrl: string | null;
+  listingTitle: string | null;
+  packCount: number | null;
+  packUnit: PackUnit | null;
+  price: number | null;
+  shippingFee: number | null;
+  shippingStatus: ShippingStatus;
+  stockStatus: StockStatus;
+};
+
+function listingContext(urlJan: string, adapted: AdaptedYahooProduct): Pick<VerifiedListing, "product" | "variant"> | null {
   if (!validJan(urlJan) || adapted.variant.janCode !== urlJan || adapted.detail.janCode !== urlJan) {
-    return [];
+    return null;
   }
   const name = adapted.product.name.trim();
   const sizeLabel = adapted.variant.sizeLabel.trim();
   if (!name || !sizeLabel) {
+    return null;
+  }
+  return {
+    product: {
+      name,
+      brand: adapted.product.brand.trim(),
+      category: adapted.product.category,
+      unitPriceType: adapted.product.unitPriceType,
+    },
+    variant: {
+      janCode: urlJan,
+      sizeLabel,
+      statedQuantity: adapted.variant.statedQuantity,
+      statedUnit: adapted.variant.statedUnit,
+      quantity: adapted.variant.quantity,
+      quantityUnit: adapted.variant.quantityUnit,
+      quantityConfidence: adapted.variant.quantityConfidence,
+      quantitySource: adapted.variant.quantitySource,
+      modelNumber: adapted.variant.modelNumber,
+    },
+  };
+}
+
+export function listingsForOffers(
+  urlJan: string,
+  observedAt: string,
+  context: Pick<VerifiedListing, "product" | "variant">,
+  offers: readonly HistoryOfferInput[],
+): VerifiedListing[] {
+  if (!validJan(urlJan) || context.variant.janCode !== urlJan) {
     return [];
   }
   const listings: VerifiedListing[] = [];
-  for (const offer of adapted.detail.offers) {
+  for (const offer of offers) {
+    const provider = historyProvider(offer.provider);
     const sellerId = offer.sellerId?.trim() ?? "";
     const itemCode = offer.itemCode?.trim() ?? "";
-    if (offer.provider !== "yahoo" || !sellerId || !itemCode || !offer.shopName.trim()) {
+    if (!provider || !sellerId || !itemCode || !offer.shopName.trim()) {
       continue;
     }
     if (!integerOrNull(offer.price) || !integerOrNull(offer.shippingFee)) {
@@ -241,25 +296,10 @@ export function listingsForJanDetail(urlJan: string, adapted: AdaptedYahooProduc
     }
     listings.push({
       observedAt,
-      product: {
-        name,
-        brand: adapted.product.brand.trim(),
-        category: adapted.product.category,
-        unitPriceType: adapted.product.unitPriceType,
-      },
-      variant: {
-        janCode: urlJan,
-        sizeLabel,
-        statedQuantity: adapted.variant.statedQuantity,
-        statedUnit: adapted.variant.statedUnit,
-        quantity: adapted.variant.quantity,
-        quantityUnit: adapted.variant.quantityUnit,
-        quantityConfidence: adapted.variant.quantityConfidence,
-        quantitySource: adapted.variant.quantitySource,
-        modelNumber: adapted.variant.modelNumber,
-      },
+      product: context.product,
+      variant: context.variant,
       offer: {
-        provider: "yahoo",
+        provider,
         sellerId,
         itemCode,
         shopName: offer.shopName.trim(),
@@ -277,6 +317,27 @@ export function listingsForJanDetail(urlJan: string, adapted: AdaptedYahooProduc
     });
   }
   return listings;
+}
+
+export function listingsForJanDetail(urlJan: string, adapted: AdaptedYahooProduct, observedAt: string): VerifiedListing[] {
+  const context = listingContext(urlJan, adapted);
+  if (!context) {
+    return [];
+  }
+  return listingsForOffers(urlJan, observedAt, context, adapted.detail.offers);
+}
+
+export function listingsForExtraOffers(
+  urlJan: string,
+  adapted: AdaptedYahooProduct,
+  offers: readonly HistoryOfferInput[],
+  observedAt: string,
+): VerifiedListing[] {
+  const context = listingContext(urlJan, adapted);
+  if (!context) {
+    return [];
+  }
+  return listingsForOffers(urlJan, observedAt, context, offers);
 }
 
 export type JanPriceSaveSummary = {
@@ -394,7 +455,7 @@ export function planPriceHistorySave(listing: VerifiedListing, catalog: PriceHis
         action: "insert" as const,
         row: {
           variant_id: catalog.variant ? { kind: "existing" as const, id: catalog.variant.id } : { kind: "new" as const },
-          provider: "yahoo" as const,
+          provider: listing.offer.provider,
           seller_id: listing.offer.sellerId,
           item_code: listing.offer.itemCode,
           shop_name: listing.offer.shopName,
@@ -414,7 +475,7 @@ export function planPriceHistorySave(listing: VerifiedListing, catalog: PriceHis
           action: "insert" as const,
           row: {
             offer_id: offerRef,
-            provider: "yahoo" as const,
+            provider: listing.offer.provider,
             jan_code: listing.variant.janCode,
             seller_id: listing.offer.sellerId,
             item_code: listing.offer.itemCode,

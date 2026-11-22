@@ -2,9 +2,11 @@ import "server-only";
 
 import {
   applyPriceHistoryPlan,
+  listingsForExtraOffers,
   listingsForJanDetail,
   planPriceHistorySave,
   settlePriceHistorySaves,
+  type HistoryOfferInput,
   type JanPriceSaveSummary,
   type PriceHistoryCatalog,
   type PriceHistoryWriter,
@@ -144,4 +146,13 @@ export async function saveDisplayedJanPrices(
 ): Promise<JanPriceSaveSummary> {
   const observedAt = adapted.detail.latestCheckedAt ?? new Date().toISOString();
   return settlePriceHistorySaves(listingsForJanDetail(urlJan, adapted, observedAt), commitPriceHistorySave);
+}
+
+export async function saveDisplayedOfferList(
+  urlJan: string,
+  adapted: Parameters<typeof listingsForJanDetail>[1],
+  offers: readonly HistoryOfferInput[],
+  observedAt = adapted.detail.latestCheckedAt ?? new Date().toISOString(),
+): Promise<JanPriceSaveSummary> {
+  return settlePriceHistorySaves(listingsForExtraOffers(urlJan, adapted, offers, observedAt), commitPriceHistorySave);
 }

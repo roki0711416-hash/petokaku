@@ -13,9 +13,10 @@ import { loadRakutenShopOffers } from "@/lib/sources/rakuten/item-search";
 import { loadRakutenJanOffers } from "@/lib/sources/rakuten/search";
 import { loadYahooJan } from "@/lib/sources/yahoo/preview";
 import type { PriceHistorySummary } from "@/lib/pricing/price-history-summary";
+import type { RankedShippingPoint } from "@/lib/pricing/shipping-history";
 import { loadJanPriceView } from "@/lib/supabase/price-history-summary";
 import { recordDisplayedJanView } from "@/lib/supabase/record-jan-view";
-import { saveDisplayedJanPrices } from "@/lib/supabase/save-price-history";
+import { saveDisplayedJanPrices, saveDisplayedOfferList } from "@/lib/supabase/save-price-history";
 import { janDetailOutcome, type RakutenDetailState } from "@/lib/jan-detail-outcome";
 import { validJanCode } from "@/lib/sources/yahoo/adapter";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
@@ -181,7 +182,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
           product={fallback.product}
           pageHref={`/products/jan/${jan}`}
           relatedArticles={articlesLinkingToJan(jan, articles)}
-          priceCheckedAt={new Date().toISOString()}
+          priceCheckedAt={fallback.product.latestCheckedAt ?? new Date().toISOString()}
           retrievalLimited={fallback.truncated}
           rakutenShopScope={fallback.truncated ? "limited" : "ready"}
           amazonUrl={amazonAssociateLink(jan, amazonAssociateLinks)?.url ?? null}
@@ -204,11 +205,20 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
     );
   }
 
+  const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffers(jan), loadRakutenShopOffers(jan)]);
+
   if (isSupabaseConfigured()) {
     try {
       await saveDisplayedJanPrices(jan, result.adapted);
     } catch {
       // 価格履歴が保存できなくても、取得済みの価格比較は表示する。
+    }
+
+    try {
+      const observedAt = result.adapted.detail.latestCheckedAt ?? new Date().toISOString();
+      await saveDisplayedOfferList(jan, result.adapted, [...(rakuten.ok ? rakuten.offers : []), ...(rakutenShops.ok ? rakutenShops.offers : [])], observedAt);
+    } catch {
+      // 楽天の掲載が保存できなくても、Yahooの記録と価格比較は表示する。
     }
 
     try {
@@ -220,12 +230,12 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
 
   const now = new Date().toISOString();
   let priceSummary: PriceHistorySummary | null = null;
-  let priceSeries: Awaited<ReturnType<typeof loadJanPriceView>>["series"] = [];
+  let shippingHistory: RankedShippingPoint[] = [];
   if (isSupabaseConfigured()) {
     try {
       const priceView = await loadJanPriceView(jan, now);
       priceSummary = priceView.summary;
-      priceSeries = priceView.series;
+      shippingHistory = priceView.shippingHistory;
     } catch {
       priceSummary = null;
     }
@@ -233,8 +243,6 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
 
   const related = await Promise.all(relatedJans(withJans, jan).map((relatedJan) => loadYahooJan(relatedJan)));
   const companions = related.flatMap((loaded) => (loaded.ok ? [loaded.adapted.detail] : []));
-
-  const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffers(jan), loadRakutenShopOffers(jan)]);
   const product = {
     ...result.adapted.detail,
     offers: confirmedJanOffers(jan, [
@@ -251,8 +259,8 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
       sizeChoices={sizeChoicesFor(result.adapted.detail, companions)}
       relatedArticles={articlesLinkingToJan(jan, articles)}
       priceSummary={priceSummary}
-      priceSeries={priceSeries}
-      priceCheckedAt={now}
+      shippingHistory={shippingHistory}
+      priceCheckedAt={product.latestCheckedAt ?? now}
       retrievalLimited={result.retrievalLimited}
       rakutenShopScope={rakutenShops.ok ? (rakutenShops.truncated ? "limited" : "ready") : "off"}
       amazonUrl={amazonAssociateLink(jan, amazonAssociateLinks)?.url ?? null}

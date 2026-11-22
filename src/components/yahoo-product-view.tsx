@@ -8,7 +8,8 @@ import type { RelatedArticleLink } from "@/lib/articles/related-for-jan";
 import { productPageCrumbs } from "@/lib/indexable-hubs";
 import { formatUnitAmount, formatYen } from "@/lib/format";
 import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
-import type { DailyPricePoint, PriceHistorySummary } from "@/lib/pricing/price-history-summary";
+import type { PriceHistorySummary } from "@/lib/pricing/price-history-summary";
+import type { RankedShippingPoint } from "@/lib/pricing/shipping-history";
 import { shopProductLink } from "@/lib/pricing/shop-link";
 import { comparisonMallOf } from "@/lib/pricing/malls";
 import { cheapestPrices, listingShopCounts, partitionShopComparison } from "@/lib/pricing/shop-compare";
@@ -34,7 +35,7 @@ export function YahooProductView({
   sizeChoices = [],
   relatedArticles = [],
   priceSummary,
-  priceSeries = [],
+  shippingHistory = [],
   priceCheckedAt,
   retrievalLimited = false,
   rakutenShopScope = "off",
@@ -45,7 +46,7 @@ export function YahooProductView({
   sizeChoices?: YahooSizeChoice[];
   relatedArticles?: RelatedArticleLink[];
   priceSummary?: PriceHistorySummary | null;
-  priceSeries?: DailyPricePoint[];
+  shippingHistory?: RankedShippingPoint[];
   priceCheckedAt?: string;
   retrievalLimited?: boolean;
   rakutenShopScope?: "off" | "ready" | "limited";
@@ -130,6 +131,12 @@ export function YahooProductView({
           </div>
         ) : null}
       </div>
+      <PriceHistory
+        offers={product.offers}
+        history={shippingHistory}
+        fetchedAt={product.latestCheckedAt ?? priceCheckedAt ?? null}
+        recordedDays={priceSummary ? priceSummary.observedDays : null}
+      />
       <ProductSectionTabs tabs={tabs} />
 
       {product.offers.length > 0 ? (
@@ -183,12 +190,6 @@ export function YahooProductView({
         </section>
       ) : null}
 
-      {priceSummary !== undefined ? (
-        <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} />
-      ) : null}
-      {priceSummary !== undefined ? (
-        <PriceHistory summary={priceSummary} offers={product.offers} series={priceSeries} now={priceCheckedAt} chart />
-      ) : null}
     </article>
   );
 }

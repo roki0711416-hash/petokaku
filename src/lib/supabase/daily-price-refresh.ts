@@ -2,12 +2,20 @@ import "server-only";
 
 import { refreshIntervalMs, refreshWindowDays, runDailyPriceRefresh, selectRefreshJans, type DailyRefreshReport } from "../pricing/daily-price-refresh.ts";
 import { tokyoObservationDate } from "../pricing/decide-price-write.ts";
+import { loadRakutenShopOffers } from "../sources/rakuten/item-search.ts";
+import { loadRakutenJanOffers } from "../sources/rakuten/search.ts";
 import { loadYahooJan } from "../sources/yahoo/preview.ts";
-import { saveDisplayedJanPrices } from "./save-price-history.ts";
+import type { Offer } from "../types.ts";
+import { saveDisplayedJanPrices, saveDisplayedOfferList } from "./save-price-history.ts";
 import { getSupabaseServerClient } from "./server.ts";
 
 function refreshFailed(): never {
   throw new Error("日次の価格更新に失敗しました");
+}
+
+async function rakutenOffersForHistory(janCode: string): Promise<Offer[]> {
+  const [product, shops] = await Promise.all([loadRakutenJanOffers(janCode), loadRakutenShopOffers(janCode)]);
+  return [...(product.ok ? product.offers : []), ...(shops.ok ? shops.offers : [])];
 }
 
 function addCalendarDays(isoDate: string, days: number): string {
@@ -78,7 +86,13 @@ export async function refreshRecentJanPrices(options?: {
     },
     save: async (janCode, adapted) => {
       const summary = await saveDisplayedJanPrices(janCode, adapted);
-      return { inserted: summary.inserted, confirmed: summary.confirmed };
+      const observedAt = adapted.detail.latestCheckedAt ?? now;
+      try {
+        const extra = await saveDisplayedOfferList(janCode, adapted, await rakutenOffersForHistory(janCode), observedAt);
+        return { inserted: summary.inserted + extra.inserted, confirmed: summary.confirmed + extra.confirmed };
+      } catch {
+        return { inserted: summary.inserted, confirmed: summary.confirmed };
+      }
     },
   });
   return { ...report, targets: selected.targets, skipped: selected.skipped, deferred: selected.deferred };

@@ -21,6 +21,9 @@ test("認証の前に価格更新を始めず、トークンを応答へ出さ�
   assert.ok(authAt > 0 && lockAt > authAt);
   assert.match(route, /PRICE_REFRESH_SECRET/);
   assert.match(route, /CRON_SECRET/);
+  assert.match(route, /maxDuration = 120/);
+  assert.match(route, /stopped/);
+  assert.match(route, /isSupabaseConfigured\(\)/);
   assert.doesNotMatch(route, /NEXT_PUBLIC_|YAHOO_CLIENT_ID|SUPABASE_SECRET_KEY|console\./);
   assert.doesNotMatch(route, /local-test-token|sb_secret_/);
   const lock = readFileSync(new URL("../supabase/price-refresh-lock.ts", import.meta.url), "utf8");

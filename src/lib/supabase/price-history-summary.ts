@@ -4,9 +4,9 @@ import {
   priceHistoryDailySeries,
   summarizePriceHistory,
   type DailyPricePoint,
-  type PriceHistoryOffer,
   type PriceHistorySummary,
 } from "../pricing/price-history-summary.ts";
+import { rankedShippingPoints, type RankedShippingPoint, type StoredShippingOffer } from "../pricing/shipping-history.ts";
 import type { ShippingStatus, StockStatus } from "../types.ts";
 import { getSupabaseServerClient } from "./server.ts";
 
@@ -14,6 +14,9 @@ type OfferRow = {
   id: string;
   pack_count: number | null;
   listing_title: string | null;
+  provider: string;
+  seller_id: string | null;
+  shop_name: string | null;
 };
 
 type ObservationRow = {
@@ -30,7 +33,7 @@ function readFailed(): never {
   throw new Error("価格履歴の集計に失敗しました");
 }
 
-async function loadGroupedOffers(janCode: string): Promise<PriceHistoryOffer[]> {
+async function loadGroupedOffers(janCode: string): Promise<StoredShippingOffer[]> {
   if (!/^[0-9]{13}$/.test(janCode)) {
     throw new Error("JANが確認できていません");
   }
@@ -42,7 +45,10 @@ async function loadGroupedOffers(janCode: string): Promise<PriceHistoryOffer[]> 
   if (!variantResult.data?.id) {
     return [];
   }
-  const offerResult = await supabase.from("offers").select("id, pack_count, listing_title").eq("variant_id", variantResult.data.id);
+  const offerResult = await supabase
+    .from("offers")
+    .select("id, pack_count, listing_title, provider, seller_id, shop_name")
+    .eq("variant_id", variantResult.data.id);
   if (offerResult.error || !offerResult.data) {
     readFailed();
   }
@@ -61,6 +67,9 @@ async function loadGroupedOffers(janCode: string): Promise<PriceHistoryOffer[]> 
   const observations = observationResult.data as ObservationRow[];
   return offers.map((offer) => ({
     id: offer.id,
+    provider: offer.provider,
+    sellerId: offer.seller_id,
+    shopName: offer.shop_name,
     packCount: offer.pack_count == null ? null : Number(offer.pack_count),
     listingTitle: offer.listing_title,
     observations: observations
@@ -87,10 +96,12 @@ export async function loadJanPriceSeries(janCode: string, days = 30, now = new D
 export async function loadJanPriceView(janCode: string, now = new Date().toISOString()): Promise<{
   summary: PriceHistorySummary;
   series: DailyPricePoint[];
+  shippingHistory: RankedShippingPoint[];
 }> {
   const offers = await loadGroupedOffers(janCode);
   return {
     summary: summarizePriceHistory({ now, offers }),
     series: priceHistoryDailySeries({ now, offers, days: 90 }),
+    shippingHistory: rankedShippingPoints({ now, offers, days: 90 }),
   };
 }
