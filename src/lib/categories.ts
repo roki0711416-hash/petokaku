@@ -1,4 +1,4 @@
-import { categoryIds, type CategoryId } from "@/lib/types";
+import { categoryIds, type CategoryId } from "./types.ts";
 
 export type Category = {
   id: CategoryId;
@@ -55,19 +55,6 @@ export function getCategory(id: CategoryId): Category {
 
 export function categoryHref(id: CategoryId): string {
   return `/products?category=${id}`;
-}
-
-const categorySearchQuery: Record<CategoryId, string> = {
-  dog: "犬 用品",
-  cat: "猫 用品",
-  "small-animal": "小動物 用品",
-  bird: "鳥 用品",
-  fish: "魚 用品",
-  other: "ペット 用品",
-};
-
-export function categorySearchHref(id: CategoryId): string {
-  return `/search?q=${encodeURIComponent(categorySearchQuery[id])}`;
 }
 
 const relatedCategoryPages: Record<string, { href: string; label: string }[]> = {

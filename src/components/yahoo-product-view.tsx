@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { AmazonAssociateLink } from "@/components/amazon-associate-link";
-import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
 import { ProductSectionTabs } from "@/components/product-section-tabs";
 import { PriceHistory } from "@/components/ui/price-history";
 import type { RelatedArticleLink } from "@/lib/articles/related-for-jan";
-import { categorySearchHref, getCategory } from "@/lib/categories";
+import { productPageCrumbs } from "@/lib/indexable-hubs";
 import { formatUnitAmount, formatYen } from "@/lib/format";
 import { readableListingTitle as compactVisibleTitle } from "@/lib/pricing/display-title";
 import { unknownQuantityLabel } from "@/lib/pricing/quantity-parse";
@@ -52,16 +52,17 @@ export function YahooProductView({
   rakutenShopScope?: "off" | "ready" | "limited";
   amazonUrl?: string | null;
 }) {
-  const category = getCategory(product.category);
   const imageUrl = safeHttpUrl(product.imageUrl);
   const visibleName = compactVisibleTitle(cleanListingTitle(product.name));
   const brand = product.brand.trim();
   const hasAffiliate = Boolean(amazonUrl) || product.offers.some((offer) => shopProductLink(offer).affiliate);
-  const crumbs: Crumb[] = [
-    { label: "ホーム", href: "/" },
-    { label: category.label, href: categorySearchHref(category.id) },
-    { label: visibleName, href: pageHref, current: true },
-  ];
+  const crumbs = productPageCrumbs({
+    name: product.name,
+    category: product.category,
+    genreNames: product.sourceCategoryName ? [product.sourceCategoryName] : [],
+    productLabel: visibleName,
+    productHref: pageHref,
+  });
 
   const capacity = product.sizeLabel && product.sizeLabel !== unknownQuantityLabel ? product.sizeLabel : null;
   const overview = productOverview(product);
