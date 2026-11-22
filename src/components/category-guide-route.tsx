@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ItemGuidePage } from "@/components/item-guide-page";
 import { itemGuideBySlug, type ItemGuideSlug } from "@/lib/item-guides";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { privateRobots, robotsMetadata } from "@/lib/site";
 
 type SearchParams = Promise<{ q?: string | string[] }>;
@@ -17,16 +18,11 @@ export async function categoryGuideMetadata(slug: ItemGuideSlug, searchParams: S
     return { title: "ページが見つかりません", robots: privateRobots() };
   }
   const userQuery = userQueryOf((await searchParams).q);
-  const metadata: Metadata = {
+  const metadata: Metadata = shareMetadata({
     title: guide.title,
     description: guide.description,
-    alternates: { canonical: guide.path },
-    openGraph: {
-      title: `${guide.title} | ペトカク`,
-      description: guide.description,
-      url: guide.path,
-    },
-  };
+    path: guide.path,
+  });
   if (userQuery !== "") {
     return { ...metadata, robots: privateRobots() };
   }

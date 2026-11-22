@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "プライバシーポリシー",
   description: "ペトカクが扱う情報、Googleアナリティクス、Cookie、予定している広告配信、お問い合わせの説明です。",
-  alternates: { canonical: "/privacy" },
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

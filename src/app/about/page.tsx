@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "ペトカクについて",
   description: "ペトカクは、ペット用品の価格と送料を販売店ごとに見比べるサイトです。商品の販売は行いません。",
-  alternates: { canonical: "/about" },
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { brandMentioned, comparisonProductName, type ComparisonNameInput } from "./comparison-name.ts";
 import { janPageRobots } from "../site.ts";
+import { brandMentioned, comparisonProductName, type ComparisonNameInput } from "./comparison-name.ts";
+import { defaultShareImage } from "./share-metadata.ts";
 
 export type JanSeoCopy = {
   title: string;
@@ -68,6 +69,10 @@ export function janProductMetadata(input: ComparisonNameInput & { jan: string; i
   const copy = curatedJanSeo(input.jan) ?? autoJanSeo(input);
   const canonical = `/products/jan/${input.jan}`;
   const image = input.imageUrl?.startsWith("https://") ? input.imageUrl : null;
+  // Next.js の OpenGraphType に product はない（article / website など）。
+  // Facebook の product 型も非推奨で、商品であることは JSON-LD に出している。
+  // そのため og:type は website のままにする。
+  const images = image ? [{ url: image, alt: copy.title }] : [defaultShareImage];
   return {
     title: copy.title,
     description: copy.description,
@@ -80,7 +85,13 @@ export function janProductMetadata(input: ComparisonNameInput & { jan: string; i
       siteName: "ペトカク",
       locale: "ja_JP",
       type: "website",
-      images: image ? [{ url: image, alt: copy.title }] : undefined,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: copy.title,
+      description: copy.description,
+      images,
     },
   };
 }

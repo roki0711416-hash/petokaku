@@ -74,7 +74,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-14">
         <div className="flex flex-col gap-8 border-b border-line pb-10 md:flex-row md:items-end md:justify-between">
           <div className="max-w-md">
-            <img src="/logo.png" alt="ペトカク" className="h-8 w-auto" />
+            <img src="/logo.png" alt="ペトカク" width={360} height={106} className="h-8 w-auto" />
             <p className="mt-3 text-sm text-muted">かしこく買って、もっと一緒に。</p>
             <FooterPriceNote />
           </div>

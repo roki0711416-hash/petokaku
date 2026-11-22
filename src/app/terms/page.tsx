@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
 import { InfoArticle } from "@/components/info-article";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "利用規約",
   description: "ペトカクの利用条件です。価格比較の情報サイトであり、商品の販売者ではありません。",
-  alternates: { canonical: "/terms" },
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

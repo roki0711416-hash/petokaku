@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { YahooProductView } from "@/components/yahoo-product-view";
 import { loadYahooPreviewCase, type YahooPreviewCase } from "@/lib/sources/yahoo/preview";
+import { shareMetadata } from "@/lib/seo/share-metadata";
 import { privateRobots } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +18,12 @@ function previewCaseFrom(value: string | undefined): YahooPreviewCase {
   return "dog";
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = shareMetadata({
   title: "販売店の商品",
   description: "販売店から取得した1商品の価格です。サンプル商品ではありません。",
+  path: "/products/yahoo-preview",
   robots: privateRobots(),
-};
+});
 
 export default async function YahooPreviewPage({ searchParams }: YahooPreviewPageProps) {
   const query = await searchParams;
