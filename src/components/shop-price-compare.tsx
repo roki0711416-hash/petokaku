@@ -11,6 +11,7 @@ import {
   competitionRanks,
   type CompareSort,
   cheapestPrices,
+  confirmedShippingOffers,
   groupOtherSalesUnits,
   initialCompareCount,
   listingShopCounts,
@@ -63,7 +64,7 @@ export function ShopPriceCompare({
   });
   const parts = partitionShopComparison(selected);
   const ranked = sortComparedOffers(parts.ranked, sort);
-  const comparable = sort === "total" ? ranked.filter((offer) => payableTotal(offer) != null) : ranked;
+  const comparable = sort === "total" ? confirmedShippingOffers(ranked) : ranked;
   const shippingUnconfirmed = sort === "total" ? ranked.filter((offer) => payableTotal(offer) == null) : [];
   const reference = sortComparedOffers(parts.reference, "item");
   const otherUnits = groupOtherSalesUnits(parts.otherUnits, sort);

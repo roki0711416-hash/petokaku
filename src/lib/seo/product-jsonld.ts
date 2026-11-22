@@ -1,4 +1,8 @@
-import type { StockStatus } from "@/lib/types";
+import { comparisonMallOf } from "../pricing/malls.ts";
+import { shippingComparisonOffers } from "../pricing/shop-compare.ts";
+import { payableTotal } from "../pricing/visible-offers.ts";
+import type { Offer, StockStatus } from "../types.ts";
+import { safeHttpUrl } from "../urls.ts";
 
 export type ProductJsonOffer = {
   shopName: string;
@@ -72,8 +76,37 @@ export function productStructuredData(input: ProductJsonInput): Record<string, u
     return [entry];
   });
   if (offers.length > 0) {
-    product.offers = offers;
+    const prices = offers.map((offer) => offer.price as number);
+    product.offers = {
+      "@type": "AggregateOffer",
+      priceCurrency: "JPY",
+      lowPrice: Math.min(...prices),
+      highPrice: Math.max(...prices),
+      offerCount: offers.length,
+      offers,
+    };
   }
 
   return product;
+}
+
+// 商品ページの送料込み順位と同じ掲載だけを、その支払総額で構造化データに入れる。
+export function pageComparisonJsonOffers(offers: readonly Offer[]): ProductJsonOffer[] {
+  const mallOffers = offers.filter((offer) => comparisonMallOf(offer) != null);
+  const pool = mallOffers.length > 0 ? mallOffers : offers.filter((offer) => !offer.isSample);
+  return shippingComparisonOffers(pool).flatMap((offer) => {
+    const price = payableTotal(offer);
+    const url = safeHttpUrl(offer.productUrl);
+    if (price == null) {
+      return [];
+    }
+    return [
+      {
+        shopName: offer.shopName,
+        price,
+        url,
+        stockStatus: offer.stockStatus,
+      },
+    ];
+  });
 }
