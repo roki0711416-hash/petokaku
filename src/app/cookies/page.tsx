@@ -14,7 +14,7 @@ export default function CookiesPage() {
     <InfoArticle
       title="Cookie設定"
       path="/cookies"
-      lead="解析のCookieは、受け入れるまで読み込みません。AdSenseの確認用スクリプトは全ページで読み込みます。2026年10月19日に更新しました。"
+      lead="解析のCookieは、受け入れるまで読み込みません。AdSenseの確認用スクリプトは全ページで読み込みます。2026年11月23日に更新しました。"
     >
       <h2>必須にあたるもの</h2>
       <p>
@@ -22,7 +22,7 @@ export default function CookiesPage() {
       </p>
       <h2>アクセス解析</h2>
       <p>
-        受け入れると、Googleアナリティクス4がページのURLなどをGoogleへ送り、Cookieを使うことがあります。拒否すると、計測タグは読み込みません。拒否へ変えたときは、このブラウザに残っている解析用Cookieの削除も試み、ページを読み直します。すでにGoogle側へ送られた情報は、ペトカクから消しきれません。
+        受け入れると、Googleアナリティクス4がページのURLや、ショップのリンクを開いた記録をGoogleへ送り、Cookieを使うことがあります。拒否すると、計測タグは読み込みません。拒否へ変えたときは、このブラウザに残っている解析用Cookieの削除も試み、ページを読み直します。すでにGoogle側へ送られた情報は、ペトカクから消しきれません。
       </p>
       <CookieSettings />
       <h2>広告</h2>

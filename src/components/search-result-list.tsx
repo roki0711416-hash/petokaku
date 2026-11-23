@@ -55,8 +55,8 @@ export function SearchResultList({ query, cards }: { query: string; cards: Searc
         })}
       </div>
       <ul className="mt-5 grid grid-cols-2 items-stretch gap-3 md:grid-cols-3 xl:grid-cols-4">
-        {visible.map((card) => (
-          <ProductCard key={card.id} card={card} />
+        {visible.map((card, index) => (
+          <ProductCard key={card.id} card={card} position={index + 1} />
         ))}
       </ul>
     </section>

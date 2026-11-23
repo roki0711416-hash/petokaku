@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AmazonAssociateLink } from "@/components/amazon-associate-link";
+import { ShopClickScope } from "@/components/shop-outbound-link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
 import { ProductSectionTabs } from "@/components/product-section-tabs";
@@ -77,6 +78,11 @@ export function YahooProductView({
     { id: "product-info", label: "商品情報" },
     ...(relatedArticles.length > 0 ? [{ id: "related-articles", label: "関連記事" }] : []),
   ];
+  const shopClick = {
+    pageType: "product" as const,
+    productId: product.janCode ?? product.id,
+    productName: visibleName,
+  };
   const structured = productStructuredData({
     name: visibleName,
     brand: product.brand,
@@ -141,19 +147,25 @@ export function YahooProductView({
 
       {product.offers.length > 0 ? (
         <section id="compare" aria-labelledby="compare-heading" className="scroll-mt-[var(--product-section-offset,7rem)] lg:scroll-mt-24">
-          <MallCompare
-            offers={product.offers}
-            quantity={product.quantity}
-            quantityUnit={product.quantityUnit}
-            unitPriceType={product.unitPriceType}
-          />
-          {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
+          <ShopClickScope {...shopClick}>
+            <MallCompare
+              offers={product.offers}
+              quantity={product.quantity}
+              quantityUnit={product.quantityUnit}
+              unitPriceType={product.unitPriceType}
+            />
+            {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
+          </ShopClickScope>
           <CompareNotes retrievalLimited={retrievalLimited} rakutenShopScope={rakutenShopScope} hasAffiliate={hasAffiliate} />
         </section>
       ) : (
         <div id="compare" className="scroll-mt-[var(--product-section-offset,7rem)] lg:scroll-mt-24">
           <p className="mt-5 text-sm text-muted">比較できる掲載はありません。</p>
-          {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
+          {amazonUrl ? (
+            <ShopClickScope {...shopClick}>
+              <AmazonAssociateLink url={amazonUrl} />
+            </ShopClickScope>
+          ) : null}
         </div>
       )}
 

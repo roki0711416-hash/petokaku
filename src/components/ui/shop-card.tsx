@@ -1,3 +1,4 @@
+import { ShopOutboundLink } from "@/components/shop-outbound-link";
 import { formatUnitAmount, formatYen, stockLabel } from "@/lib/format";
 import { calculateUnitPrices, type QuantityUnit, type UnitPriceType } from "@/lib/pricing/calculate";
 import { unitPriceQuantity } from "@/lib/pricing/quantity-parse";
@@ -73,10 +74,9 @@ export function offerUnitLabel(
   return `${prefix}${formatUnitAmount(unitPrice.itemUnit, unitPrice.unitLabel)}`;
 }
 
-function ShopVisit({ offer, wide }: { offer: Offer; wide?: boolean }) {
+function ShopVisit({ offer, wide, position }: { offer: Offer; wide?: boolean; position?: number | null }) {
   const link = shopProductLink(offer);
   const href = link.href;
-  const isAdvertisement = link.affiliate;
   const label = mallVisitLabel(offer.provider);
   const className = wide
     ? "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-forest px-4 text-sm font-medium text-white hover:bg-forest-deep"
@@ -95,14 +95,9 @@ function ShopVisit({ offer, wide }: { offer: Offer; wide?: boolean }) {
 
   return (
     <div>
-      <a
-        href={href}
-        target="_blank"
-        rel={isAdvertisement ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
-        className={className}
-      >
+      <ShopOutboundLink href={href} affiliate={link.affiliate} shop={offer.provider} shopName={offer.shopName} price={offer.price} position={position} className={className}>
         {label}
-      </a>
+      </ShopOutboundLink>
     </div>
   );
 }
@@ -167,7 +162,7 @@ export function ShopCard({
       {offer.isSample ? <p className="mt-1 text-xs text-clay">サンプル</p> : null}
       {reference ? <p className="mt-2 text-xs leading-5 text-muted">店舗ごとの個数と送料は未確認です。単品の順位には入れていません。</p> : null}
       <div className="mt-auto pt-4">
-        <ShopVisit offer={offer} wide />
+        <ShopVisit offer={offer} wide position={rank > 0 ? rank : null} />
       </div>
     </li>
   );
@@ -228,7 +223,7 @@ export function ShopTable({
                 {offer.isSample ? <span className="ml-2 text-xs font-normal text-clay">サンプル</span> : null}
               </td>
               <td className="py-3 align-middle">
-                <ShopVisit offer={offer} />
+                <ShopVisit offer={offer} position={rank} />
               </td>
             </tr>
           );
