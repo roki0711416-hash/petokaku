@@ -10,25 +10,30 @@ import {
 } from "./item-guides.ts";
 import { sitemapEntries } from "./site.ts";
 
-test("品目ページは4件だけで、title・説明・見出し・FAQがそれぞれ違う", () => {
+test("品目ページは確認できた品目だけで、title・説明・見出し・FAQがそれぞれ違う", () => {
   assert.deepEqual(
     itemGuides.map((guide) => guide.slug),
-    ["dog-food", "cat-food", "cat-litter", "pet-sheets"],
+    ["dog-food", "cat-food", "cat-litter", "pet-sheets", "treats", "cat-tower", "pet-toilet"],
   );
   assert.deepEqual(categoryGuidePaths(), [
     "/categories/dog-food",
     "/categories/cat-food",
     "/categories/cat-litter",
     "/categories/pet-sheets",
+    "/categories/treats",
+    "/categories/cat-tower",
+    "/categories/pet-toilet",
   ]);
   const titles = itemGuides.map((guide) => guide.title);
   const descriptions = itemGuides.map((guide) => guide.description);
+  const intros = itemGuides.map((guide) => guide.intro);
   const questions = itemGuides.flatMap((guide) => guide.faqs.map((faq) => faq.question));
   const answers = itemGuides.flatMap((guide) => guide.faqs.map((faq) => faq.answer));
   const pointBodies = itemGuides.flatMap((guide) => guide.points.map((point) => point.body));
-  for (const values of [titles, descriptions, questions, answers, pointBodies]) {
+  for (const values of [titles, descriptions, intros, questions, answers, pointBodies]) {
     assert.equal(new Set(values).size, values.length);
   }
+  assert.equal(intros.every((intro) => intro.length >= 40), true);
   assert.equal(itemGuides.every((guide) => guide.h1 === guide.title), true);
   assert.equal(itemGuides.every((guide) => guide.description.length >= 40 && guide.description.length <= 160), true);
   assert.equal(itemGuideBySlug("unknown"), null);
@@ -86,6 +91,20 @@ test("品目ガイドは重点商品へ1〜2件だけつなぎ、記事カード
 
   const page = readFileSync(new URL("../components/item-guide-page.tsx", import.meta.url), "utf8");
   assert.match(page, /ComparableProductCards/);
+
+  const treats = itemGuideBySlug("treats");
+  const tower = itemGuideBySlug("cat-tower");
+  const toilet = itemGuideBySlug("pet-toilet");
+  assert.ok(treats && tower && toilet);
+  assert.equal(treats.relatedProducts, undefined);
+  assert.deepEqual(
+    tower.relatedProducts?.map((item) => item.href),
+    ["/products/jan/4582701000467"],
+  );
+  assert.deepEqual(
+    toilet.relatedProducts?.map((item) => item.href),
+    ["/products/jan/4520699282786", "/products/jan/4520699618851"],
+  );
 });
 
 test("品目の検索語は空なら品目名、入力があれば品目名と組み合わせる", () => {
@@ -114,9 +133,24 @@ test("品目と関係の薄い掲載は一覧に残さない", () => {
   assert.equal(listingMatchesGuide("cat-litter", "ペットシーツ ワイド", []), false);
 
   assert.equal(listingMatchesGuide("pet-sheets", "ペットシーツ ワイド 100枚", ["犬用品"]), true);
+  assert.equal(listingMatchesGuide("pet-sheets", "デオシート レギュラー 112枚", []), true);
   assert.equal(listingMatchesGuide("pet-sheets", "猫砂 鉱物", []), false);
   assert.equal(listingMatchesGuide("pet-sheets", "ドッグフード 8kg", []), false);
   assert.equal(listingMatchesGuide("pet-sheets", "犬用 服", []), false);
+
+  assert.equal(listingMatchesGuide("treats", "犬用おやつ ジャーキー", []), true);
+  assert.equal(listingMatchesGuide("treats", "猫 ちゅーる おやつ", []), true);
+  assert.equal(listingMatchesGuide("treats", "ドッグフード 成犬用", []), false);
+  assert.equal(listingMatchesGuide("treats", "猫砂 鉱物", []), false);
+
+  assert.equal(listingMatchesGuide("cat-tower", "キャットタワー 据え置き 高さ142cm", ["猫用品"]), true);
+  assert.equal(listingMatchesGuide("cat-tower", "キャットフード ドライ", []), false);
+  assert.equal(listingMatchesGuide("cat-food", "猫トイレ 本体 フード付き", []), false);
+  assert.equal(listingMatchesGuide("pet-toilet", "猫トイレ 本体 フード付き", []), true);
+  assert.equal(listingMatchesGuide("pet-toilet", "デオトイレ ハーフカバー 本体セット", []), true);
+  assert.equal(listingMatchesGuide("pet-toilet", "木の猫砂 7L", []), false);
+  assert.equal(listingMatchesGuide("pet-toilet", "ペットシーツ ワイド", []), false);
+  assert.equal(listingMatchesGuide("cat-litter", "猫トイレ 本体 フード付き", []), false);
 });
 
 test("サイトマップは実在する品目ページだけを指し、TOPはペットの種類と品目ページから開く", () => {
@@ -139,6 +173,14 @@ test("サイトマップは実在する品目ページだけを指し、TOPは�
   assert.match(hubs, /\/categories\/cat-litter/);
   assert.doesNotMatch(hubs, /#home-search|#categories/);
   assert.match(categoryPage, /privateRobots\(\)/);
-  assert.doesNotMatch(categoryPage, /FAQPage/);
   assert.doesNotMatch(categoryPage, /searchYahooItems/);
+  assert.doesNotMatch(categoryPage, /loadGuideListings/);
+  const guidePage = readFileSync(new URL("../components/item-guide-page.tsx", import.meta.url), "utf8");
+  assert.match(guidePage, /categoryFaqJsonLd\(guide\.faqs\)/);
+  assert.match(guidePage, /\{item\.question\}/);
+  assert.match(guidePage, /\{item\.answer\}/);
+  assert.match(guidePage, /categoryItemListJsonLd/);
+  assert.match(guidePage, /この品目の商品/);
+  assert.match(guidePage, /金額はこの一覧には出していません/);
+  assert.doesNotMatch(guidePage, /amazon\.co\.jp|searchYahooItems|loadGuideListings/);
 });
