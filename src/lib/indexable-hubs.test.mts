@@ -14,7 +14,7 @@ test("人気カテゴリは品目ページかペットページへつなぎ、�
       ["キャットフード", "/categories/cat-food"],
       ["猫砂・トイレ用品", "/categories/cat-litter"],
       ["ペットシーツ", "/categories/pet-sheets"],
-      ["おやつ", "/pets/dog?category=treat"],
+      ["おやつ", "/categories/treats"],
       ["おもちゃ・グッズ", "/pets/cat?category=toy"],
     ],
   );
@@ -31,13 +31,15 @@ test("キーワードは種類なら索引ページ、ブランドだけ検索�
   assert.equal(byLabel.get("キャットフード"), "/categories/cat-food");
   assert.equal(byLabel.get("猫砂"), "/categories/cat-litter");
   assert.equal(byLabel.get("ペットシーツ"), "/categories/pet-sheets");
-  assert.equal(byLabel.get("おやつ"), "/pets/dog?category=treat");
+  assert.equal(byLabel.get("おやつ"), "/categories/treats");
+  assert.equal(byLabel.get("キャットタワー"), "/categories/cat-tower");
+  assert.equal(byLabel.get("トイレ用品"), "/categories/pet-toilet");
   assert.equal(byLabel.get("おもちゃ"), "/pets/cat?category=toy");
   assert.equal(byLabel.get("チモシー"), "/pets/small-animal");
   assert.equal(byLabel.get("ロイヤルカナン"), "/search?q=%E3%83%AD%E3%82%A4%E3%83%A4%E3%83%AB%E3%82%AB%E3%83%8A%E3%83%B3");
   assert.equal(byLabel.get("ネクトン"), "/search?q=%E3%83%8D%E3%82%AF%E3%83%88%E3%83%B3");
 
-  for (const label of ["ドッグフード", "キャットフード", "猫砂", "ペットシーツ", "おやつ", "おもちゃ", "チモシー"]) {
+  for (const label of ["ドッグフード", "キャットフード", "猫砂", "ペットシーツ", "おやつ", "キャットタワー", "トイレ用品", "おもちゃ", "チモシー"]) {
     const href = byLabel.get(label);
     assert.ok(href);
     assert.equal(href.startsWith("/search"), false);
@@ -72,6 +74,18 @@ test("商品パンくずは品目ページかペットページを絶対URLに�
     siteUrl,
   );
   assert.equal(food.itemListElement[1]?.item, "https://petokaku.com/categories/dog-food");
+
+  const tower = breadcrumbListJsonLd(
+    productPageCrumbs({
+      name: "キャットタワー スリム 据え置き 高さ142cm",
+      category: "cat",
+      productLabel: "キャットタワー スリム 据え置き 高さ142cm",
+      productHref: "/products/jan/4582701000467",
+    }),
+    siteUrl,
+  );
+  assert.equal(tower.itemListElement[1]?.name, "キャットタワー");
+  assert.equal(tower.itemListElement[1]?.item, "https://petokaku.com/categories/cat-tower");
 
   const collar = breadcrumbListJsonLd(
     productPageCrumbs({

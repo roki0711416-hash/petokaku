@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { articles } from "@/data/articles";
 import { articleSitemapPaths } from "@/lib/articles/catalog";
+import { categoryContentUpdatedAt } from "@/lib/category-products-live";
 import { publishedProductPaths } from "@/lib/sitemap-products";
 import { getSiteUrl, sitemapEntries } from "@/lib/site";
 
@@ -9,7 +10,9 @@ export const maxDuration = 60;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
-  const staticEntries = sitemapEntries().filter((entry) => !entry.url.includes("/products/jan/"));
+  const now = new Date();
+  const categoryUpdatedAt = await categoryContentUpdatedAt();
+  const staticEntries = sitemapEntries({ now, categoryUpdatedAt }).filter((entry) => !entry.url.includes("/products/jan/"));
   const seen = new Set(staticEntries.map((entry) => entry.url));
   const products = (await publishedProductPaths())
     .map((path) => ({
