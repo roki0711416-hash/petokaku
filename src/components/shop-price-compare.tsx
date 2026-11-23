@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { ShopCompareList } from "@/components/shop-compare-list";
+import { ShopOutboundLink } from "@/components/shop-outbound-link";
 import { PriceSummary } from "@/components/ui/price-summary";
 import { formatYen } from "@/lib/format";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
@@ -254,7 +255,7 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
     <aside className="mt-4 rounded-xl border border-line bg-sand/70 px-4 py-3">
       <h3 className="text-sm font-medium text-ink">楽天の参考価格</h3>
       <ul className="mt-3 grid gap-3">
-        {offers.map((offer) => {
+        {offers.map((offer, index) => {
           const link = shopProductLink(offer);
           const label = mallVisitLabel(offer.provider);
           return (
@@ -262,17 +263,20 @@ function ReferencePrices({ offers }: { offers: Offer[] }) {
               <p className="price-num text-2xl text-ink">{offer.price == null ? "情報なし" : formatYen(offer.price)}</p>
               {link.href ? (
                 <div className="min-w-36">
-                  <a
+                  <ShopOutboundLink
                     href={link.href}
-                    target="_blank"
-                    rel={link.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
+                    affiliate={link.affiliate}
+                    shop={offer.provider}
+                    shopName={offer.shopName}
+                    price={offer.price}
+                    position={index + 1}
                     className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-line bg-card px-4 text-sm text-ink"
                   >
                     {label}
                     <span aria-hidden="true" className="ml-1">
                       ↗
                     </span>
-                  </a>
+                  </ShopOutboundLink>
                 </div>
               ) : (
                 <span className="text-sm text-muted">リンクなし</span>

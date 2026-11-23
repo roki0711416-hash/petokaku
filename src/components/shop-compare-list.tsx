@@ -1,3 +1,4 @@
+import { ShopOutboundLink } from "@/components/shop-outbound-link";
 import { formatYen, stockLabel } from "@/lib/format";
 import type { QuantityUnit, UnitPriceType } from "@/lib/pricing/calculate";
 import { mallVisitLabel } from "@/lib/pricing/malls";
@@ -36,6 +37,7 @@ export function ShopCompareList({
             key={offer.id}
             offer={offer}
             rank={ranks ? (ranks[index] ?? null) : null}
+            position={ranks?.[index] ?? index + 1}
             showRank={ranks != null}
             sort={sort}
             quantity={quantity}
@@ -62,6 +64,7 @@ export function ShopCompareList({
                 key={offer.id}
                 offer={offer}
                 rank={ranks ? (ranks[index] ?? null) : null}
+                position={ranks?.[index] ?? index + 1}
                 showRank={ranks != null}
                 sort={sort}
                 quantity={quantity}
@@ -105,6 +108,7 @@ function UnitHints({
 function MobileShop({
   offer,
   rank,
+  position,
   showRank,
   sort,
   quantity,
@@ -113,6 +117,7 @@ function MobileShop({
 }: {
   offer: Offer;
   rank: number | null;
+  position: number;
   showRank: boolean;
   sort: CompareSort;
   quantity: number | null;
@@ -142,7 +147,7 @@ function MobileShop({
           <p className="price-num text-3xl leading-none font-semibold text-ink">{headline}</p>
         </div>
         <div className="w-[8.25rem] shrink-0">
-          <VisitLink offer={offer} buyLabel />
+          <VisitLink offer={offer} buyLabel position={position} />
         </div>
       </div>
 
@@ -173,6 +178,7 @@ function MobileShop({
 function DesktopRow({
   offer,
   rank,
+  position,
   showRank,
   sort,
   quantity,
@@ -181,6 +187,7 @@ function DesktopRow({
 }: {
   offer: Offer;
   rank: number | null;
+  position: number;
   showRank: boolean;
   sort: CompareSort;
   quantity: number | null;
@@ -209,7 +216,7 @@ function DesktopRow({
         <p className="break-words text-base font-medium leading-6 text-ink">{offer.shopName}</p>
       </td>
       <td className="px-3 py-3 align-middle">
-        <VisitLink offer={offer} />
+        <VisitLink offer={offer} position={position} />
       </td>
     </tr>
   );
@@ -230,7 +237,7 @@ function RankLabel({ rank }: { rank: number | null }) {
   return <span className={rank === 1 ? "text-base font-medium text-forest" : "text-base font-medium text-ink"}>{rank}位</span>;
 }
 
-function VisitLink({ offer, buyLabel = false }: { offer: Offer; buyLabel?: boolean }) {
+function VisitLink({ offer, buyLabel = false, position }: { offer: Offer; buyLabel?: boolean; position?: number | null }) {
   const link = shopProductLink(offer);
   const label = buyLabel ? "ショップで購入" : mallVisitLabel(offer.provider);
   const className = buyLabel
@@ -245,17 +252,20 @@ function VisitLink({ offer, buyLabel = false }: { offer: Offer; buyLabel?: boole
   }
   return (
     <div>
-      <a
+      <ShopOutboundLink
         href={link.href}
-        target="_blank"
-        rel={link.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
+        affiliate={link.affiliate}
+        shop={offer.provider}
+        shopName={offer.shopName}
+        price={offer.price}
+        position={position}
         className={className}
       >
         {label}
         <span aria-hidden="true" className="ml-1">
           ↗
         </span>
-      </a>
+      </ShopOutboundLink>
     </div>
   );
 }

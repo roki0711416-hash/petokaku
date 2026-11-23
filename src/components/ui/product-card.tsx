@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { ShopOutboundLink } from "@/components/shop-outbound-link";
 import { formatUnitAmount, formatYen } from "@/lib/format";
 import { readableListingTitle } from "@/lib/pricing/display-title";
 import type { SearchCandidateCard } from "@/lib/sources/yahoo/search-candidates";
 import { safeHttpUrl } from "@/lib/urls";
 
-export function ProductCard({ card }: { card: SearchCandidateCard }) {
+export function ProductCard({ card, position }: { card: SearchCandidateCard; position?: number }) {
   const imageUrl = safeHttpUrl(card.imageUrl);
   const productUrl = safeHttpUrl(card.productUrl);
   const title = readableListingTitle(card.name);
@@ -50,15 +51,19 @@ export function ProductCard({ card }: { card: SearchCandidateCard }) {
             <div className="mt-3 text-xs leading-5 text-muted">
               <p>商品名からほかのショップを探せます。</p>
               {productUrl ? (
-                <a
+                <ShopOutboundLink
                   href={productUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  shopName={card.shopLabel}
+                  price={card.sellingPrice}
+                  position={position}
+                  productId={card.janCode ?? card.id}
+                  productName={title}
+                  pageType="search"
                   className="mt-2 inline-flex min-h-11 items-center font-medium text-forest underline-offset-4 hover:underline"
                 >
                   商品を見る
                   <span className="sr-only">（外部サイトを開きます）</span>
-                </a>
+                </ShopOutboundLink>
               ) : null}
             </div>
           )}

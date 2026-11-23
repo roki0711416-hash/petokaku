@@ -37,6 +37,15 @@ test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く
   assert.doesNotMatch(script, /adsbygoogle\s*=|data-ad-client|data-ad-slot|enable_page_level_ads/);
 });
 
+test("ads.txtの発行者IDはAdSenseスクリプトと同じ", () => {
+  const script = readFileSync(new URL("../components/adsense-script.tsx", import.meta.url), "utf8");
+  const ads = readFileSync(new URL("../../public/ads.txt", import.meta.url), "utf8").trim();
+  const pub = script.match(/ca-pub-(\d+)/)?.[1];
+  assert.ok(pub);
+  assert.equal(ads, `google.com, pub-${pub}, DIRECT, f08c47fec0942fa0`);
+  assert.equal(script.match(/pagead2\.googlesyndication\.com/g)?.length, 1);
+});
+
 test("AdSense所有権確認用メタタグは共通metadataに1回だけ置く", () => {
   const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
   assert.match(layout, /"google-adsense-account":\s*"ca-pub-6861979311690077"/);
