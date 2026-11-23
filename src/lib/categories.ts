@@ -60,13 +60,29 @@ export function categoryHref(id: CategoryId): string {
 const relatedCategoryPages: Record<string, { href: string; label: string }[]> = {
   "犬 用品": [
     { href: "/categories/dog-food", label: "ドッグフード" },
+    { href: "/categories/treats", label: "おやつ" },
     { href: "/categories/pet-sheets", label: "ペットシーツ" },
+    { href: "/categories/pet-toilet", label: "トイレ用品" },
   ],
   "猫 用品": [
     { href: "/categories/cat-food", label: "キャットフード" },
     { href: "/categories/cat-litter", label: "猫砂" },
+    { href: "/categories/cat-tower", label: "キャットタワー" },
+    { href: "/categories/treats", label: "おやつ" },
+    { href: "/categories/pet-toilet", label: "トイレ用品" },
     { href: "/categories/pet-sheets", label: "ペットシーツ" },
   ],
+  おやつ: [{ href: "/categories/treats", label: "おやつ" }],
+  キャットタワー: [{ href: "/categories/cat-tower", label: "キャットタワー" }],
+  猫砂: [
+    { href: "/categories/cat-litter", label: "猫砂" },
+    { href: "/categories/pet-toilet", label: "トイレ用品" },
+  ],
+  ペットシーツ: [
+    { href: "/categories/pet-sheets", label: "ペットシーツ" },
+    { href: "/categories/pet-toilet", label: "トイレ用品" },
+  ],
+  トイレ: [{ href: "/categories/pet-toilet", label: "トイレ用品" }],
 };
 
 export function relatedCategoryLinks(query: string): { href: string; label: string }[] {

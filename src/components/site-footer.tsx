@@ -13,6 +13,14 @@ const columns = [
   {
     title: "ご利用ガイド",
     links: [
+      { href: "/categories", label: "品目一覧" },
+      { href: "/categories/dog-food", label: "ドッグフード" },
+      { href: "/categories/cat-food", label: "キャットフード" },
+      { href: "/categories/cat-litter", label: "猫砂" },
+      { href: "/categories/pet-sheets", label: "ペットシーツ" },
+      { href: "/categories/treats", label: "おやつ" },
+      { href: "/categories/cat-tower", label: "キャットタワー" },
+      { href: "/categories/pet-toilet", label: "トイレ用品" },
       { href: "/pets/dog", label: "犬用品の価格比較" },
       { href: "/pets/cat", label: "猫用品の価格比較" },
       { href: "/articles", label: "ペット用品の選び方" },

@@ -2,6 +2,11 @@ import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
 import { shareMetadata } from "@/lib/seo/share-metadata";
 
+// 運営責任者の氏名、または法人の正式名称。未記入のあいだは行を出さない。
+const operatorName = "";
+// 掲載できる所在地。未記入のあいだは行を出さない。
+const operatorAddress = "";
+
 export const metadata = shareMetadata({
   title: "ペトカクについて",
   description: "ペトカクの目的、価格の集め方と更新、広告の扱い、運営者と連絡先の説明です。",
@@ -70,14 +75,8 @@ export default function AboutPage() {
         </Link>
         にもあります。
       </p>
-      <div className="rounded-3xl border border-clay/30 bg-sand px-4 py-3">
-        <h2>運営者が記入する項目</h2>
-        <p>次の項目は、実在の情報だけを掲載します。確認できるまで推測では書きません。</p>
-        <ul>
-          <li>TODO: 運営責任者の氏名、または法人の正式名称</li>
-          <li>TODO: 所在地（掲載できる住所）</li>
-        </ul>
-      </div>
+      {operatorName ? <p>運営責任者は{operatorName}です。</p> : null}
+      {operatorAddress ? <p>所在地は{operatorAddress}です。</p> : null}
       <h2>関連する説明</h2>
       <ul>
         <li>

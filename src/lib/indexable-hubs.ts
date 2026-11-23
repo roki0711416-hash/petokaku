@@ -11,7 +11,7 @@ export const homeCategoryCards = [
   { label: "キャットフード", href: "/categories/cat-food" },
   { label: "猫砂・トイレ用品", href: "/categories/cat-litter" },
   { label: "ペットシーツ", href: "/categories/pet-sheets" },
-  { label: "おやつ", href: "/pets/dog?category=treat" },
+  { label: "おやつ", href: "/categories/treats" },
   { label: "おもちゃ・グッズ", href: "/pets/cat?category=toy" },
 ] as const;
 
@@ -25,7 +25,9 @@ export const homeKeywordLinks = [
   { label: "猫砂", href: "/categories/cat-litter" },
   { label: "ペットシーツ", href: "/categories/pet-sheets" },
   { label: "ロイヤルカナン", href: brandSearchHref("ロイヤルカナン") },
-  { label: "おやつ", href: "/pets/dog?category=treat" },
+  { label: "おやつ", href: "/categories/treats" },
+  { label: "キャットタワー", href: "/categories/cat-tower" },
+  { label: "トイレ用品", href: "/categories/pet-toilet" },
   { label: "おもちゃ", href: "/pets/cat?category=toy" },
   { label: "チモシー", href: "/pets/small-animal" },
   { label: "ネクトン", href: brandSearchHref("ネクトン") },

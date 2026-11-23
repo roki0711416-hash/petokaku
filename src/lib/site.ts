@@ -78,8 +78,26 @@ export function indexedJanPath(janCode: string): string {
   return `/products/jan/${janCode}`;
 }
 
-export function sitemapEntries(): MetadataRoute.Sitemap {
+export type SitemapBuildInput = {
+  now?: Date;
+  categoryUpdatedAt?: Readonly<Record<string, string>>;
+};
+
+function modifiedAt(value: string | undefined, now: Date): Date {
+  if (!value) {
+    return now;
+  }
+  const time = Date.parse(value);
+  if (Number.isNaN(time)) {
+    return now;
+  }
+  return new Date(time);
+}
+
+export function sitemapEntries(input: SitemapBuildInput = {}): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
+  const now = input.now ?? new Date();
+  const updated = input.categoryUpdatedAt ?? {};
   const pages = publicPaths.map((path) => ({
     url: new URL(path, siteUrl).toString(),
     changeFrequency: "weekly" as const,
@@ -87,15 +105,26 @@ export function sitemapEntries(): MetadataRoute.Sitemap {
   }));
   const guides = categoryGuidePaths().map((path) => ({
     url: new URL(path, siteUrl).toString(),
+    lastModified: modifiedAt(updated[path], now),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
+  const categoryIndexModified = guides.reduce((latest, entry) => {
+    return entry.lastModified.getTime() > latest.getTime() ? entry.lastModified : latest;
+  }, guides[0]?.lastModified ?? now);
+  const categoriesIndex = {
+    url: new URL("/categories", siteUrl).toString(),
+    lastModified: categoryIndexModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  };
   const petEntries = petPages().map((pet) => ({
     url: new URL(pet.path, siteUrl).toString(),
+    lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
-  return [...pages, ...guides, ...petEntries];
+  return [...pages, ...guides, categoriesIndex, ...petEntries];
 }
 
 export function privateRobots(): Metadata["robots"] {

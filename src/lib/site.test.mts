@@ -56,6 +56,10 @@ const publicSitemap = [
   "https://petokaku.com/categories/cat-food",
   "https://petokaku.com/categories/cat-litter",
   "https://petokaku.com/categories/pet-sheets",
+  "https://petokaku.com/categories/treats",
+  "https://petokaku.com/categories/cat-tower",
+  "https://petokaku.com/categories/pet-toilet",
+  "https://petokaku.com/categories",
   "https://petokaku.com/pets/dog",
   "https://petokaku.com/pets/cat",
   "https://petokaku.com/pets/small-animal",
@@ -101,6 +105,49 @@ test("サイトマップの固定ページは公開ページだけで、商品�
     );
     assert.equal(entries[0]?.priority, 1);
     assert.ok(entries.slice(1).every((entry) => entry.priority === 0.6 && entry.changeFrequency === "weekly"));
+  });
+});
+
+test("品目ページの lastmod はデータの更新時刻、無ければ同じ生成時刻を使う", () => {
+  const now = new Date("2026-11-23T03:00:00.000Z");
+  withEnv({ NEXT_PUBLIC_SITE_URL: "https://petokaku.com" }, () => {
+    const dated = sitemapEntries({
+      now,
+      categoryUpdatedAt: {
+        "/categories/cat-litter": "2026-10-16T01:00:00.000Z",
+        "/categories/dog-food": "not-a-date",
+      },
+    });
+    const litter = dated.find((entry) => entry.url.endsWith("/categories/cat-litter"));
+    const dog = dated.find((entry) => entry.url.endsWith("/categories/dog-food"));
+    const treats = dated.find((entry) => entry.url.endsWith("/categories/treats"));
+    const index = dated.find((entry) => entry.url.endsWith("/categories"));
+    const pet = dated.find((entry) => entry.url.endsWith("/pets/dog"));
+    const about = dated.find((entry) => entry.url.endsWith("/about"));
+    assert.equal(litter?.lastModified instanceof Date && litter.lastModified.toISOString(), "2026-10-16T01:00:00.000Z");
+    assert.equal(dog?.lastModified, now);
+    assert.equal(treats?.lastModified, now);
+    assert.equal(index?.lastModified, now);
+    assert.equal(pet?.lastModified, now);
+    assert.equal(about?.lastModified, undefined);
+
+    const onlyData = sitemapEntries({
+      now,
+      categoryUpdatedAt: {
+        "/categories/dog-food": "2026-10-01T00:00:00.000Z",
+        "/categories/cat-food": "2026-10-17T00:00:00.000Z",
+        "/categories/cat-litter": "2026-10-16T00:00:00.000Z",
+        "/categories/pet-sheets": "2026-10-14T00:00:00.000Z",
+        "/categories/treats": "2026-10-02T00:00:00.000Z",
+        "/categories/cat-tower": "2026-10-03T00:00:00.000Z",
+        "/categories/pet-toilet": "2026-10-04T00:00:00.000Z",
+      },
+    });
+    const indexFromData = onlyData.find((entry) => entry.url.endsWith("/categories"));
+    assert.equal(indexFromData?.lastModified instanceof Date && indexFromData.lastModified.toISOString(), "2026-10-17T00:00:00.000Z");
+    const tower = onlyData.find((entry) => entry.url.endsWith("/categories/cat-tower"));
+    const sheets = onlyData.find((entry) => entry.url.endsWith("/categories/pet-sheets"));
+    assert.notEqual(tower?.lastModified, sheets?.lastModified);
   });
 });
 
