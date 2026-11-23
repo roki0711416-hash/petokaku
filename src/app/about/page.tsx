@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { InfoArticle } from "@/components/info-article";
+import { operatorAddress, operatorName } from "@/lib/operator";
 import { shareMetadata } from "@/lib/seo/share-metadata";
-
-// 運営責任者の氏名、または法人の正式名称。未記入のあいだは行を出さない。
-const operatorName = "";
-// 掲載できる所在地。未記入のあいだは行を出さない。
-const operatorAddress = "";
 
 export const metadata = shareMetadata({
   title: "ペトカクについて",
@@ -63,7 +59,8 @@ export default function AboutPage() {
         です。Amazonのアソシエイトとして、ペトカク運営事務局は適格販売により収入を得ています。
       </p>
       <h2 id="operator">運営者</h2>
-      <p>運営者は、ペトカク運営事務局です。会員登録や、このサイト上の注文機能はありません。</p>
+      {operatorName ? <p>運営者: {operatorName}</p> : <p>運営者は、ペトカク運営事務局です。</p>}
+      <p>会員登録や、このサイト上の注文機能はありません。</p>
       <p>
         連絡先は
         <a href="mailto:petokaku@outlook.jp" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
@@ -75,7 +72,6 @@ export default function AboutPage() {
         </Link>
         にもあります。
       </p>
-      {operatorName ? <p>運営責任者は{operatorName}です。</p> : null}
       {operatorAddress ? <p>所在地は{operatorAddress}です。</p> : null}
       <h2>関連する説明</h2>
       <ul>

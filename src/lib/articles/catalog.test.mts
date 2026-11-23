@@ -143,6 +143,8 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
   assert.equal(litter.products.filter((product) => product.href === "/products/jan/4903351011250").length, 1);
   const data = articleStructuredData(howTo, "https://petokaku.com/articles/how-to-compare-pet-prices");
   assert.equal(data["@type"], "Article");
+  assert.deepEqual(data.author, { "@type": "Person", name: "ごぼう" });
+  assert.equal(JSON.stringify(data.author).includes("sameAs"), false);
   assert.equal(data.headline, "ペット用品の価格比較の見方");
   assert.equal(data.image, "https://petokaku.com/article-images/how-to-compare-pet-prices.png");
   assert.equal(data.datePublished, "2026-10-13");
