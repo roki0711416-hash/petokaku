@@ -3,6 +3,7 @@ import { AmazonAssociateLink } from "@/components/amazon-associate-link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
 import { ProductSectionTabs } from "@/components/product-section-tabs";
+import { ProductReading } from "@/components/product-reading";
 import { PriceHistory } from "@/components/ui/price-history";
 import type { RelatedArticleLink } from "@/lib/articles/related-for-jan";
 import { productPageCrumbs } from "@/lib/indexable-hubs";
@@ -156,6 +157,15 @@ export function YahooProductView({
           {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
         </div>
       )}
+
+      <ProductReading
+        name={visibleName}
+        category={product.category}
+        genreName={product.sourceCategoryName}
+        sizeLabel={capacity}
+        recordedDays={priceSummary?.observedDays ?? null}
+        sufficiency={priceSummary?.sufficiency ?? null}
+      />
 
       <section id="product-info" aria-labelledby="product-info-heading" className="mt-5 scroll-mt-[var(--product-section-offset,7rem)] md:mt-8 lg:scroll-mt-24">
         <h2 id="product-info-heading" className="text-lg font-bold tracking-tight text-ink">

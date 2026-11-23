@@ -110,11 +110,11 @@ export default async function HomePage() {
             ))}
           </ol>
           <p className="mt-3 text-sm leading-6 text-muted">
-            詳しくは
+            操作は
             <Link href="/guide" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
               サイトの使い方
             </Link>
-            と
+            、フード・猫砂・シーツ・おやつ・キャットタワーの選び方と、送料やポイントを含めた価格の見方は
             <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
               ペット用品の選び方（お役立ち記事）
             </Link>

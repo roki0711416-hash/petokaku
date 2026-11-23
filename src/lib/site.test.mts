@@ -44,6 +44,7 @@ function withEnv(values: Partial<Record<(typeof envKeys)[number], string | undef
 const publicSitemap = [
   "https://petokaku.com/",
   "https://petokaku.com/about",
+  "https://petokaku.com/price-data",
   "https://petokaku.com/guide",
   "https://petokaku.com/articles",
   "https://petokaku.com/contact",
@@ -161,7 +162,8 @@ test("検索・プレビュー・サンプル商品は noindex、JANページは
   assert.match(jan, /janProductMetadata/);
   assert.match(jan, /janPageRobots\(false\)/);
   assert.match(jan, /export async function generateMetadata\(\{ params \}/);
-  assert.match(janMetadata, /janPageRobots\(true\)/);
+  assert.match(janMetadata, /janPageRobots\(input\.hasComparableOffers !== false\)/);
+  assert.match(jan, /hasComparableOffers/);
   assert.match(janMetadata, /alternates: \{ canonical \}/);
   assert.doesNotMatch(janMetadata, /searchParams/);
   const home = read("../app/page.tsx");

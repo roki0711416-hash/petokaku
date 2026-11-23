@@ -7,6 +7,7 @@ import {
   articleIsValid,
   articleSitemapPaths,
   articleStructuredData,
+  isArticleInternalHref,
   isArticleProductHref,
   publishedArticle,
   publishedArticles,
@@ -42,6 +43,9 @@ test("商品リンクは既存のJAN詳細だけを受け、不正な記事は�
   assert.equal(isArticleProductHref("/pets/cat?category=litter"), true);
   assert.equal(isArticleProductHref("https://example.com/item"), false);
   assert.equal(isArticleProductHref("/search?q=猫砂"), false);
+  assert.equal(isArticleInternalHref("/pets/cat"), true);
+  assert.equal(isArticleInternalHref("/price-data"), true);
+  assert.equal(isArticleInternalHref("/search?q=猫砂"), false);
   const broken = article({ products: [{ href: "https://www.amazon.co.jp/dp/B00TEST", label: "外部" }] });
   assert.equal(articleIsValid(broken, [broken]), false);
   assert.deepEqual(publishedArticles([broken]), []);
@@ -81,9 +85,42 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
     assert.equal(liveText.includes(word), false);
   }
   const live = publishedArticles(articles);
-  assert.equal(live.length, 5);
-  for (const slug of ["cat-litter-types", "how-to-choose-cat-food", "how-to-choose-dog-food", "how-to-choose-pet-sheets"]) {
+  assert.equal(live.length, 9);
+  for (const slug of [
+    "cat-litter-types",
+    "how-to-choose-cat-food",
+    "how-to-choose-dog-food",
+    "how-to-choose-pet-sheets",
+    "how-to-choose-treats",
+    "how-to-choose-cat-tower",
+    "how-to-buy-pet-supplies",
+    "how-to-choose-cat-toilet",
+  ]) {
     assert.equal(live.some((item) => item.slug === slug), true);
+  }
+  for (const item of live) {
+    const body = [
+      item.title,
+      item.description,
+      ...(item.takeaways ?? []),
+      ...item.blocks.flatMap((block) => {
+        if (block.type === "ul") {
+          return block.items;
+        }
+        if (block.type === "table") {
+          return [...block.headers, ...block.rows.flat()];
+        }
+        if (block.type === "p" || block.type === "h2" || block.type === "h3" || block.type === "note") {
+          return [block.text];
+        }
+        if (block.type === "source" || block.type === "link") {
+          return [block.label];
+        }
+        return [];
+      }),
+    ].join("");
+    const japanese = body.match(/[\u3040-\u30ff\u3400-\u9fff]/g)?.length ?? 0;
+    assert.equal(japanese >= 2000, true, item.slug);
   }
   assert.equal(articleSitemapPaths(articles).includes("/articles/how-to-choose-pet-sheets"), true);
   const sheets = live.find((item) => item.slug === "how-to-choose-pet-sheets");
@@ -117,6 +154,6 @@ test("初期の公開記事は比較ルールだけで、未確認の評価は�
     assert.equal(item.image.src.startsWith("/article-images/"), true);
     assert.equal(existsSync(new URL(`../../../public${item.image.src}`, import.meta.url)), true);
   }
-  assert.equal(data.dateModified, "2026-10-18");
+  assert.equal(data.dateModified, "2026-11-23");
   assert.equal(data.mainEntityOfPage, "https://petokaku.com/articles/how-to-compare-pet-prices");
 });

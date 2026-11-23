@@ -4,7 +4,11 @@ import { FooterPriceNote } from "@/components/footer-price-note";
 const columns = [
   {
     title: "ペトカクについて",
-    links: [{ href: "/about", label: "ペトカクについて" }],
+    links: [
+      { href: "/about", label: "ペトカクについて" },
+      { href: "/about#operator", label: "運営者情報" },
+      { href: "/price-data", label: "価格データについて" },
+    ],
   },
   {
     title: "ご利用ガイド",

@@ -27,8 +27,11 @@ import { janPageRobots } from "@/lib/site";
 import { safeHttpUrl } from "@/lib/urls";
 import type { ProductDetail } from "@/lib/types";
 
+const loadRakutenJanOffersCached = cache(loadRakutenJanOffers);
+const loadRakutenShopOffersCached = cache(loadRakutenShopOffers);
+
 const loadRakutenOnlyComparison = cache(async (jan: string): Promise<{ product: ProductDetail; truncated: boolean } | "temporary" | null> => {
-  const shops = await loadRakutenShopOffers(jan);
+  const shops = await loadRakutenShopOffersCached(jan);
   if (!shops.ok) {
     if (shops.reason === "rate-limited" || shops.reason === "request-failed") {
       return "temporary";
@@ -149,11 +152,23 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
         imageUrl: safeHttpUrl(fallback.product.imageUrl),
         sizeLabel: fallback.product.sizeLabel,
         quantityConfidence: fallback.product.quantityConfidence,
+        hasComparableOffers: fallback.product.offers.length > 0,
       });
     }
     return { title: outcome === "missing" ? "商品が見つかりません" : "商品を表示できません", robots: janPageRobots(false) };
   }
   const detail = result.adapted.detail;
+  const yahooOffers = confirmedJanOffers(jan, [{ janCode: detail.janCode, offers: detail.offers }]);
+  let hasComparableOffers = yahooOffers.length > 0;
+  if (!hasComparableOffers) {
+    const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffersCached(jan), loadRakutenShopOffersCached(jan)]);
+    hasComparableOffers =
+      confirmedJanOffers(jan, [
+        { janCode: detail.janCode, offers: detail.offers },
+        { janCode: jan, offers: rakuten.ok ? rakuten.offers : [] },
+        { janCode: jan, offers: rakutenShops.ok ? rakutenShops.offers : [] },
+      ]).length > 0;
+  }
   return janProductMetadata({
     jan,
     name: detail.name,
@@ -161,6 +176,7 @@ export async function generateMetadata({ params }: JanPageProps): Promise<Metada
     imageUrl: safeHttpUrl(detail.imageUrl),
     sizeLabel: detail.sizeLabel,
     quantityConfidence: detail.quantityConfidence,
+    hasComparableOffers,
   });
 }
 
@@ -205,7 +221,7 @@ export default async function YahooJanPage({ params, searchParams }: JanPageProp
     );
   }
 
-  const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffers(jan), loadRakutenShopOffers(jan)]);
+  const [rakuten, rakutenShops] = await Promise.all([loadRakutenJanOffersCached(jan), loadRakutenShopOffersCached(jan)]);
 
   if (isSupabaseConfigured()) {
     try {

@@ -65,7 +65,7 @@ function autoJanSeo(input: ComparisonNameInput & { jan: string }): JanSeoCopy {
   return { title, description };
 }
 
-export function janProductMetadata(input: ComparisonNameInput & { jan: string; imageUrl?: string | null }): Metadata {
+export function janProductMetadata(input: ComparisonNameInput & { jan: string; imageUrl?: string | null; hasComparableOffers?: boolean }): Metadata {
   const copy = curatedJanSeo(input.jan) ?? autoJanSeo(input);
   const canonical = `/products/jan/${input.jan}`;
   const image = input.imageUrl?.startsWith("https://") ? input.imageUrl : null;
@@ -77,7 +77,7 @@ export function janProductMetadata(input: ComparisonNameInput & { jan: string; i
     title: copy.title,
     description: copy.description,
     alternates: { canonical },
-    robots: janPageRobots(true),
+    robots: janPageRobots(input.hasComparableOffers !== false),
     openGraph: {
       title: copy.title,
       description: copy.description,

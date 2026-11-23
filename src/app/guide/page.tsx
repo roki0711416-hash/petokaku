@@ -64,10 +64,18 @@ export default function GuidePage() {
       </ul>
       <p>
         比較の見方は
+        <Link href="/articles/how-to-compare-pet-prices" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          価格比較の見方
+        </Link>
+        と
         <Link href="/articles" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
           お役立ち記事
         </Link>
-        にもまとめています。操作で分からないことは、
+        、金額の出典と更新は
+        <Link href="/price-data" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
+          価格データについて
+        </Link>
+        にまとめています。操作で分からないことは、
         <Link href="/contact" className="mx-1 font-medium text-forest-deep underline underline-offset-4">
           お問い合わせ
         </Link>
