@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ListAdUnit } from "@/components/ad-unit";
 import { HomeCatalogSections } from "@/components/home-catalog-sections";
 import { HomeSearchKeywords, HomeTopics } from "@/components/home-topics";
 import { SearchForm } from "@/components/search-form";
@@ -93,6 +94,11 @@ export default async function HomePage() {
       </section>
       <HomeTopics />
       <HomeCatalogSections catalog={catalog} articles={publishedArticles(articles)} />
+      <div className="px-4">
+        <div className="mx-auto max-w-6xl">
+          <ListAdUnit />
+        </div>
+      </div>
       <section aria-labelledby="howto-heading" className="px-4 pt-6 pb-8">
         <div className="mx-auto max-w-6xl">
           <h2 id="howto-heading" className="text-base font-medium text-ink md:text-lg">

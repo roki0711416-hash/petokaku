@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ListAdUnit } from "@/components/ad-unit";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { hubPageCrumbs } from "@/lib/indexable-hubs";
 import { ComparableProductCards } from "@/components/comparable-product-cards";
@@ -85,6 +86,7 @@ export function ItemGuidePage({ guide }: { guide: ItemGuide }) {
             />
           </div>
         ) : null}
+        <ListAdUnit />
 
         {guide.relatedGuides && guide.relatedGuides.length > 0 ? (
           <section aria-labelledby="guide-article-heading" className="mt-12">

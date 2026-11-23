@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProductAdUnit } from "@/components/ad-unit";
 import { AmazonAssociateLink } from "@/components/amazon-associate-link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MallCompare } from "@/components/mall-compare";
@@ -156,6 +157,8 @@ export function YahooProductView({
           {amazonUrl ? <AmazonAssociateLink url={amazonUrl} /> : null}
         </div>
       )}
+
+      <ProductAdUnit />
 
       <section id="product-info" aria-labelledby="product-info-heading" className="mt-5 scroll-mt-[var(--product-section-offset,7rem)] md:mt-8 lg:scroll-mt-24">
         <h2 id="product-info-heading" className="text-lg font-bold tracking-tight text-ink">

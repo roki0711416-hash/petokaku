@@ -95,7 +95,7 @@ export function CookieSettings() {
         </div>
       </fieldset>
       <p className="text-sm leading-7 text-muted">
-        AdSenseの確認用スクリプトは全ページで読み込みます。広告ユニットの表示設定は入れていません。広告Cookieの切り替え項目はありません。
+        AdSenseのスクリプトは全ページで読み込みます。広告ユニットは、IDを設定した比較・一覧・記事のページに出します。広告Cookieの切り替え項目はありません。
       </p>
       <button type="submit" className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-5 text-sm text-white hover:bg-forest-deep sm:w-auto">
         設定を保存する

@@ -16,3 +16,13 @@ npm run dev
 ## いまの価格データ
 
 商品は `src/data/products.json`、ショップごとの価格は `src/data/offers.json` に分かれています。外部の通販サイトへは接続しません。
+
+## 広告（AdSense）
+
+表示広告のスロットIDは、次の環境変数です。説明は `.env.example` にあります。
+
+- `NEXT_PUBLIC_ADSENSE_SLOT_PRODUCT` … 商品ページ。価格比較の下
+- `NEXT_PUBLIC_ADSENSE_SLOT_LIST` … トップ、ペット、品目、検索結果。商品一覧のあと
+- `NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE` … 記事の途中と末尾
+
+未設定のときは枠を出しません。IDは AdSense で広告ユニットを作ってから `.env.local` と Vercel に置きます。このREADMEと `.env.example` には書きません。管理画面で自動広告を有効にする場合は、これらのIDは不要です。
