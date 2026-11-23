@@ -7,7 +7,7 @@ import { shareMetadata } from "@/lib/seo/share-metadata";
 import { robotsMetadata } from "@/lib/site";
 
 const title = "ペット用品の選び方";
-const description = "お役立ち記事・購入ガイド。フードや猫砂、シーツの選び方と、価格比較の見方をまとめています。";
+const description = "フード、猫砂、シーツ、おやつ、キャットタワーの選び方と、送料やポイントを含めた価格の見方をまとめています。";
 
 export const metadata: Metadata = {
   ...shareMetadata({ title, description, path: "/articles" }),
@@ -26,7 +26,9 @@ export default function ArticlesPage() {
         ]}
       />
       <h1 className="mt-4 text-2xl leading-snug font-medium tracking-tight text-ink md:text-3xl">{title}</h1>
-      <p className="mt-2 text-sm leading-6 text-muted">お役立ち記事・購入ガイドとして、比較の見方と品目ごとの選び方をまとめています。</p>
+      <p className="mt-2 text-sm leading-6 text-muted">
+        購入ガイドです。品目の見方と、ショップごとの合計の読み方を書いています。金額の例は計算手順であり、特定の店の販売価格ではありません。
+      </p>
       {list.length === 0 ? (
         <p className="mt-6 text-sm leading-7 text-muted">公開中の記事はまだありません。</p>
       ) : (

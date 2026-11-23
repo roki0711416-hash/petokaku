@@ -60,6 +60,8 @@ const pets: readonly PetPage[] = [
     ],
     related: [
       { href: petPath("cat"), label: "猫用品" },
+      { href: "/articles/how-to-choose-dog-food", label: "ドッグフードの選び方" },
+      { href: "/articles/how-to-choose-treats", label: "おやつの与え方と選び方" },
       { href: "/categories/dog-food", label: "ドッグフード" },
       { href: "/categories/treats", label: "おやつ" },
       { href: "/categories/pet-sheets", label: "ペットシーツ" },
@@ -103,6 +105,8 @@ const pets: readonly PetPage[] = [
       { href: "/categories/treats", label: "おやつ" },
       { href: "/categories/pet-toilet", label: "トイレ用品" },
       { href: "/articles/cat-litter-types", label: "猫砂の種類と選び方" },
+      { href: "/articles/how-to-choose-cat-tower", label: "キャットタワーの選び方" },
+      { href: "/articles/how-to-choose-treats", label: "おやつの与え方と選び方" },
       { href: "/categories/pet-sheets", label: "ペットシーツ" },
       { href: "/products/jan/3182550706933", label: "ロイヤルカナン インドア 成猫用 4kg" },
       { href: "/products/jan/4903351011250", label: "LION ニオイをとる砂 5L×4個" },

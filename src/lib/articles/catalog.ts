@@ -54,6 +54,8 @@ const articleImagePattern = /^\/article-images\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:png
 const productHrefPattern = /^\/products\/jan\/[0-9]{13}$/;
 const categoryHrefPattern = /^\/categories\/[a-z0-9-]+$/;
 const petsCategoryHrefPattern = /^\/pets\/(?:dog|cat)\?category=[a-z]+$/;
+const petHubHrefPattern = /^\/pets\/(?:dog|cat|small-animal|bird|fish|reptile)$/;
+const infoHrefPattern = /^\/(?:about|guide|price-data|affiliate|privacy|contact)$/;
 const articleHrefPattern = /^\/articles\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function calendarDate(value: string): boolean {
@@ -73,7 +75,13 @@ export function isArticleProductHref(href: string): boolean {
 }
 
 export function isArticleInternalHref(href: string): boolean {
-  return categoryHrefPattern.test(href) || petsCategoryHrefPattern.test(href) || articleHrefPattern.test(href);
+  return (
+    categoryHrefPattern.test(href) ||
+    petsCategoryHrefPattern.test(href) ||
+    petHubHrefPattern.test(href) ||
+    infoHrefPattern.test(href) ||
+    articleHrefPattern.test(href)
+  );
 }
 
 const sourceHosts = new Set(["pffta.org", "www.pffta.org", "petfood.or.jp", "www.petfood.or.jp"]);
