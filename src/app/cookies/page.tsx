@@ -5,7 +5,7 @@ import { shareMetadata } from "@/lib/seo/share-metadata";
 
 export const metadata = shareMetadata({
   title: "Cookie設定",
-  description: "ペトカクのCookie、アクセス解析の設定、導入を予定している広告Cookieの説明です。",
+  description: "ペトカクのCookie、アクセス解析、Google AdSenseの説明です。",
   path: "/cookies",
 });
 
@@ -14,7 +14,7 @@ export default function CookiesPage() {
     <InfoArticle
       title="Cookie設定"
       path="/cookies"
-      lead="解析のCookieは、受け入れるまで読み込みません。AdSenseの確認用スクリプトは全ページで読み込みます。2026年11月23日に更新しました。"
+      lead="解析のCookieは、受け入れるまで読み込みません。受け入れると、ページのURLとショップのリンクを開いた記録を送ります。AdSenseのスクリプトは全ページで読み込み、広告ユニットIDがあるページに表示広告を出します。2026年11月23日に更新しました。"
     >
       <h2>必須にあたるもの</h2>
       <p>
@@ -27,7 +27,7 @@ export default function CookiesPage() {
       <CookieSettings />
       <h2>広告</h2>
       <p>
-        サイト所有権の確認のため、Google AdSenseのローダースクリプトを全ページで読み込みます。現時点では広告ユニットや自動広告の表示設定は入れていません。このスクリプトにより、Google側がCookie等を使う場合があります。広告Cookieのオンとオフを切り替える設定は、このページにはありません。
+        Google AdSenseのスクリプト（pagead2.googlesyndication.com）は、全ページで読み込みます。アクセス解析の受け入れ・拒否とは別に動き、このページに広告Cookieのオンとオフはありません。広告ユニットIDを設定しているとき、商品の価格比較の下、トップ・ペット・品目・検索の商品一覧のあと、記事の途中と末尾に表示広告を出します。IDがないときは枠を出しません。プライバシーポリシー、利用規約、広告・アフィリエイト、Cookie設定、ペトカクについて、お問い合わせ、サイトの使い方、記事一覧、エラーページには出しません。スクリプトと広告の読み込みに伴い、Google側がCookie等を使う場合があります。
       </p>
       <p>
         Googleなどの第三者配信事業者がCookieを使い、利用者がこのサイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信する場合があります。Googleの広告Cookieにより、Googleおよびそのパートナーが適切な広告を表示できるようになる場合もあります。パーソナライズを止めるときは

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ListAdUnit } from "@/components/ad-unit";
 import { SearchForm } from "@/components/search-form";
 import { YahooSearchResults } from "@/components/yahoo-search-results";
 import Link from "next/link";
@@ -34,9 +35,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       />
       <RelatedCategoryLinks query={query} />
       {query ? (
-        <Suspense key={query} fallback={<SearchResultsPending />}>
-          <YahooSearchResults query={query} />
-        </Suspense>
+        <>
+          <Suspense key={query} fallback={<SearchResultsPending />}>
+            <YahooSearchResults query={query} />
+          </Suspense>
+          <ListAdUnit />
+        </>
       ) : (
         <p className="mt-8 text-muted">商品名を入力して検索してください。</p>
       )}

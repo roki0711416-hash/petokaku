@@ -29,8 +29,10 @@ test("GA4は許可があるときだけ読み、自動ページビューと重�
 test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く", () => {
   const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
   const script = readFileSync(new URL("../components/adsense-script.tsx", import.meta.url), "utf8");
+  const config = readFileSync(new URL("./adsense.ts", import.meta.url), "utf8");
   assert.equal(layout.match(/<AdSenseScript/g)?.length, 1);
-  assert.match(script, /ca-pub-6861979311690077/);
+  assert.match(config, /ca-pub-6861979311690077/);
+  assert.match(script, /adsensePublisherId/);
   assert.match(script, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=/);
   assert.match(script, /crossOrigin="anonymous"/);
   assert.match(script, /strategy="beforeInteractive"/);
@@ -39,15 +41,19 @@ test("AdSense確認用スクリプトは共通レイアウトに1回だけ置く
 
 test("ads.txtの発行者IDはAdSenseスクリプトと同じ", () => {
   const script = readFileSync(new URL("../components/adsense-script.tsx", import.meta.url), "utf8");
+  const config = readFileSync(new URL("./adsense.ts", import.meta.url), "utf8");
   const ads = readFileSync(new URL("../../public/ads.txt", import.meta.url), "utf8").trim();
-  const pub = script.match(/ca-pub-(\d+)/)?.[1];
+  const pub = config.match(/ca-pub-(\d+)/)?.[1];
   assert.ok(pub);
+  assert.match(script, /adsensePublisherId/);
   assert.equal(ads, `google.com, pub-${pub}, DIRECT, f08c47fec0942fa0`);
   assert.equal(script.match(/pagead2\.googlesyndication\.com/g)?.length, 1);
 });
 
 test("AdSense所有権確認用メタタグは共通metadataに1回だけ置く", () => {
   const layout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
-  assert.match(layout, /"google-adsense-account":\s*"ca-pub-6861979311690077"/);
+  const config = readFileSync(new URL("./adsense.ts", import.meta.url), "utf8");
+  assert.match(layout, /"google-adsense-account":\s*adsensePublisherId/);
   assert.equal(layout.match(/google-adsense-account/g)?.length, 1);
+  assert.match(config, /export const adsensePublisherId = "ca-pub-6861979311690077"/);
 });

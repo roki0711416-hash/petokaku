@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ListAdUnit } from "@/components/ad-unit";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { hubPageCrumbs } from "@/lib/indexable-hubs";
 import { PetListingBrowser } from "@/components/pet-listing-browser";
@@ -57,6 +58,7 @@ export function PetKindPage({ pet, listings, categoryId }: { pet: PetPage; listi
             listings.yahoo.hasNext || listings.rakuten.hasNext ? listingPageHref(pet.path, selected?.id ?? null, listings.page + 1) : null
           }
         />
+        <ListAdUnit />
 
         <section className="mt-8" aria-labelledby="pet-points-heading">
           <h2 id="pet-points-heading" className="text-lg font-medium text-ink">

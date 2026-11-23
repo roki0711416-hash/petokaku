@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Fragment } from "react";
+import { ArticleAdUnit } from "@/components/ad-unit";
 import { ArticleCard } from "@/components/article-card";
 import { ArticleDiagram } from "@/components/article-diagrams";
 import { ArticleProductCards } from "@/components/article-product-cards";
@@ -17,6 +19,7 @@ import {
   type Article,
   type ArticleBlock,
 } from "@/lib/articles/catalog";
+import { articleMidAdBeforeIndex } from "@/lib/adsense";
 import { defaultShareImage } from "@/lib/seo/share-metadata";
 import { getSiteUrl, privateRobots, robotsMetadata } from "@/lib/site";
 
@@ -153,6 +156,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const pageUrl = new URL(articlePath(article.slug), getSiteUrl()).toString();
   const related = relatedArticles(article, articles);
   const headings = article.blocks.flatMap((block, index) => (block.type === "h2" ? [{ id: `section-${index}`, text: block.text }] : []));
+  const midAdAt = articleMidAdBeforeIndex(article.blocks);
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-6 md:py-10">
@@ -218,7 +222,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       ) : null}
       <div className="mt-6 grid gap-4 text-sm leading-7 text-ink">
         {article.blocks.map((block, index) => (
-          <ArticleBlockView key={index} block={block} index={index} article={article} />
+          <Fragment key={index}>
+            {index === midAdAt ? <ArticleAdUnit /> : null}
+            <ArticleBlockView block={block} index={index} article={article} />
+          </Fragment>
         ))}
       </div>
       {article.products.length > 0 && !article.blocks.some((block) => block.type === "products") ? (
@@ -226,6 +233,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <ArticleProductCards article={article} />
         </div>
       ) : null}
+      <ArticleAdUnit />
       {related.length > 0 ? (
         <section aria-labelledby="related-articles" className="mt-8">
           <h2 id="related-articles" className="text-base font-medium text-ink">

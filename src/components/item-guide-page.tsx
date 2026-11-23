@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ListAdUnit } from "@/components/ad-unit";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ComparableProductCards } from "@/components/comparable-product-cards";
 import { CatalogIcon } from "@/components/ui/catalog-card";
@@ -89,6 +90,7 @@ export async function ItemGuidePage({ guide }: { guide: ItemGuide }) {
             <p className="mt-4 max-w-3xl text-sm leading-7 text-muted">確認できた商品は、まだこの一覧にありません。</p>
           )}
         </section>
+        <ListAdUnit />
 
         <section aria-labelledby="guide-points-heading" className="mt-8">
           <h2 id="guide-points-heading" className="text-lg font-medium text-ink">

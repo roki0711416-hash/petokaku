@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
 import { Suspense } from "react";
 import { AdSenseScript } from "@/components/adsense-script";
+import { adsensePublisherId } from "@/lib/adsense";
 import { CookieBanner } from "@/components/cookie-consent";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { NoticeBar } from "@/components/notice-bar";
@@ -35,9 +36,9 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "ペトカク",
   robots: robotsMetadata(),
-  // AdSenseサイト所有権確認用（広告ユニットの設定ではない）
+  // AdSenseサイト所有権確認。広告ユニットは各ページで、同じパブリッシャーIDを使う。
   other: {
-    "google-adsense-account": "ca-pub-6861979311690077",
+    "google-adsense-account": adsensePublisherId,
   },
   openGraph: {
     siteName: "ペトカク",
