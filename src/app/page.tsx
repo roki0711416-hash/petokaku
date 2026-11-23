@@ -8,6 +8,7 @@ import { PetPhotoGrid } from "@/components/ui/pet-photo-card";
 import { publishedArticles } from "@/lib/articles/catalog";
 import { articles } from "@/data/articles";
 import { loadHomeCatalog } from "@/lib/home-catalog";
+import { operatorPerson } from "@/lib/operator";
 import { shareMetadata } from "@/lib/seo/share-metadata";
 import { getSiteUrl } from "@/lib/site";
 
@@ -32,6 +33,7 @@ const steps = [
 // 検索結果は noindex で robots からも除外しているため、WebSite に検索アクションは付けない。
 function homeStructuredData() {
   const siteUrl = getSiteUrl();
+  const founder = operatorPerson();
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -43,6 +45,7 @@ function homeStructuredData() {
         email: "petokaku@outlook.jp",
         logo: new URL("/logo.png", siteUrl).toString(),
         sameAs: ["https://www.instagram.com/petokaku/", "https://x.com/petokaku"],
+        ...(founder ? { founder } : {}),
       },
       {
         "@type": "WebSite",
@@ -50,7 +53,12 @@ function homeStructuredData() {
         alternateName: siteName,
         url: siteUrl,
         description,
-        publisher: { "@type": "Organization", name: "ペトカク", url: siteUrl },
+        publisher: {
+          "@type": "Organization",
+          name: "ペトカク",
+          url: siteUrl,
+          ...(founder ? { founder } : {}),
+        },
       },
     ],
   };

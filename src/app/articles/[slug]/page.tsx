@@ -20,6 +20,7 @@ import {
   type ArticleBlock,
 } from "@/lib/articles/catalog";
 import { articleMidAdBeforeIndex } from "@/lib/adsense";
+import { operatorPerson } from "@/lib/operator";
 import { defaultShareImage } from "@/lib/seo/share-metadata";
 import { getSiteUrl, privateRobots, robotsMetadata } from "@/lib/site";
 
@@ -43,11 +44,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const image = article.image
     ? { url: article.image.src, alt: article.image.alt }
     : defaultShareImage;
+  const author = operatorPerson();
   return {
     title: article.title,
     description: article.description,
     alternates: { canonical },
     robots: robotsMetadata(),
+    ...(author ? { authors: [{ name: author.name }] } : {}),
     openGraph: {
       title: article.title,
       description: article.description,
@@ -57,6 +60,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       type: "article",
       publishedTime: article.publishedOn,
       modifiedTime: article.updatedOn,
+      ...(author ? { authors: [author.name] } : {}),
       images: [image],
     },
     twitter: {

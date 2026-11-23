@@ -1,3 +1,5 @@
+import { operatorPerson } from "../operator.ts";
+
 export const articleDiagramIds = [
   "litter-materials",
   "dry-wet",
@@ -202,6 +204,7 @@ export function formatArticleDate(value: string): string {
 }
 
 export function articleStructuredData(article: Article, pageUrl: string): Record<string, unknown> {
+  const person = operatorPerson();
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -211,7 +214,7 @@ export function articleStructuredData(article: Article, pageUrl: string): Record
     datePublished: article.publishedOn,
     dateModified: article.updatedOn,
     mainEntityOfPage: pageUrl,
-    author: { "@type": "Organization", name: "ペトカク運営事務局" },
+    author: person ?? { "@type": "Organization", name: "ペトカク運営事務局" },
     publisher: {
       "@type": "Organization",
       name: "ペトカク",
